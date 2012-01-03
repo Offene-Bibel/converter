@@ -1,6 +1,6 @@
 package offeneBibel.parser;
 
-public class ObAstNode extends ObTreeNode {
+public class ObAstNode extends ObTreeNode { // implements IVisitorHost<ObAstNode> {
 	public enum NodeType {
 		fassung,
 		chapter,
@@ -50,4 +50,13 @@ public class ObAstNode extends ObTreeNode {
 		m_nodeType = nodeType;
 		return true;
 	}
+	
+	/*public void host(IVisitor<ObAstNode> visitor) throws Throwable {
+		visitor.visitBefore(this);
+		visitor.visit(this);
+		for(ObAstNode child : m_children) {
+			child.host(visitor);
+		}
+		visitor.visitAfter(this);
+	}*/
 }

@@ -6,7 +6,7 @@ import offeneBibel.visitorPattern.IVisitor;
 import offeneBibel.visitorPattern.IVisitorHost;
 
 
-public class ObTreeNode<VisitorBase extends ObTreeNode> implements IVisitorHost<VisitorBase> {
+public class ObTreeNode implements IVisitorHost<ObTreeNode>{
 	private LinkedList<ObTreeNode> m_children;
 	private ObTreeNode m_parent;
 	
@@ -69,18 +69,7 @@ public class ObTreeNode<VisitorBase extends ObTreeNode> implements IVisitorHost<
 		return m_parent;
 	}
 
-	/*
 	public void host(IVisitor<ObTreeNode> visitor) throws Throwable {
-		visitor.visitBefore(this);
-		visitor.visit(this);
-		for(ObTreeNode child : m_children) {
-			child.host(visitor);
-		}
-		visitor.visitAfter(this);
-	}
-	*/
-
-	public void host(IVisitor<VisitorBase> visitor) throws Throwable {
 		visitor.visitBefore(this);
 		visitor.visit(this);
 		for(ObTreeNode child : m_children) {
