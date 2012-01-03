@@ -1,0 +1,56 @@
+{{Lesefassung in Arbeit}}
+{{Lesefassung}}
+
+{{L|1}} Ein Davidspsalm. 
+<poem>
+Mein Hirte – das ist JHWH. Nie fehlt mir etwas.
+{{L|2}} Auf saftigen Weiden lässt er mich rasten,
+und zu Tränkstellen führt er mich.
+{{L|3}} Meine Lebenskraft bringt er zurück,
+und er führt mich auf richtigen Pfaden,
+um seinem Namen [gerecht zu werden].
+{{L|4}} Auch wenn ich durch das Tal des Todesschattens gehe,
+fürchte ich keine Gefahr –
+denn ''du'', du bist bei mir.
+Dein Stock und dein Stab geben mir Zuversicht. 
+{{L|5}} Du deckst vor mir einen Tisch,
+direkt vor denen, die mich anfeinden.
+Du hast meinen Kopf mit [wohlriechendem] Öl gesalbt,
+und mein Becher [ist] randvoll gefüllt.
+{{L|6}} Nichts außer Güte und Liebe wird mich verfolgen
+an allen Tagen meines Lebens,
+und so werde ich im Haus JHWHs wohnen,
+solange ich lebe.
+</poem>
+
+{{Bemerkungen}}
+
+{{Studienfassung}}
+
+{{S|1}} Ein Psalm Davids (von/an/für David).
+<poem>
+JHWH ist mein Hirte.<ref>E. Zenger übersetzt in seinem Kommentar: „»Mein Hirte ist der Herr« (und niemand sonst)“ (Hossfeld/Zenger 1993, S. 153). Psalm 23 vergleicht Gottes Fürsorge mit der eines Hirten für seine Schafe.</ref> Nichts fehlt mir (wird mir fehlen)<ref>Für die Lesefassung eventuell „Mir fehlt nie etwas“. Der Gedanke des „nie“ scheint durch die Formulierung mit Ipf. ausgedrückt zu werden (Vgl. LUT, REB, SLT, EÜ).</ref>.{{Par|Ezechiel|34|11}}{{Par|Psalm|78|52}}
+{{S|2}} Auf grünen (frischen, saftigen) Weiden lässt er (bringt mich dazu, wird mich veranlassen)<ref>Das Hifil drückt aus, dass JHWH dafür sorgt, dass etwas geschieht. In der Lesefassung könnte man „Er sorgt dafür, dass ich mich auf einer grünen Weide hinlegen kann“ schreiben. </ref> mich lagern (hinlegen).{{Par|Psalm|80|2}}{{Par|Ezechiel|34|14}}
+Zu Gewässern (einem Gewässer) der Rast (von Ruheorten)<ref>Wird häufig als „stilles/frisches Wasser“ verstanden. Wahrscheinlicher klingt aber eine Deutung als „natürliche Tränken“ oder „Tränkstellen“ – also Stellen an Wasserläufen, die ruhig sind (daher der hebräische Name) und das Tränken von Vieh ermöglichen (DBL Hebrew 4957.5; vgl. die Übersetzung Menges).<br/>
+E. Zenger erwähnt die Beobachtung, dass sowohl die Weiden als auch die Rastplätze im Plural stehen. (Hossfeld/Zenger, S. 154)</ref> führt er mich (wird er mich führen).{{Par|Psalm|105|41}} {{Par|Matthäus|11|28}}
+{{S|3}} Meine Lebenskraft (meine Kehle, mein innerstes Wesen)<ref>Das Wort {{Hebr}}נֶפֶשׁ{{Hebr ende}} bezeichnet den Atem eines Lebewesens, die Kehle, mit der man atmet, sowie die grundsätzliche Lebenskraft/Lebendigkeit/Vitalität, den Personenkern. Die traditionelle Übersetzung „Seele“ erinnert an einen vermeintlichen Körper-Seele-Gegesatz, an den im hebräischen Urtext überhaupt nicht gedacht ist. (Vgl. [http://www.bibelwissenschaft.de/nc/wibilex/das-bibellexikon/details/quelle/WIBI/referenz/24713/ Wibilex.de, Art. „Leben“], und Genesius, Art. {{Hebr}}נֶפֶשׁ{{Hebr ende}})</ref> bringt er zurück (wird er erneuern, erfrischt er)<ref>Die Einheitsübersetzung hat: „Er stillt mein Verlangen.“ E. Zenger schlägt in seinem Kommentar als Alternative hierzu vor: „Er stellt meine Lebenskraft wieder her.“ (Hossfeld/Zenger 1993, S. 153)
+</ref>.
+Er führt mich (wird mich führen) auf (in) richtigen Pfaden (Pfaden der Gerechtigkeit){{Par|Psalm|5|9}} {{Par|Jeremia|23|3}}
+wegen seines Namens ([guten] Rufs)<ref>D.h. um den Ruf seines Namens zu wahren.</ref>.{{Par|Exodus|3|14}} {{Par|Jesaja|48|9}}
+{{S|4}} Auch wenn ich durch (in) das Tal des Todesschattens (tiefen Schattens, tiefer Dunkelheit) gehe (gehen werde/muss/sollte),{{Par|Ijob|2|21}} {{Par|Jeremia|2|6}} {{Par|Jesaja|9|1}}
+fürchte (werde ich fürchten) ich keine Gefahr (Unheil, Übel, Unglück, nichts Böses, das Böse nicht),{{Par|Jesaja|41|10}} {{Par|Jesaja|43|1}}
+denn du [bist] bei mir.{{Par|Exodus|3|14}}
+Dein Stock (Rute, Knüppel) und dein Stab {sie} geben mir Zuversicht (trösten/beruhigen mich, werden mir Zuversicht geben)<ref>In den Kommentaren wird als Übersetzung „Mut geben“ (Kraus <sup>6</sup>1989, S. 334) oder „Zuversicht geben“ (Hossfeld/Zenger 1993, S. 153) vorgeschlagen. Denkt man die Hirtenmetapher zu Ende, dann passt in Bezug auf Schafe (vgl. 1b) „beruhigen“ oder „beschwichtigen“ besser als der auf Menschen bezogene Begriff „trösten“ (vgl. NET Ps 23,4, Fußnote 1). </ref>. 
+{{S|5}} Du deckst (bereitest vor, wirst decken) vor mir einen Tisch,{{Par|Psalm|78|19}}
+direkt vor (gegenüber von) meinen Feinden<ref>Während das Verb, von dem dieses Wort abgeleitet ist, speziell die Feindseligkeit der Gegner betont, ist das Wort {{Hebr}}צֹרֵר{{Hebr ende}} ein Kollektivbegriff für persönliche Feinde. </ref>.
+Du hast (salbst) meinen Kopf mit Öl (Olivenöl, Fett) gesalbt (erfrischt, eingefettet)<ref>Hier ist keine kultische Salbung gemeint, dagegen spricht schon das verwendete Verb ({{Hebr}}דָשַׁן{{Hebr ende}} statt sonst {{Hebr}}מָשָׁח{{Hebr ende}}). Die Betonung liegt eher auf seiner häufigen Grundbedeutung „erfrischen“, sonst auch „einfetten“. Das Verb setzt sich im Psalm durch die Verwendung des Perfekts ab. Vgl. NET Ps 23,5, Fußnote 3.</ref>.<ref>Entspricht einer hebräischen Sitte, nach der der Gastgeber seinem Gast den Kopf einfettet.</ref>{{Par|Psalm|133|2}}
+Mein Becher [ist] randvoll (fließt über)<ref>Eigentlich ein Substantiv: „Mein Becher [ist] Sättigung/Füllung/Überfluss“. Das Verschwimmen der Grenzen zwischen Nomen und Adjektiv ist eine hebräische Eigenart.</ref>.{{Par|Psalm|116|13}}
+{{S|6}} Nur (ja, nichts als)<ref>An dieser Stelle kann das Wort sowohl bekräftigend als auch einschränkend verstanden werden.</ref> Güte (Gutes) und Liebe (Gnade) werden mir (verfolgen mich)
+[an] allen Tagen meines Lebens,
+und (und dann, und so) ich werde wohnen (halte mich auf, werde zurückkehren)<ref>Die Konsonanten des hebräischen Textes lassen sich entweder deuten als „und ich werde zurückkehren“ (so die masoretischen Handschriften) oder als „und ich werde wohnen“ (ähnlich die Septuaginta: „und mein Wohnen“). Vgl. Hossfeld/Zenger 1993, S. 153, und Kraus <sup>6</sup>1989, S. 334.</ref> im Haus JHWHs
+für die Länge meiner Tage.{{Par|Psalm|5|8}}{{Par|Psalm|61|5}}
+</poem>
+
+{{Bemerkungen}}
+
+{{Kapitelseite Fuß}}
