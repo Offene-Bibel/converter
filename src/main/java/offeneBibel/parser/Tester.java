@@ -14,7 +14,7 @@ import org.parboiled.parserunners.TracingParseRunner;
 import org.parboiled.support.ParseTreeUtils;
 import org.parboiled.support.ParsingResult;
 
-class App
+class Tester
 {
 	public static void main(String [] args)
 	{

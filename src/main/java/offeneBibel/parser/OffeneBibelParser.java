@@ -6,23 +6,22 @@ import org.parboiled.annotations.BuildParseTree;
 import org.parboiled.support.StringVar;
 import org.parboiled.support.Var;
 
-@BuildParseTree 
-class OffeneBibelParser extends BaseParser<ObAstNode> {
-	enum FassungType { lesefassung, studienfassung }
+@BuildParseTree
+public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
 	//page	:	ws* (chaptertag ws*)* lesefassung ws* studienfassung ws* '{{Kapitelseite Fuß}}' ws* EOF;
-    Rule Page() {
+    public Rule Page() {
         return Sequence(
         	push(new ObChapterNode()),
             ZeroOrMore(Whitespace()),
             ZeroOrMore(Sequence(ChapterTag(), ZeroOrMore(Whitespace()))),
             "{{Lesefassung}}",
             ZeroOrMore(Whitespace()),
-            Fassung(FassungType.lesefassung), 
+            Fassung(ObFassungNode.FassungType.lesefassung),
             ZeroOrMore(Whitespace()),
             "{{Studienfassung}}",
             ZeroOrMore(Whitespace()),
-            Fassung(FassungType.studienfassung),
+            Fassung(ObFassungNode.FassungType.studienfassung),
             ZeroOrMore(Whitespace()),
             "{{Kapitelseite Fuß}}",
             ZeroOrMore(Whitespace()),
@@ -65,9 +64,9 @@ class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     //(poemstart ws*)? (vers ws*)* '{{Bemerkungen}}';
-    Rule Fassung(FassungType fassung) {
+    Rule Fassung(ObFassungNode.FassungType fassung) {
     	return Sequence(
-			push(new ObAstNode(ObAstNode.NodeType.fassung)),
+			push(new ObFassungNode(fassung)),
             Optional(Sequence(PoemStart(), ZeroOrMore(Whitespace()))),
             ZeroOrMore(Sequence(Vers(fassung), ZeroOrMore(Whitespace()))),
             "{{Bemerkungen}}",
@@ -76,10 +75,10 @@ class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     // "{{" ('S'|'L') '|' NUMBER  "}}" (ws* bibletext)?;
-    Rule Vers(FassungType fassung) {
+    Rule Vers(ObFassungNode.FassungType fassung) {
     	return Sequence(
     		"{{",
-    		FirstOf('S', 'L'), (fassung == FassungType.lesefassung && matchedChar() == 'L') || (fassung == FassungType.studienfassung && matchedChar() == 'S') ? true : false,
+    		FirstOf('S', 'L'), (fassung == ObFassungNode.FassungType.lesefassung && matchedChar() == 'L') || (fassung == ObFassungNode.FassungType.studienfassung && matchedChar() == 'S') ? true : false,
     		'|',
     		Number(), push(new ObVerseNode(Integer.parseInt(match()))),
     		"}}", 
@@ -91,7 +90,7 @@ class OffeneBibelParser extends BaseParser<ObAstNode> {
     Rule BibleText() {
     	return OneOrMore(
 			FirstOf(
-				ScriptureText(), // this might cause a problem because OneOrMore() fights with ScriptureText() for the chars
+				Sequence(ScriptureText(), peek().pushChild(new ObAstNode(ObAstNode.NodeType.text, match()))), // this might cause a problem because OneOrMore() fights with ScriptureText() for the chars
 				BibleTextMarkup()
 			)
     	);
