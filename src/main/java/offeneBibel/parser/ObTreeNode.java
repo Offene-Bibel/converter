@@ -31,6 +31,13 @@ public class ObTreeNode implements IVisitorHost<ObTreeNode>{
 		return true;
 	}
 	
+	public boolean appendChild(ObTreeNode node)
+	{
+		node.setParent(this);
+		m_children.add(node);
+		return true;
+	}
+	
 	public boolean pushChild(ObTreeNode node)
 	{
 		node.setParent(this);

@@ -1,11 +1,10 @@
 package offeneBibel.osisExporter;
 
 import offeneBibel.parser.ObAstNode;
-import offeneBibel.parser.ObChapterNode;
 import offeneBibel.parser.ObFassungNode;
+import offeneBibel.parser.ObTextNode;
 import offeneBibel.parser.ObTreeNode;
 import offeneBibel.parser.ObVerseNode;
-import offeneBibel.visitorPattern.DifferentiatingVisitor;
 import offeneBibel.visitorPattern.IVisitor;
 
 public class ObAstVisitor implements IVisitor<ObTreeNode>
@@ -37,7 +36,6 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 			ObVerseNode verse = (ObVerseNode)node;
 			String verseTag = m_verseTagStart + verse.getNumber();
 			m_currentFassung += "<verse osisID=\"" + verseTag + "\" sID=\"" + verseTag + "\"/>";
-			m_currentFassung += "<verse eID=\"" + verseTag + "\"/>\n";
 		}
 	}
 
@@ -45,16 +43,9 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 	{
 		ObAstNode astNode = (ObAstNode)node;
 		
-		if(astNode.getNodeType() == ObAstNode.NodeType.text ||
-				astNode.getNodeType() == ObAstNode.NodeType.alternative ||
-				astNode.getNodeType() == ObAstNode.NodeType.emphasis ||
-				astNode.getNodeType() == ObAstNode.NodeType.hebrew ||
-				astNode.getNodeType() == ObAstNode.NodeType.insertion ||
-				astNode.getNodeType() == ObAstNode.NodeType.omission ||
-				astNode.getNodeType() == ObAstNode.NodeType.parallelPassage ||
-				astNode.getNodeType() == ObAstNode.NodeType.superScript
-				) {
-			m_currentFassung += astNode.getText();
+		if(astNode.getNodeType() == ObAstNode.NodeType.text) {
+			ObTextNode text = (ObTextNode)node;
+			m_currentFassung += text.getText();
 		}
 	}
 
