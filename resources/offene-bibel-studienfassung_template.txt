@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<osis
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.bibletechnologies.net/2003/OSIS/namespace"
+    xmlns:osis="http://www.bibletechnologies.net/2003/OSIS/namespace"
+    xsi:schemaLocation="http://www.bibletechnologies.net/2003/OSIS/namespace http://www.bibletechnologies.net/osisCore.2.1.1.xsd">
+    <osisText osisIDWork="OffBiSt" osisRefWork="bible" xml:lang="de" canonical="true">
+        <header>
+        	<revisionDesc>{{revision}}</revisionDesc>
+            <work osisWork="OffBiSt">
+                <title>Offene Bibel - Studienfassung</title>
+                <type type="OSIS">Bible</type>
+                <identifier type="OSIS">Bible.de.ABS.OFFBIST.{{year}}</identifier>
+                <rights type="x-copyright"></rights>
+                <scope></scope>
+                <refSystem>Bible</refSystem>
+            </work>
+        </header>
+        {{content}}
+    </osisText>
+</osis>
