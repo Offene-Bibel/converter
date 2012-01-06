@@ -1,1 +1,4 @@
-Genesis,Gen,1
+Genesis,Gen,50
+1 Könige,1Kgs,22
+Jona,Jonah,4
+Titus,Titus,3
