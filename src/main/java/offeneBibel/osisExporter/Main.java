@@ -60,7 +60,7 @@ public class Main
 		else {
 			bibleTexts = (List<Map<String, Object>>) Misc.deserializeBibleDataToFile(m_bibleTextObjectFilename);
 		}
-		createOsisTextsForChapters(bibleTexts);
+		createOsisTextsForChapters(bibleTexts, true);
 		String studienFassung = constructOsisText(putOsisTextTogether(bibleTexts, false), false);
 		String leseFassung = constructOsisText(putOsisTextTogether(bibleTexts, true), true);
 		
@@ -126,7 +126,7 @@ public class Main
 	 * @param wikiTexts, 0 = german name, 1 = sword name, 2 = chapter count, 3 = wiki text
 	 * @param leseFassung
 	 */
-	 	private static void createOsisTextsForChapters(List<Map<String, Object>> bibleTexts)
+	private static void createOsisTextsForChapters(List<Map<String, Object>> bibleTexts, boolean stopOnError)
 	{
 		OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
 		BasicParseRunner<ObAstNode> parseRunner = new BasicParseRunner<ObAstNode>(parser.Page());
@@ -147,6 +147,13 @@ public class Main
 					
 					System.out.println("Errors:");
 					ErrorUtils.printParseErrors(tracingParseRunner.getParseErrors());
+					
+					System.out.println("Book: " + bookData.get("swordName"));
+					System.out.println("Chapter: " + chapterData.getKey());
+					
+					if(stopOnError) {
+						return;
+					}
 				}
 				else {
 					ObAstVisitor visitor = new ObAstVisitor((Integer)bookData.get("chapterCount"), (String)bookData.get("swordName"));
