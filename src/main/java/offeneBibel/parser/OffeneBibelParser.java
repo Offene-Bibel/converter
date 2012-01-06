@@ -509,7 +509,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     Rule TagChar() {
     	return FirstOf(
         	CharRange('a', 'z'),
-        	CharRange('A', 'Z')
+        	CharRange('A', 'Z'),
+        	'_'
         );
     }
     
