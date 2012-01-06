@@ -179,19 +179,16 @@ public class Main
 			for(Map.Entry<Integer, String> chapterData : ((Map<Integer, String>)(bookData.get("chapterTexts"))).entrySet() ) {
 				ParsingResult<ObAstNode> result = parseRunner.run(chapterData.getValue());
 	
-				if(result.hasErrors()) {				
+				if(result.matched == false) {
 					TracingParseRunner<ObAstNode> tracingParseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
-					ParsingResult<ObAstNode> tracingResult = parseRunner.run(chapterData.getValue());
+					ParsingResult<ObAstNode> tracingResult = tracingParseRunner.run(chapterData.getValue());
 					
 					System.out.println("Tree:");
 					String parseTreePrintOut = ParseTreeUtils.printNodeTree(tracingResult);
 					System.out.println(parseTreePrintOut);
 					
 					System.out.println("Errors:");
-					ErrorUtils.printParseErrors(parseRunner.getParseErrors());
-					
-					System.out.println("Log:");
-					System.out.println(tracingParseRunner.getLog());
+					ErrorUtils.printParseErrors(tracingParseRunner.getParseErrors());
 				}
 				else {
 					ObAstVisitor visitor = new ObAstVisitor((Integer)bookData.get("chapterCount"), (String)bookData.get("swordName"));

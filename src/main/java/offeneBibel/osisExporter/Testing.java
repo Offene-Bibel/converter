@@ -31,19 +31,16 @@ public class Testing
 		BasicParseRunner<ObAstNode> parseRunner = new BasicParseRunner<ObAstNode>(parser.Page());
 		ParsingResult<ObAstNode> result = parseRunner.run(text);
 
-		if(true || result.hasErrors()) {
+		if(result.matched == false) {
 			TracingParseRunner<ObAstNode> tracingParseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
-			ParsingResult<ObAstNode> tracingResult = parseRunner.run(text);
+			ParsingResult<ObAstNode> tracingResult = tracingParseRunner.run(text);
 			
 			System.out.println("Tree:");
 			String parseTreePrintOut = ParseTreeUtils.printNodeTree(tracingResult);
 			System.out.println(parseTreePrintOut);
 			
 			System.out.println("Errors:");
-			ErrorUtils.printParseErrors(parseRunner.getParseErrors());
-			
-			System.out.println("Log:");
-			System.out.println(tracingParseRunner.getLog());
+			ErrorUtils.printParseErrors(tracingParseRunner.getParseErrors());
 		}
 		else {
 			ObAstVisitor visitor = new ObAstVisitor(23, "Ps");

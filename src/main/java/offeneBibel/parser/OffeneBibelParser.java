@@ -98,6 +98,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     Rule BibleTextMarkup() {
     	return FirstOf(
+    		QuoteOne(),
+    		QuoteTwo(),
 			Emphasis(),
     		Insertion(),
     		Omission(),
@@ -107,6 +109,22 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		Break(),
     		ParallelPassage(),
     		Note()
+    	);
+    }
+
+    Rule QuoteOne() {
+    	return Sequence(
+    		'\u201e', // „
+    		BibleText(),
+    		'\u201c' // “
+    	);
+    }
+
+    Rule QuoteTwo() {
+    	return Sequence(
+    		'\u201e', // „
+    		BibleText(),
+    		'\u201c' // “
     	);
     }
     
@@ -241,10 +259,28 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     Rule NoteMarkup() {
     	return FirstOf(
+    		BibleTextQuote(),
     		Hebrew(),
     		WikiLink(),
     		SuperScript(),
     		Break()
+    	);
+    }
+    
+    Rule NoteQuote() {
+    	return Sequence(
+    		'\u00AB', // »
+    		NoteText(),
+    		'\u00BB' // «
+    	);
+    }
+    
+    Rule BibleTextQuote() {
+    	return Sequence(
+        	'\u201e', // „
+    		BibleText(),
+        	'\u201c' // “
+    		
     	);
     }
     
@@ -269,8 +305,13 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 	    		"]]"
     		),
     		Sequence(
+    	    		"[[",
+    	    		UrlText(), url.set(match()), peek().appendChild(new ObWikiLinkNode(url.get(), url.get())),
+    	    		"]]"
+        		),
+    		Sequence(
 	    		"[",
-	    		UrlText(), url.set(match()),
+	    		WebLinkText(), url.set(match()),
 	    		' ',
 	    		ScriptureText(), peek().appendChild(new ObWikiLinkNode(match(), url.get())),
 	    		"]"
@@ -388,41 +429,43 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		CharRange('\ufb1d', '\ufb4f')  // hebrew presentation forms
     	));
     }
+
+    Rule WebLinkText() {
+    	return Sequence(
+    			"http://",
+    			UrlText()
+    	);
+    }
     
     Rule UrlText() {
     	return OneOrMore(FirstOf(
-    		CharRange('a', 'z'),
-    		CharRange('A', 'Z'),
-    		CharRange('0', '9'),
-    		'-',
-    		'.',
-    		':',
-    		'/',
-    		'?',
-    		'$'
-    	));
+	    		CharRange('a', 'z'),
+	    		CharRange('A', 'Z'),
+	    		CharRange('0', '9'),
+	    		'-',
+	    		'#',
+	    		'_',
+	    		'.',
+	    		':',
+	    		'/',
+	    		'?',
+	    		'$'
+	    	));
     }
     
     Rule NoteTextText() {
-    	return OneOrMore(FirstOf(
-    		ScriptureChar(),
-    		'(',
-    		')',
-    		'[',
-    		']',
-    		'\u00AB', // »
-    		'\u00BB' // «
-    	));
+    	return Sequence(OneOrMore(NoteTextChar()), peek().appendChild(new ObTextNode(match())));
     }
     
     Rule ScriptureText() {
-    	return Sequence(OneOrMore(ScriptureChar()), peek().appendChild(new ObTextNode(match()))); // this might cause a problem because OneOrMore() fights with ScriptureText() for the chars
+    	return Sequence(OneOrMore(TextChar()), peek().appendChild(new ObTextNode(match()))); // this might cause a problem because OneOrMore() fights with ScriptureText() for the chars
     }
     
-    Rule ScriptureChar() {
+    Rule TextChar() {
     	return FirstOf(
     		'\u0021', // !
     		CharRange('\u002c', '\u002f'), // , - . /
+    		'\u2026', // …
     		//CharRange('\u2010', '\u2015'), // all sorts of dashes
     		'\u2013', // – <- this is a EN DASH
     		CharRange('\u0030', '\u003b'), // 0-9 : ;
@@ -436,10 +479,16 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		'\u00e4', // ä
     		'\u00f6', // ö
     		'\u00fc', // ü
-    		'\u201e', // „
-    		'\u201c', // “
     		Whitespace()
     	);
+    }
+    
+    Rule NoteTextChar() {
+    	return OneOrMore(FirstOf(
+    		TextChar(),
+    		'(',
+    		')'
+    	));
     }
     
     Rule TagChar() {

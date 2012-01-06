@@ -1,32 +1,72 @@
-{{Lesefassung in Arbeit}}
+{{Studienfassung liegt in Rohübersetzung vor}}
 {{Lesefassung}}
 
-{{L|1}} Ein Davidspsalm. 
-<poem>
-Mein Hirte – das ist JHWH. Nie fehlt mir etwas.
-{{L|2}} Auf saftigen Weiden lässt er mich rasten,
-und zu Tränkstellen führt er mich.
-{{L|3}} Meine Lebenskraft bringt er zurück,
-und er führt mich auf richtigen Pfaden,
-um seinem Namen [gerecht zu werden].
-{{L|4}} Auch wenn ich durch das Tal des Todesschattens gehe,
-fürchte ich keine Gefahr –
-denn ''du'', du bist bei mir.
-Dein Stock und dein Stab geben mir Zuversicht. 
-{{L|5}} Du deckst vor mir einen Tisch,
-direkt vor denen, die mich anfeinden.
-Du hast meinen Kopf mit [wohlriechendem] Öl gesalbt,
-und mein Becher [ist] randvoll gefüllt.
-{{L|6}} Nichts außer Güte und Liebe wird mich verfolgen
-an allen Tagen meines Lebens,
-und so werde ich im Haus JHWHs wohnen,
-solange ich lebe.
-</poem>
+{{L|1}}
+{{L|2}}
+{{L|3}}
+{{L|4}}
+{{L|5}}
+{{L|6}}
+{{L|7}}
+{{L|8}}
+{{L|9}}
+{{L|10}}
+{{L|11}}
+{{L|12}}
+{{L|13}}
+{{L|14}}
+{{L|15}}
+{{L|16}}
+{{L|17}}
+{{L|18}}
+{{L|19}}
+{{L|20}}
+{{L|21}}
+{{L|22}}
+{{L|23}}
+{{L|24}}
+{{L|25}}
+{{L|26}}
+{{L|27}}
+{{L|28}}
+{{L|29}}
+{{L|30}}
+{{L|31}}
 
 {{Bemerkungen}}
 
 {{Studienfassung}}
-{{S|30}} <ref>[[Hallo|Duda]]</ref>
+{{S|1}} Am (im) Anfang erschuf Gott den Himmel (die Himmel) und die Erde.
+{{S|2}} Und die Erde war (wurde) ungeformt (wüst, formlos, öde) und leer (ordnungslos)<ref>Hier werden zwei hebräische Substantive wie Adjektive gebraucht (und übersetzt), ein Phänomen, das im AT immer wieder vorkommt. </ref>, und Finsternis (Dunkelheit) [war] auf der Oberfläche der Tiefe (Wassertiefe, des tiefen Wassers) und der Geist Gottes<ref>Theoretisch möglich sind auch Übersetzungen wie „Wind [von] Gott“ oder „ein starker Wind“ (das Wort „Gott“ wäre dann lediglich intensivierendes Element), vgl. NET Gen 1,2, Fußnote 10. </ref> schwebte (bewegte sich, brütete)<ref>Die genaue Konnotation des Wortes ist wegen seiner Seltenheit nicht genau zu bestimmen. Die Urbedeutung scheint „schweben“ sein. An anderer Stelle ([[Jeremia_23#s9|Jer 23,9]]) heißt es entweder „zittern“ oder „schlaff/schwach sein“, in [[Deuteronomium_32#s11|Dt 32,11]] steht es für das schützende Schweben eines Vogels über seinen Jungen. Die verwandte syrische Wurzel unterstützt auch die Denotation „brüten“, „entspannt sein“ (BDB, {{Hebr}}רָחַף{{Hebr ende}}). Der Geist würde sich dann in Vorbereitung auf kommende Schöpfungsakte über dem Wasser bewegen (NET Gen 1,2, Fußnote 11). </ref> auf (über) der Oberfläche des Wassers. 
+{{S|3}} Da (und) sprach Gott: Licht soll (wird) entstehen (sein, werden)! Da (und) entstand (war, wurde) Licht. 
+{{S|4}} Und Gott sah, dass das Licht gut [war]. So (dann, und) trennte (teilte, unterschied) Gott {zwischen} das Licht und von (zwischen) der Finsternis (Dunkelheit). 
+{{S|5}} Dann (und) nannte (rief) Gott das Licht „Tag“ und die Finsternis (Dunkelheit) nannte (rief) er „Nacht“. Und (da) es wurde (war) Abend und es wurde Morgen: Ein (der) erster Tag (Ein Tag).<ref>Diese Einteilung folgt dem jüdischen Verständnis, nach dem der Tag bei Sonnenuntergang beginnt. </ref> 
+{{S|6}} Dann (da, und) sprach Gott: Ein Gewölbe (Firmament)<ref>Im hebräischen Weltbild hielt das Firmament den (soliden) Himmel und die Erde auseinander. Skizziert wird also die Erschaffung der Atmosphäre. LUT: „Feste“, REB: „Wölbung“, NL: „Raum“. </ref> soll (wird) inmitten des Wassers entstehen (sein, werden) und es soll {zwischen} Wasser vom Wasser trennen (teilen, unterscheiden). 
+{{S|7}} {Und} Gott machte das Gewölbe (Firmament), und (indem) er trennte (teilte, unterschied) {zwischen} das Wasser {welches} unterhalb des Gewölbes (Firmaments) vom<ref>Wörtlich „und zwischen“.</ref> Wasser {welches} über dem Gewölbe (Firmament). Und so geschah (war) es.
+{{S|8}} Da (dann, und) nannte (rief) Gott das Gewölbe (Firmament) „Himmel“. Und (da, dann) es wurde (war) Abend und es wurde Morgen: Ein (der) zweiter Tag. 
+{{S|9}} Dann (da, und) sprach Gott: Das Wasser unter dem Himmel soll sich an (zu … hin) einem Ort sammeln und das Festland (trockene Land) soll zum Vorschein kommen (erscheinen, sich zeigen). Und so geschah (war) es. 
+{{S|10}} Da (dann, und) nannte (rief) Gott das Festland (trockene Land) „Erde (Land)“ und die Ansammlung des Wassers nannte (rief) er „Meere“. Und Gott sah, dass [es] gut [war]. 
+{{S|11}} Dann (da, und) sprach Gott: Die Erde (Land) soll [grünes, frisches] Gras<ref name="Gras">Das Wort steht speziell für junges, frisches Gras (EU: „junges Grün“, GNB: „frisches Grün“; DBL Hebrew 2013). </ref>, Grünpflanzen, die Samen tragen<ref name="attrptz">Auflösung eines attr. [[Partizip|Ptz.]]</ref>; {und} Obstbäume sprießen (grünen, wachsen) lassen, die [jeder] nach seiner Art Früchte (Obst, Frucht) erzeugen (machen)<ref name="attrptz" />, in denen sich ihr Same [befindet], auf der Erde. Und so geschah (war) es. 
+{{S|12}} Da (und) brachte die Erde [grünes, frisches] Gras<ref name="Gras" />, Grünpflanzen, die [alle] nach ihrer Art Samen tragen<ref name="attrptz" />, und Obstbäume hervor, die [alle] nach ihrer Art Früchte (Obst, Frucht) erzeugen (machen)<ref name="attrptz" />, in denen sich ihr Same [befindet]. Und Gott sah, dass [es] gut [war]. 
+{{S|13}} Und es wurde (war) Abend und es wurde Morgen: Ein (der) dritter Tag. 
+{{S|14}} Dann (da, und) sprach Gott: Lichter sollen am (im) Himmelsgewölbe entstehen (sein), um (so dass) {zwischen} den Tag {und} von (zwischen) der Nacht zu trennen (teilen, unterscheiden), und sie sollen als (für) Zeichen und als Jahreszeiten (Zeitabschnitte, Feste, Festzeiten) und als Tage und Jahre dienen (sein),<ref>Lässt sich verschieden deuten: „Sie sollen als Zeichen für … dienen“ (GNB, NL, NET, NIV) oder „Sie sollen als Zeichen dienen und [zur Bestimmung] von Jahreszeiten, Tagen und Jahren“ (Menge, EU, REB, SLT).</ref> 
+{{S|15}} und sie sollen (werden) {als} Lichter am (im) Himmelsgewölbe sein (werden), so dass (um) [sie] über dem Land scheinen. Und so geschah (war) es. 
+{{S|16}} {Und} Gott machte die beiden großen Lichter: das große Licht zur Herrschaft (Beherrschung) [über] den Tag und das kleine Licht zur Herrschaft (Beherrschung) [über] die Nacht, und die Sterne. 
+{{S|17}} Und Gott setzte (gab) sie an (in) das Himmelsgewölbe, so dass (damit, um) [sie] über dem Land schienen
+{{S|18}} und so dass (damit, um) [sie] am Tag und in der Nacht herrschten und  so dass (damit, um) [sie] sie {zwischen} das Licht {und} von (zwischen) der Finsternis (Dunkelheit) trennten (teilten, unterschieden). Und Gott sah, dass [es] gut [war]. 
+{{S|19}} Und es wurde (war) Abend und es wurde Morgen: Ein (der) vierter Tag. 
+{{S|20}} Dann (da, und) sprach Gott: [Im] Wasser sollen Schwärme lebendiger<ref name="nomen">Eigentlich ein Nomen; s.a. Anm. in V. 2. </ref> Wesen (Seelen, Leben) schwärmen und Vögel (fliegende Tiere)<ref>Schließt auch Insekten mit ein (DBL Hebrew 6416). </ref> sollen auf der Erde über das Himmelsgewölbe fliegen. 
+{{S|21}} {Und} Gott erschuf die großen Meereslebewesen (Seeungeheuer, Seeschlangen) und alle lebendigen<ref name="nomen" /> Wesen, die im Wasser schwärmen nach ihrer Art und alle geflügelten Vögel<ref>Wörtlich „Vögel (col.) Flügel (Sg.)“. </ref> nach ihrer<ref>Wörtlich „seiner“, weil „Vögel“ im Hebräischen ein Sammelbegriff ist, der nur im Sg. vorkommt. </ref> Art. Und Gott sah, dass [es] gut [war]. 
+{{S|22}} Dann (danach, und) segnete Gott sie mit den Worten: Seid fruchtbar und vermehrt euch (werdet zahlreich) und füllt das Wasser in den Meeren, und die Vögel sollen sich auf (in) der Erde vermehren (zahlreich werden)! 
+{{S|23}} Und es wurde (war) Abend und es wurde Morgen: Ein (der) fünfter Tag. 
+{{S|24}} Dann (da, und) sprach Gott: Die Erde soll lebendige<ref name="nomen" /> Wesen nach ihrer Art hervorbringen – Vieh (Tier, Tiere), {und} kriechende Tiere und (wilde) Landtiere<ref>Jedes der drei Wörter, die hier Tierkategorien bezeichnen, ist ein Sammelbegriff, steht im Urtext also im Sg. So auch in den folgenden Versen. </ref> nach ihrer Art. Und so geschah (war) es. 
+{{S|25}} {Und} Gott machte die (wilden) Tiere des Landes (der Erde) nach ihrer Art, {und} das Vieh (Tier, Tiere) nach seiner Art und alle auf dem Boden kriechenden Tiere nach ihrer Art. Und Gott sah, dass [es] gut [war]. 
+{{S|26}} Dann (da, und) sprach Gott: Wir wollen (werden) (Lass uns)<ref>Es gibt verschiedene Theorien, warum Gott hier im Plural spricht. Eine abwägende Meinung s. NET Gen 1,26, Fußnote 47. </ref> [den] Menschen (Adam, die Menschheit)<ref>Das im Hebräischen häufige Wort für Mensch ist zugleich der Name des ersten Menschen Adam ({{Hebr}}אָדָם{{Hebr ende}}). Das Wort ist von dem Wort {{Hebr}}אֲדָמָה{{Hebr ende}} („Erdboden“) abgeleitet, das etwa in V. 25 verwendet wurde („Boden“). Ein Artikel fehlt hier, so dass das Wort als Oberbegriff oder Gattungsbezeichnung verstanden werden kann (s.a. 26b „sie sollen herrschen“ und [[Genesis_5#s2|5,2]]). S.a. NET Gen 1:26 Fußnote 48. </ref> in (nach, als) unserem Bild (Abbild)<ref>Das Wort bezeichnet allgemein ein repräsentatives Abbild von etwas, häufig die Repräsentation eines Gottes durch ein Götzenbild (THAT {{Hebr}}צֶלֶמ{{Hebr ende}}, TWOT 1923a). </ref>, nach unserer Ähnlichkeit (Gleichheit)<ref>Häufig als „uns ähnlich/gleich“ übersetzt. </ref> machen! Und (damit)<ref>Eine finale Deutung („damit“) ist aufgrund der Grammatik sehr wahrscheinlich. </ref> sie sollen über die Fische [im] Meer und über die Vögel [am] Himmel und über das Vieh (Tier, Tiere) und über die ganze Erde herrschen und über alle kriechenden Tiere, die auf der Erde (Land) kriechen.<ref name="attrptz" /> 
+{{S|27}} Und Gott erschuf den Menschen in (nach, als) seinem Bild (Abbild)<ref>Vgl. Anm. in V. 26.</ref>, im (nach dem, als) Bild Gottes erschuf er ihn, männlich und weiblich<ref>Traditionell: „als Mann und Frau“</ref> erschuf er sie.
+{{S|28}} Danach (und) segnete Gott sie und es sprach zu ihnen Gott: Seid fruchtbar und vermehrt euch (werdet zahlreich); {und} füllt die Erde (Land), {und} unterwerft sie und herrscht über die Fische [im] Meer, {und} über die Vögel [am] Himmel und über alle (jedes) Wesen (alles Leben), die auf der Erde kriechen!<ref name="attrptz" /> 
+{{S|29}} {und} Gott sagte: Hiermit (schaut, siehe)<ref>„Siehe“ oder „Schaut“ wird häufig zur Verstärkung der Gegenwärtigkeit einer Handlung benutzt und sollte hier in Verbindung mit dem Vollzugsperfekt am besten als „hiermit“ verstanden werden. </ref> gebe ich<ref>Als Vollzugsperfekt verstanden. Möglich wäre auch „ich habe … gegeben“, der Kontext (v.a. „Siehe“) spricht aber dagegen. </ref> euch alle Pflanzen (jede Pflanze), die Samen tragen (erzeugen)<ref>„Samen“ und „tragen“ stammt im Hebräischen von derselben Wurzel (Figura etymologica). Die Pflanze „samt“ dann also Samen. So auch weiter unten. </ref>,<ref name="attrptz" /> die auf der Oberfläche der ganzen Erde wachsen, und alle Bäume (jeden Baum, alles Gehölz), die in ihren<ref>Weil „Bäume“ ein Sammelbegriff (Sg.) ist, steht dieses Wort auf Hebräisch im Sg. </ref> {Baum}Früchten Samen tragen. [Sie] werden (sollen)<ref>Singular. In Verbindung mit dem eingefügten „[Sie]“ dem deutschen Sprachgebrauch angepasst. </ref> euch als (zur) Nahrung dienen (gehören, sein), 
+{{S|30}} und jedem (wilden) Tier (Lebewesen, Leben) des Landes (der Erde), {und} jedem Vogel (allen Vögeln) [am] Himmel und jedem [Tier], das auf der Erde kriecht (sich regt),<ref>Aufgelöstes subst. [[Partizip|Ptz.]]</ref> das in sich ein lebendes (atmendes) Leben [ist] ([hat]), [werden] alle Grünpflanzen als (zur) Nahrung [dienen]<ref>Das Verb wurde zur Verständlichkeit aus V. 29 eingefügt. </ref>. Und so geschah (war) es. 
+{{S|31}} Und (da, dann) Gott betrachtete (sah) alles, was er gemacht hatte (machte), und sah (siehe, ja), [dass es] sehr gut [war]. Und es wurde (war) Abend und es wurde (war) Morgen: ein (der) sechster Tag. 
 
 {{Bemerkungen}}
 
