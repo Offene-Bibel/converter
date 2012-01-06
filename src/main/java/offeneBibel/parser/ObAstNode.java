@@ -7,6 +7,7 @@ public class ObAstNode extends ObTreeNode { // implements IVisitorHost<ObAstNode
 		verse,
 		text,
 		emphasis,
+		italics,
 		insertion,
 		omission,
 		alternative,
@@ -17,7 +18,9 @@ public class ObAstNode extends ObTreeNode { // implements IVisitorHost<ObAstNode
 		note,
 		hebrew,
 		wikiLink,
-		superScript
+		superScript,
+		heading,
+		quote
 	}
 	private NodeType m_nodeType;
 	
