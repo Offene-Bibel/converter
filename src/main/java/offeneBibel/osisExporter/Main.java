@@ -66,6 +66,7 @@ public class Main
 		
 		Misc.writeFile(studienFassung, m_studienFassungFilename);
 		Misc.writeFile(leseFassung, m_leseFassungFilename);
+		System.out.println("done");
 		
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -156,7 +157,7 @@ public class Main
 					}
 				}
 				else {
-					ObAstVisitor visitor = new ObAstVisitor((Integer)bookData.get("chapterCount"), (String)bookData.get("swordName"));
+					ObAstVisitor visitor = new ObAstVisitor(chapterData.getKey(), (String)bookData.get("swordName"));
 					ObAstNode node = result.resultValue;
 					try {
 						node.host(visitor);

@@ -18,6 +18,28 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 	private String m_currentFassung = "";
 	
 	private String m_verseStopTag = null;
+	private String m_noteIndexCounter = "a";
+	
+	private void incrementNoteCounter()
+	{
+		int walker = m_noteIndexCounter.length() - 1;
+		
+		while(walker >=0) {
+			String preWalkerString = walker>0 ? m_noteIndexCounter.substring(0, walker) : "";
+			String postWalkerString = walker<m_noteIndexCounter.length()-1 ? m_noteIndexCounter.substring(walker+1, m_noteIndexCounter.length()) : "";
+			if(m_noteIndexCounter.charAt(walker) < 'z') {
+				m_noteIndexCounter = preWalkerString + (char)(m_noteIndexCounter.charAt(walker)+1) + postWalkerString;
+				break;
+			}
+			else {
+				m_noteIndexCounter = preWalkerString + 'a' + postWalkerString;
+			}
+			--walker;
+		}
+		if(walker == -1) {
+			m_noteIndexCounter = "a" + m_noteIndexCounter;
+		}
+	}
 	
 	public ObAstVisitor(int chapter, String book)
 	{
@@ -40,6 +62,11 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 			String verseTag = m_verseTagStart + verse.getNumber();
 			m_currentFassung += "<verse osisID=\"" + verseTag + "\" sID=\"" + verseTag + "\"/>";
 			m_verseStopTag = "<verse eID=\"" + verseTag + "\"/>\n";
+		}
+		
+		else if(astNode.getNodeType() == ObAstNode.NodeType.note) {
+			m_currentFassung += "<note type=\"x-footnote\" n=\"" + m_noteIndexCounter + "\">";
+			incrementNoteCounter();
 		}
 	}
 
@@ -66,13 +93,17 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		
 		if(astNode.getNodeType() == ObAstNode.NodeType.fassung) {
 			ObFassungNode fassung = (ObFassungNode)node;
+			addStopTag();
 			if(fassung.getFassung() == ObFassungNode.FassungType.lesefassung) {
 				m_leseFassung = m_currentFassung;
 			}
 			else {
 				m_studienFassung = m_currentFassung;
 			}
-			addStopTag();
+		}
+		
+		else if(astNode.getNodeType() == ObAstNode.NodeType.note) {
+			m_currentFassung += "</note>";
 		}
 	}
 
