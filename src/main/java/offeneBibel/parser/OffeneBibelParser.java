@@ -284,7 +284,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		"{{Hebr}}",
     		ZeroOrMore(Whitespace()),
     		push(new ObAstNode(NodeType.hebrew)),
-    		HebrewText(), //TODO HEBREW TEXT...
+    		HebrewText(),
     		"{{Hebr ende}}",
     		peek(1).appendChild(pop())
     		
