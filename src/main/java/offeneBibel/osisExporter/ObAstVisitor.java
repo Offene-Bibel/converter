@@ -17,6 +17,8 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 	private String m_leseFassung = null;
 	private String m_currentFassung = "";
 	
+	private String m_verseStopTag = null;
+	
 	public ObAstVisitor(int chapter, String book)
 	{
 		m_chapter = chapter;
@@ -34,8 +36,17 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		
 		else if(astNode.getNodeType() == ObAstNode.NodeType.verse) {
 			ObVerseNode verse = (ObVerseNode)node;
+			addStopTag();
 			String verseTag = m_verseTagStart + verse.getNumber();
 			m_currentFassung += "<verse osisID=\"" + verseTag + "\" sID=\"" + verseTag + "\"/>";
+			m_verseStopTag = "<verse eID=\"" + verseTag + "\"/>\n";
+		}
+	}
+
+	private void addStopTag() {
+		if(m_verseStopTag != null) {
+			m_currentFassung += m_verseStopTag;
+			m_verseStopTag = null;
 		}
 	}
 
@@ -61,12 +72,7 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 			else {
 				m_studienFassung = m_currentFassung;
 			}
-		}
-		
-		else if(astNode.getNodeType() == ObAstNode.NodeType.verse) {
-			ObVerseNode verse = (ObVerseNode)node;
-			String verseTag = m_verseTagStart + verse.getNumber();
-			m_currentFassung += "<verse eID=\"" + verseTag + "\"/>\n";
+			addStopTag();
 		}
 	}
 
