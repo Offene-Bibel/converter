@@ -1,54 +1,44 @@
 {{Lesefassung in Arbeit}}
+
 {{Lesefassung}}
 
-{{L|1}} Ein Davidspsalm. 
 <poem>
-Mein Hirte – das ist JHWH. Nie fehlt mir etwas.
-{{L|2}} Auf saftigen Weiden lässt er mich rasten,
-und zu Tränkstellen führt er mich.
-{{L|3}} Meine Lebenskraft bringt er zurück,
-und er führt mich auf richtigen Pfaden,
-um seinem Namen [gerecht zu werden].
-{{L|4}} Auch wenn ich durch das Tal des Todesschattens gehe,
-fürchte ich keine Gefahr –
-denn ''du'', du bist bei mir.
-Dein Stock und dein Stab geben mir Zuversicht. 
-{{L|5}} Du deckst vor mir einen Tisch,
-direkt vor denen, die mich anfeinden.
-Du hast meinen Kopf mit [wohlriechendem] Öl gesalbt,
-und mein Becher [ist] randvoll gefüllt.
-{{L|6}} Nichts außer Güte und Liebe wird mich verfolgen
-an allen Tagen meines Lebens,
-und so werde ich im Haus JHWHs wohnen,
-solange ich lebe.
+{{L|1}} Wie glücklich der, der niemals folgt der Frevler Rat, 
+der nicht betritt der Sünder Pfad, 
+nicht sitzt im Kreis der Spötter,
+{{L|2}} der sich vielmehr der Weisung Gottes freut
+und sie bedenket Tag und Nacht.
+{{L|3}} Der gleicht dem Baum, 
+der, wasser-nah gepflanzt,
+die Früchte bringt zur rechten Zeit
+und dessen Blätter welken nicht.
+Und was er tut, gerät ihm gut. 
+{{L|4}} Nicht so die Frevler!
+Wie Spreu sind sie, die jeder Wind verweht
+{{L|5}} Daher der Frevler im Gerichte nicht besteht,
+der Sünder nicht im Rate der Gerechten.
+{{L|6}} Gerechter Weg: Von Gott umhegt,
+der Frevler Weg jedoch vergeht.
 </poem>
-
 {{Bemerkungen}}
 
 {{Studienfassung}}
 
-{{S|1}} Ein Psalm Davids (von/an/für David).
 <poem>
-JHWH ist mein Hirte.<ref>E. Zenger übersetzt in seinem Kommentar: „»Mein Hirte ist der Herr« (und niemand sonst)“ (Hossfeld/Zenger 1993, S. 153). Psalm 23 vergleicht Gottes Fürsorge mit der eines Hirten für seine Schafe.</ref> Nichts fehlt mir (wird mir fehlen)<ref>Für die Lesefassung eventuell „Mir fehlt nie etwas“. Der Gedanke des „nie“ scheint durch die Formulierung mit Ipf. ausgedrückt zu werden (Vgl. LUT, REB, SLT, EÜ).</ref>.{{Par|Ezechiel|34|11}}{{Par|Psalm|78|52}}
-{{S|2}} Auf grünen (frischen, saftigen) Weiden lässt er (bringt mich dazu, wird mich veranlassen)<ref>Das Hifil drückt aus, dass JHWH dafür sorgt, dass etwas geschieht. In der Lesefassung könnte man „Er sorgt dafür, dass ich mich auf einer grünen Weide hinlegen kann“ schreiben. </ref> mich lagern (hinlegen).{{Par|Psalm|80|2}}{{Par|Ezechiel|34|14}}
-Zu Gewässern (einem Gewässer) der Rast (von Ruheorten)<ref>Wird häufig als „stilles/frisches Wasser“ verstanden. Wahrscheinlicher klingt aber eine Deutung als „natürliche Tränken“ oder „Tränkstellen“ – also Stellen an Wasserläufen, die ruhig sind (daher der hebräische Name) und das Tränken von Vieh ermöglichen (DBL Hebrew 4957.5; vgl. die Übersetzung Menges).<br/>
-E. Zenger erwähnt die Beobachtung, dass sowohl die Weiden als auch die Rastplätze im Plural stehen. (Hossfeld/Zenger, S. 154)</ref> führt er mich (wird er mich führen).{{Par|Psalm|105|41}} {{Par|Matthäus|11|28}}
-{{S|3}} Meine Lebenskraft (meine Kehle, mein innerstes Wesen)<ref>Das Wort {{Hebr}}נֶפֶשׁ{{Hebr ende}} bezeichnet den Atem eines Lebewesens, die Kehle, mit der man atmet, sowie die grundsätzliche Lebenskraft/Lebendigkeit/Vitalität, den Personenkern. Die traditionelle Übersetzung „Seele“ erinnert an einen vermeintlichen Körper-Seele-Gegesatz, an den im hebräischen Urtext überhaupt nicht gedacht ist. (Vgl. [http://www.bibelwissenschaft.de/nc/wibilex/das-bibellexikon/details/quelle/WIBI/referenz/24713/ Wibilex.de, Art. „Leben“], und Genesius, Art. {{Hebr}}נֶפֶשׁ{{Hebr ende}})</ref> bringt er zurück (wird er erneuern, erfrischt er)<ref>Die Einheitsübersetzung hat: „Er stillt mein Verlangen.“ E. Zenger schlägt in seinem Kommentar als Alternative hierzu vor: „Er stellt meine Lebenskraft wieder her.“ (Hossfeld/Zenger 1993, S. 153)
-</ref>.
-Er führt mich (wird mich führen) auf (in) richtigen Pfaden (Pfaden der Gerechtigkeit){{Par|Psalm|5|9}} {{Par|Jeremia|23|3}}
-wegen seines Namens ([guten] Rufs)<ref>D.h. um den Ruf seines Namens zu wahren.</ref>.{{Par|Exodus|3|14}} {{Par|Jesaja|48|9}}
-{{S|4}} Auch wenn ich durch (in) das Tal des Todesschattens (tiefen Schattens, tiefer Dunkelheit) gehe (gehen werde/muss/sollte),{{Par|Ijob|2|21}} {{Par|Jeremia|2|6}} {{Par|Jesaja|9|1}}
-fürchte (werde ich fürchten) ich keine Gefahr (Unheil, Übel, Unglück, nichts Böses, das Böse nicht),{{Par|Jesaja|41|10}} {{Par|Jesaja|43|1}}
-denn du [bist] bei mir.{{Par|Exodus|3|14}}
-Dein Stock (Rute, Knüppel) und dein Stab {sie} geben mir Zuversicht (trösten/beruhigen mich, werden mir Zuversicht geben)<ref>In den Kommentaren wird als Übersetzung „Mut geben“ (Kraus <sup>6</sup>1989, S. 334) oder „Zuversicht geben“ (Hossfeld/Zenger 1993, S. 153) vorgeschlagen. Denkt man die Hirtenmetapher zu Ende, dann passt in Bezug auf Schafe (vgl. 1b) „beruhigen“ oder „beschwichtigen“ besser als der auf Menschen bezogene Begriff „trösten“ (vgl. NET Ps 23,4, Fußnote 1). </ref>. 
-{{S|5}} Du deckst (bereitest vor, wirst decken) vor mir einen Tisch,{{Par|Psalm|78|19}}
-direkt vor (gegenüber von) meinen Feinden<ref>Während das Verb, von dem dieses Wort abgeleitet ist, speziell die Feindseligkeit der Gegner betont, ist das Wort {{Hebr}}צֹרֵר{{Hebr ende}} ein Kollektivbegriff für persönliche Feinde. </ref>.
-Du hast (salbst) meinen Kopf mit Öl (Olivenöl, Fett) gesalbt (erfrischt, eingefettet)<ref>Hier ist keine kultische Salbung gemeint, dagegen spricht schon das verwendete Verb ({{Hebr}}דָשַׁן{{Hebr ende}} statt sonst {{Hebr}}מָשָׁח{{Hebr ende}}). Die Betonung liegt eher auf seiner häufigen Grundbedeutung „erfrischen“, sonst auch „einfetten“. Das Verb setzt sich im Psalm durch die Verwendung des Perfekts ab. Vgl. NET Ps 23,5, Fußnote 3.</ref>.<ref>Entspricht einer hebräischen Sitte, nach der der Gastgeber seinem Gast den Kopf einfettet.</ref>{{Par|Psalm|133|2}}
-Mein Becher [ist] randvoll (fließt über)<ref>Eigentlich ein Substantiv: „Mein Becher [ist] Sättigung/Füllung/Überfluss“. Das Verschwimmen der Grenzen zwischen Nomen und Adjektiv ist eine hebräische Eigenart.</ref>.{{Par|Psalm|116|13}}
-{{S|6}} Nur (ja, nichts als)<ref>An dieser Stelle kann das Wort sowohl bekräftigend als auch einschränkend verstanden werden.</ref> Güte (Gutes) und Liebe (Gnade) werden mir (verfolgen mich)
-[an] allen Tagen meines Lebens,
-und (und dann, und so) ich werde wohnen (halte mich auf, werde zurückkehren)<ref>Die Konsonanten des hebräischen Textes lassen sich entweder deuten als „und ich werde zurückkehren“ (so die masoretischen Handschriften) oder als „und ich werde wohnen“ (ähnlich die Septuaginta: „und mein Wohnen“). Vgl. Hossfeld/Zenger 1993, S. 153, und Kraus <sup>6</sup>1989, S. 334.</ref> im Haus JHWHs
-für die Länge meiner Tage.{{Par|Psalm|5|8}}{{Par|Psalm|61|5}}
+{{S|1}} [Wie] glücklich (gesegnet)<ref>Das hier verwendete Wort {{Hebr}}אַשְׁרֵי־{{Hebr ende}} drückt nicht einen konkreten Segen, sondern erstrebenswertes, gesegnetes Glück in einer Beziehung mit Gott durch Bundesgehorsam aus ([http://books.google.de/books?id=nJbZ3d5BF0UC&lpg=PP1&pg=PA133#v=onepage&q&f=false Waltke 2010, 133]). Ähnlich auch die Seligpreisungen ([[Matthäus_5#s1|Mt 5,1-12]]). Psalm 1 kann als Definition dafür gelten, welche Art von Mensch sich auf diese Weise glücklich nennen darf (vgl. Kraus <sup>4</sup>1972, 3): der „Gerechte“ ({{Hebr}}צַדִּיק{{Hebr ende}}), der falsche Wege meidet (1) und sich stattdessen der Torah, der Weisung Gottes zuwendet ([[Psalm_1#s2|2]])(Kraus <sup>4</sup>1972, 9). </ref> [ist] der Mensch (Mann)<ref>Die männliche Form steht hier stellvertretend für jeden Menschen, auf den das Beschriebene zutrifft ([[Generisches Maskulinum]]; vgl. [http://books.google.de/books?id=nJbZ3d5BF0UC&lpg=PP1&pg=PA128#v=onepage&q&f=false Waltke 2010, 128]). </ref>, der nicht dem Rat (den Plänen)<ref>Das Wort kann sich auch auf die Pläne und Ziele einer Person beziehen, umfasst also mehr als einen einmaligen Ratschlag. </ref> der Gottlosen (Übeltäter)<ref>„Gottlose“ ({{Hebr}}רְשָׁעִים{{Hebr ende}}) sind solche, die vor dem Gesetz Gottes schuldig sind und sich Gott bewusst widersetzen (Kraus <sup>4</sup>1972, 4). Der Gottlose ist das genaue Gegenstück zum Gerechten ([http://books.google.de/books?id=nJbZ3d5BF0UC&lpg=PP1&pg=PA133#v=onepage&q&f=false Waltke 2010, 133]). </ref> folgt (gefolgt ist)<ref>Wörtlich: „im Rat der Gottlosen geht/gegangen ist“; Übs. vgl. NGÜ, REB, NET. </ref>, 
+{und} nicht auf (mit) dem Weg der Sünder steht (betritt; gestanden hat)
+und nicht an dem Ort (auf dem Sitz, im Kreis<ref>''im Kreis'' So EÜ. Gemeint ist mit dem „Sitz der Spötter“ ihr Versammlungsort (TWOT 922d), wo die Spötter ({{Hebr}}לֵצִים{{Hebr ende}}) sich gegenseitig zum Spott über Gott herausfordern (Kraus <sup>4</sup>1972, 4). </ref>) der Spötter sitzt (saß)<ref>V. 1 ließe sich auf zwei Weisen lesen: Entweder handelt es sich bei „dem Rat der Gottlosen folgen“, „auf dem Weg Weg der Sünder stehen“ und „am Ort der Spötter sitzen“ um eine Synonymreihung, die sämtlich für das „sich-Vergehen“ stehen, oder es wird hier durch die Entwicklung von „folgen“-„stehen“-„sitzen“ eine Entwicklung von dynamisch zu statisch ausgedrückt: Der betreffende Mensch verdirbt immer mehr, indem er sich immer mehr an den Kreis der Sünder annähert, bis er sich schließlich ganz bei ihnen niederlässt. Vgl. hierzu die Diskussionsseite.</ref>, 
+{{S|2}} sondern am Gesetz (Weisung, Tora) JHWHs {seine} Freude (Verlangen, Lust) [hat] 
+und über sein Gesetz Tag und Nacht nachdenkt (grübelt; leise liest oder rezitiert; nachdenken wird)<ref>Freude und Andacht gegenüber dem Gesetz sind Metonymien der Ursache für das Leben gemäß der Schrift. Da Psalm 1 den gesamten [[Psalter]] einleitet, nennt er mit dieser Aussage eine Schlüsselqualifikation für das richtige Verständnis der Psalmen ([http://books.google.de/books?id=nJbZ3d5BF0UC&lpg=PP1&pg=PA139#v=onepage&q&f=false Waltke 2010, 139]). </ref>. 
+{{S|3}} Und er ist (wird sein) wie ein Baum{{par|Psalm|92|13|15}}{{par|Jeremia|11|19}}{{par|Ezechiel|17|5}}, gepflanzt an Wasserkanälen (Wasserbächen)<ref>Gemeint sind künstliche Bewässerungskanäle. </ref>, 
+der seine Frucht bringt (gibt; bringen wird) zu seiner Zeit<ref>Also: regelmäßig, wegen der steten Wasserversorgung, die ohne solche Bewässerungskanäle nicht möglich wäre (Kraus <sup>4</sup>1972, 6). Dieser Vergleich beschreibt zusammen mit dem Aspekt der nicht verwelkenden Blätter das ewige Leben, das der Gottesfürchtige als „Frucht“ bekommen wird ([http://books.google.de/books?id=nJbZ3d5BF0UC&lpg=PP1&pg=PA140#v=onepage&q&f=false Waltke 2010, 140]). </ref> und dessen Blätter nicht welken. 
+Und alles, was er tut, gedeiht (gelingt; wird gedeihen)<ref>Auch möglich: „Und er bringt alles, was er tut, zum Gedeihen“ („two-place“ Hiphil nach [http://books.google.de/books?id=nJbZ3d5BF0UC&lpg=PP1&pg=PA128#v=onepage&q&f=false Waltke 2010, 128]).</ref> <ref>Eine der verbreitetsten Klassifikationen von Ps 1 ist die als Torah- bzw. Weisheitspsalm. Entsprechend findet man hier ein typisches Motiv aus der Weisheitsliteratur wieder, das unter dem Namen des „Tun-Ergehen-Zusammenhangs“ bekannt geworden ist: Wie man handelt, so ergeht es einem. Gutes Handeln - das Beschreiten des „gerechten Weges“ - zieht in der Regel positive Folgen für den Handelnden nach sich, der Frevler-weg dagegen führt ins Verderben. vgl. z.B. Oeming 2000, S. 50 f.</ref>.{{par|Josua|1|8}} 
+{{S|4}} Nicht so die Gottlosen (Übeltäter)! 
+{sondern (vielmehr)} [Sie sind] wie Spreu<ref>Spreu sind die Schalen von Getreidekörnern, die früher durch Dreschen von diesen gelöst und dann durch Worfeln von ihnen getrennt wurden. Dabei warf man beide Teile in den Wind, der die leichten Spelzen wegblies, während die Körner wieder auf den Boden fielen (Douglas, Chaff, in: NBD 1996). Die nutzlose Spreu steht im Gegensatz zu dem lebendigen, fruchtbaren Baum ([[Psalm_1#s3|3]]) ([http://books.google.de/books?id=nJbZ3d5BF0UC&lpg=PP1&pg=PA141#v=onepage&q&f=false Waltke 2010, 141]). </ref>, die [der] Wind wegbläst (wegblasen wird). {{par|Lukas|3|17}}
+{{S|5}} Deshalb bestehen (stehen auf; werden bestehen) Gottlose nicht vor dem (nicht im) Gericht<ref>Unklar ist, ob das Endgericht oder ein irdisches Gericht gemeint ist. Möglichkeiten: Gericht, Gerichtsverhandlung (Gesenius<sup>18</sup>, ~ 5), Gerichtshof (DCH, ~ §1d), gesamtes Gerichtsverfahren (TWAT, ~ II.2.a; NIDOTTE, ~ 2), Zeitpunkt des (End-?)Gerichts (TWOT, ~ 6), Urteilsvollzug (im Endgericht?) (DCH, ~ §1e, in 1d in Betracht gezogen)? Kraus <sup>4</sup>1972, 8 glaubt in Anlehnung an [[Psalm_24#s3|Ps 24,3]], es wäre hier stattdessen vom Betreten der heiligen Stätte die Rede. Gut möglich, dass schlicht der Archetyp eines Gerichts gemeint ist – dann bestehen die Gottlosen im Grundsatz vor keinem Gericht bzw. in keinem Verfahren. Die Entsprechung „Versammlung der Gerechten“ in 5b wäre dann vielleicht die Instanz, die das Urteil fällt ([http://books.google.de/books?id=nJbZ3d5BF0UC&lpg=PP1&pg=PA142#v=onepage&q&f=false Waltke 2010, 142]). </ref> 
+und Sünder [nicht] in der Versammlung der Gerechten<ref>Zum Gebrauch des Begriffs „Gerechter“ s. die Fußnote in [[Psalm_1#note_a|V. 1]]. </ref>. 
+{{S|6}} Denn (ja) JHWH kennt (wacht über) den Weg der Gerechten, 
+aber (und) der Weg der Gottlosen (Übeltäter) führt ins Verderben (vergeht)<ref>„ins Verderben führen“ (vgl. SLT, NGÜ, NLB) übersetzt das Verb {{Hebr}}אָבַד{{Hebr ende}}, das häufig etwas altertümlich als „zugrunde gehen, umkommen“ übersetzt wird. </ref>.
 </poem>
 
 {{Bemerkungen}}

@@ -31,6 +31,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import offeneBibel.parser.ObAstFixuper;
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.OffeneBibelParser;
 import util.Misc;
@@ -157,8 +158,10 @@ public class Main
 					}
 				}
 				else {
-					ObAstVisitor visitor = new ObAstVisitor(chapterData.getKey(), (String)bookData.get("swordName"));
 					ObAstNode node = result.resultValue;
+					ObAstFixuper.fixupAstTree(node);
+					
+					ObAstVisitor visitor = new ObAstVisitor(chapterData.getKey(), (String)bookData.get("swordName"));
 					try {
 						node.host(visitor);
 					} catch (Throwable e) {

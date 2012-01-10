@@ -11,7 +11,7 @@ public class ObNoteLinkNode extends ObAstNode {
 	private ObNoteNode m_linkTarget;
 	
 	public ObNoteLinkNode(String tag) {
-		super(NodeType.note);
+		super(NodeType.noteLink);
 		m_noteTag = tag;
 		m_linkTarget = null;
 	}

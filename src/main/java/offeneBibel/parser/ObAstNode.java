@@ -3,6 +3,7 @@ package offeneBibel.parser;
 public class ObAstNode extends ObTreeNode { // implements IVisitorHost<ObAstNode> {
 	public enum NodeType {
 		fassung,
+		fassungNotes,
 		chapter,
 		verse,
 		text,
@@ -16,6 +17,7 @@ public class ObAstNode extends ObTreeNode { // implements IVisitorHost<ObAstNode
 		textBreak,
 		parallelPassage,
 		note,
+		noteLink,
 		hebrew,
 		wikiLink,
 		superScript,
