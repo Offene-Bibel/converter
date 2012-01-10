@@ -17,9 +17,14 @@ public class Validator
 
 	public static void main(String[] args)
 	{
+		if(args.length != 1) {
+			System.out.println("Invalid number of arguments.");
+			System.exit(3);
+			return;
+		}
 		String text;
 		try {
-			text = readFile("resources/psalm23.txt");
+			text = readFile(args[0]);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(2);
