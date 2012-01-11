@@ -658,19 +658,24 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     Rule NoteTextChar() {
-    	return OneOrMore(FirstOf(
-    		TextChar(),
-    		GreekTextChar(),
-    		'(',
-    		')',
-    		'=',
-    		'+', // \u002b
-    		'~',
-    		'\u2192', // →
-    		'\u00a7', // §
-    		'\u00a9', // ©
-    		'\u00ae' // ®
-    	));
+    	return OneOrMore(
+    		NoneOf("><[]'„“»«{}")
+    		/*
+    		FirstOf(
+	    		TextChar(),
+	    		GreekTextChar(),
+	    		'(',
+	    		')',
+	    		'=',
+	    		'+', // \u002b
+	    		'~',
+	    		'\u2192', // →
+	    		'\u00a7', // §
+	    		'\u00a9', // ©
+	    		'\u00ae' // ®
+    		)
+    		*/
+    	);
     }
     
     Rule TagChar() {
