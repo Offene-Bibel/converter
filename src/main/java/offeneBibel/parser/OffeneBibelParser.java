@@ -664,7 +664,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		'(',
     		')',
     		'=',
-    		'+', // \u002b 
+    		'+', // \u002b
+    		'~',
     		'\u2192', // →
     		'\u00a7', // §
     		'\u00a9', // ©

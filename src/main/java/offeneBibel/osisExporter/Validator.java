@@ -9,7 +9,7 @@ import offeneBibel.parser.OffeneBibelParser;
 
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ErrorUtils;
-import org.parboiled.parserunners.ReportingParseRunner;
+import org.parboiled.parserunners.RecoveringParseRunner;
 import org.parboiled.support.ParsingResult;
 
 public class Validator
@@ -32,7 +32,7 @@ public class Validator
 		}
 
 		OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
-		ReportingParseRunner<ObAstNode> reportingParseRunner = new ReportingParseRunner<ObAstNode>(parser.Page());
+		RecoveringParseRunner<ObAstNode> reportingParseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page());
 		ParsingResult<ObAstNode> result = reportingParseRunner.run(text);
 
 		if(result.hasErrors()) {
@@ -40,6 +40,7 @@ public class Validator
 			System.exit(1);
 		}
 		else {
+			System.out.println("success");
 			System.exit(0);
 		}
 	}
