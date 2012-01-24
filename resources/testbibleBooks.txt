@@ -1,1 +1,1 @@
-Psalm,Ps,150
+Sprüche,Prov,31

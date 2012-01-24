@@ -19,6 +19,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return Sequence(
         	push(new ObChapterNode()),
             ZeroOrMore(Whitespace()),
+            Optional(Sequence(ChapterNotes(), ZeroOrMore(Whitespace()))),
             ZeroOrMore(Sequence(ChapterTag(), ZeroOrMore(Whitespace()))),
             "{{Lesefassung}}",
             ZeroOrMore(Whitespace()),
@@ -34,6 +35,31 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
+    Rule ChapterNotes() {
+    	return Sequence(
+    			"==Einführende Bemerkungen==",
+	        	push(new ObAstNode(NodeType.chapterNotes)),
+	        	ZeroOrMore(Whitespace()),
+	        	FreeWikiText(),
+	        	peek(1).appendChild(pop())
+    	);
+    }
+    
+    Rule FreeWikiText() {
+    	return OneOrMore(FirstOf(
+    			NoteTextText(),
+    			BibleTextQuote(),
+	    		NoteInnerQuote(),
+	    		NoteEmphasis(),
+				NoteItalics(),
+	    		Hebrew(),
+	    		WikiLink(),
+	    		NoteSuperScript(),
+	    		Break(),
+	    		Note()
+    	));
+    }
+    
     /*
     chaptertag	:	"{{" chaptertagtype "}}"
 	|	"{{" chaptertagtype '|Vers ' NUMBER '-' NUMBER "}}"
@@ -47,8 +73,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		Sequence("{{", ChapterTagType(tagName), "}}", ((ObChapterNode)peek()).addChapterTag(new ObChapterTag(tagName.get()))),
     		Sequence("{{",
     				ChapterTagType(tagName), "|Vers ",
-    				Number(), startVerse.set(Integer.parseInt(match())), '-',
-    				Number(), stopVerse.set(Integer.parseInt(match())), "}}",
+    				Number(), safeParseIntSet(startVerse), '-',
+    				Number(), safeParseIntSet(stopVerse), "}}",
     				((ObChapterNode)peek()).addChapterTag(new ObChapterTag(tagName.get(), startVerse.get(), stopVerse.get()))
     				)
     	);
@@ -80,11 +106,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	    		Note()
     			)),
 		        "{{Bemerkungen}}",
-		        Optional(
-		        	push(new ObAstNode(NodeType.fassungNotes)),
-		        	ZeroOrMore(Whitespace()),
-		        	NoteText(),
-		        	peek(1).insertChild(0, pop()) // put the notes of the Fassung at the beginning
+		        Optional(Sequence(
+			        	push(new ObAstNode(NodeType.fassungNotes)),
+			        	ZeroOrMore(Whitespace()),
+			        	NoteText(),
+			        	peek(1).insertChild(0, pop()) // put the notes of the Fassung at the beginning
+		        	)
 		        ),
 		        peek(1).appendChild(pop())
 		);
@@ -110,6 +137,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     // "{{" ('S'|'L') '|' NUMBER  "}}" (ws* bibletext)?;
     Rule Verse() {
+    	Var<Integer> verseNumber = new Var<Integer>();
     	return Sequence(
     		ZeroOrMore(Whitespace()),
     		"{{",
@@ -129,7 +157,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 }
             },
     		'|',
-    		Number(), peek().appendChild(new ObVerseNode(Integer.parseInt(match()))),
+    		Number(), safeParseIntSet(verseNumber), peek().appendChild(new ObVerseNode(verseNumber.get())),
     		"}}",
     		ZeroOrMore(Whitespace())
     	);
@@ -234,9 +262,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     Rule NoteEmphasis() {
     	return Sequence(
+			checkRecursion(),
     		"''",
     		push(new ObAstNode(ObAstNode.NodeType.emphasis)),
-    		NoteTextText(),
+    		NoteTextWithBreaker(new StringVar("''")),
     		"''",
     		peek(1).appendChild(pop())
     	);
@@ -245,6 +274,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     Rule NoteItalics() {
     	return FirstOf(
     		Sequence(
+    			checkRecursion(),
 	    		"<em>",
 	    		push(new ObAstNode(ObAstNode.NodeType.italics)),
 	    		NoteTextText(),
@@ -252,6 +282,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 	    		peek(1).appendChild(pop())
     		),
     		Sequence(
+				checkRecursion(),
 	    		"<i>",
 	    		push(new ObAstNode(ObAstNode.NodeType.italics)),
 	    		NoteTextText(),
@@ -331,7 +362,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     Rule Break() {
-    	return Sequence("<br/>",
+    	return Sequence(FirstOf("<br/>", "<br />"),
     			peek().appendChild(new ObAstNode(ObAstNode.NodeType.textBreak))
     			);
     }
@@ -346,12 +377,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 			FirstOf("{{Par|", "{{par|"),
 			Book(), bookName.set(match()),
 			'|',
-			Number(), chapter.set(Integer.parseInt(match())),
+			Number(), safeParseIntSet(chapter),
 			'|',
-			Number(), startVerse.set(Integer.parseInt(match())),
+			Number(), safeParseIntSet(startVerse),
 			Optional(Sequence(
 				'|',
-				Number(), stopVerse.set(Integer.parseInt(match()))
+				Number(), safeParseIntSet(stopVerse)
 			)),
 			"}}", peek().appendChild(new ObParallelPassageNode(bookName.get(), chapter.get().intValue(), startVerse.get().intValue(), stopVerse.get().intValue()))
     	);
@@ -366,7 +397,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	return FirstOf(
     		Sequence(
     			"<ref>", push(new ObNoteNode()),
-    			NoteText(),
+    			NoteTextWithBreaker(new StringVar("</ref>")),
     			"</ref>",
     			peek(1).appendChild(pop())
     		),
@@ -384,7 +415,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     			"\"",
     			ZeroOrMore(Whitespace()),
     			">", push(new ObNoteNode(tagText.get())),
-    			NoteText(),
+    			NoteTextWithBreaker(new StringVar("</ref>")),
     			"</ref>",
     			peek(1).appendChild(pop())
     		)
@@ -395,30 +426,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	return OneOrMore(TagChar());
     }
     
-    Rule NoteText() {
-    	return OneOrMore(FirstOf(
-    			NoteTextText(),
-    			NoteMarkup()
-    	));
-    }
-    
-    Rule NoteMarkup() {
-    	return FirstOf(
-    		BibleTextQuote(),
-    		NoteInnerQuote(),
-    		NoteEmphasis(),
-			NoteItalics(),
-    		Hebrew(),
-    		WikiLink(),
-    		NoteSuperScript(),
-    		Break()
-    	);
-    }
-    
     Rule NoteInnerQuote() {
     	return Sequence(
     		'\u00AB', // »
-    		NoteText(),
+    		NoteTextWithBreaker(new StringVar("" + '\u00BB')),
     		'\u00BB' // «
     	);
     }
@@ -426,11 +437,16 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     Rule BibleTextQuote() {
     	return Sequence(
         	'\u201e', // „
-        	NoteText(),
+        	NoteBibleQuoteTempFixup(),
+        	//NoteText(),
     		//BibleText(),
         	'\u201c' // “
     		
     	);
+    }
+    
+    Rule NoteBibleQuoteTempFixup() {
+    	return Sequence(OneOrMore(NoneOf("“")), peek().appendChild(new ObTextNode(match())));
     }
     
     Rule Hebrew() {
@@ -447,6 +463,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     Rule WikiLink() {
     	return FirstOf(
     		Sequence(
+    			checkRecursion(),
 	    		"[[",
 	    		OneOrMore(NoneOf("|]")),
 	    		push(new ObWikiLinkNode(match())),
@@ -458,6 +475,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 	    		peek(1).appendChild(pop())
     		),
     		Sequence(
+    			checkRecursion(),
 	    		"[",
 	    		Sequence(
 	        			"http://",
@@ -466,7 +484,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 	    		push(new ObWikiLinkNode(match())),
 	    		Optional(
 		    		' ',
-		    		NoteTextText()
+		    		NoteWikiLinkText()
 	    		),
 	    		"]",
 	    		peek(1).appendChild(pop())
@@ -474,8 +492,22 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	);
     }
     
+    Rule NoteWikiLinkText() {
+    	return OneOrMore(FirstOf(
+    			NoteTextText(),
+    			BibleTextQuote(),
+	    		NoteInnerQuote(),
+	    		NoteEmphasis(),
+				NoteItalics(),
+	    		Hebrew(),
+	    		NoteSuperScript(),
+	    		Break()
+    	));
+    }    
+    
     Rule SuperScript() {
     	return Sequence(
+    		checkRecursion(),
     		"<sup>",
     		push(new ObSuperScriptTextNode()),
     		ScriptureText(),
@@ -486,11 +518,59 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     Rule NoteSuperScript() {
     	return Sequence(
+    		checkRecursion(),
     		"<sup>",
     		push(new ObSuperScriptTextNode()),
-    		NoteTextText(),
+    		NoteTextWithBreaker(new StringVar("</sup>")),
+    		//NoteTextText(),
     		"</sup>",
     		peek(1).appendChild(pop())
+    	);
+    }
+    
+    Rule NoteText() {
+    	return OneOrMore(FirstOf(
+    			NoteTextText(),
+    			NoteMarkup()
+    	));
+    }
+
+    Rule NoteTextWithBreaker(StringVar breaker) {
+    	return OneOrMore(
+    			FirstOf(
+	    			NoteWithBreakerText(breaker),
+	    			NoteMarkup()
+    			)
+			);
+    }
+    
+    Rule NoteWithBreakerText(StringVar breaker) {
+    	return Sequence(
+    			OneOrMore(
+	    			FirstOf(
+	    				NoneOf("><[]'„“»«{}"),
+	    				Sequence(
+	    					TestNot(breaker.get()),
+	    					TestNot(NoteMarkup()),
+	    					AnyOf("><[]'„“»«{}") // match the rest
+	    				)
+	    			)
+    			),
+    			peek().appendChild(new ObTextNode(match()))
+    		);
+    }
+    
+    Rule NoteMarkup() {
+    	return FirstOf(
+    		Note(), // recursion is allowed
+    		BibleTextQuote(),
+    		NoteInnerQuote(),
+    		NoteEmphasis(),
+			NoteItalics(),
+    		Hebrew(),
+    		WikiLink(),
+    		NoteSuperScript(),
+    		Break()
     	);
     }
 
@@ -506,7 +586,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	return FirstOf(
     		"Genesis",
     		"Exodus",
-    		"Levitikus",
+    		"Levitikus", "Lev",
     		"Numeri",
     		"Deuteronomium",
     		"Josua",
@@ -527,7 +607,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		"Kohelet",
     		"Hohelied",
     		"Jesaja",
-    		"Jeremia",
+    		"Jeremia", "Jer",
     		"Klagelieder",
     		"Ezechiel",
     		"Daniel",
@@ -541,7 +621,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		"Habakuk",
     		"Zefanja",
     		"Haggai",
-    		"Sacharja",
+    		"Sacharja", "Sach",
     		"Maleachi"
     	);
     }
@@ -566,7 +646,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 			"2 Timotheus", "2_Timotheus",
 			"Titus",
 			"Philemon",
-			"Hebräer",
+			"Hebräer", "Hebr",
 			"Jakobus",
 			"1 Petrus", "1_Petrus",
 			"2 Petrus", "2_Petrus",
@@ -602,7 +682,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     Rule NoteTextText() {
-    	return Sequence(OneOrMore(NoteTextChar()), peek().appendChild(new ObTextNode(match())));
+    	return Sequence(OneOrMore(NoneOf("><[]'„“»«{}")), peek().appendChild(new ObTextNode(match())));
     }
     
     Rule ScriptureText() {
@@ -643,6 +723,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	    		'\u2013', // – en dash
     	    		'\u2014', // — em dash
     	    		'\u2026', // …
+    	    	// C1 Controls and Latin-1 Supplement, http://unicode.org/charts/PDF/U0080.pdf
+    	    		'\u00b4', // ´
     	    		//CharRange('\u2010', '\u2015'), // all sorts of dashes
         		// Latin Extended Additional, http://www.unicode.org/charts/PDF/U1E00.pdf
         			CharRange('\u1e00', '\u1eff'), 
@@ -654,27 +736,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	return OneOrMore(
     		// Greek and Coptic, http://unicode.org/charts/PDF/U0370.pdf
     		CharRange('\u0370', '\u03ff')
-    	);
-    }
-    
-    Rule NoteTextChar() {
-    	return OneOrMore(
-    		NoneOf("><[]'„“»«{}")
-    		/*
-    		FirstOf(
-	    		TextChar(),
-	    		GreekTextChar(),
-	    		'(',
-	    		')',
-	    		'=',
-	    		'+', // \u002b
-	    		'~',
-	    		'\u2192', // →
-	    		'\u00a7', // §
-	    		'\u00a9', // ©
-	    		'\u00ae' // ®
-    		)
-    		*/
     	);
     }
     
@@ -700,6 +761,26 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     			'\t',
     			'\r'
     	);
+    }
+    
+    boolean safeParseIntSet(Var<Integer> ref)
+    {
+    	try
+    	{
+    		ref.set(Integer.parseInt(match()));
+    		return true;
+    	}
+    	catch(NumberFormatException e)
+    	{
+    		return false;
+    	}
+    }
+    
+    boolean checkRecursion()
+    {
+    	//String currentRuleName = getContext().getMatcher().getLabel();
+    	//MatcherPath matchedRules = getContext().getPath();
+    	return !getContext().getParent().getPath().contains(getContext().getMatcher());
     }
     
 	private static ObFassungNode.FassungType getCurrentFassung(ValueStack<ObAstNode> valueStack) throws Exception
