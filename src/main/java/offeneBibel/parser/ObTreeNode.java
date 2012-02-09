@@ -56,6 +56,11 @@ public class ObTreeNode implements IVisitorHost<ObTreeNode>{
 		return m_children.peek();
 	}
 	
+	public int childCount()
+	{
+		return m_children.size();
+	}
+	
 	public boolean removeChild(ObTreeNode node)
 	{
 		if(m_children.remove(node) == true) {

@@ -73,7 +73,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		Sequence("{{", ChapterTagType(tagName), "}}", ((ObChapterNode)peek()).addChapterTag(new ObChapterTag(tagName.get()))),
     		Sequence("{{",
     				ChapterTagType(tagName), "|Vers ",
-    				Number(), safeParseIntSet(startVerse), '-',
+    				Number(), safeParseIntSet(startVerse), FirstOf('-', " und "),
     				Number(), safeParseIntSet(stopVerse), "}}",
     				((ObChapterNode)peek()).addChapterTag(new ObChapterTag(tagName.get(), startVerse.get(), stopVerse.get()))
     				)
@@ -184,7 +184,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	    		Verse(),
     	    		Note()
         	)),
-    		'\u201c', // “
+        	// TODO: quick fix to get quotes across chapter borders working
+    		Optional('\u201c'), // “
     		peek(1).appendChild(pop())
     	);
     }
@@ -324,9 +325,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	    		Alternative(),
     	    		Break(),
     	    		ParallelPassage(),
-    	    		Note()
+    	    		Note(),
+        			Omission()
         		)),
     		'}',
+    		//prevent "{{blabla}}", an omission that contains only one other omission
+    		ACTION( peek().childCount()!=1 || ((ObAstNode)(peek().peekChild())).getNodeType()!=NodeType.omission),
     		peek(1).appendChild(pop())
     	);
     }
@@ -724,7 +728,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	    		'\u2014', // — em dash
     	    		'\u2026', // …
     	    	// C1 Controls and Latin-1 Supplement, http://unicode.org/charts/PDF/U0080.pdf
-    	    		'\u00b4', // ´
+    	    		//'\u00b4', // ´
+    	    		'\u2019', // ’ preferred character to be used for apostrophe
     	    		//CharRange('\u2010', '\u2015'), // all sorts of dashes
         		// Latin Extended Additional, http://www.unicode.org/charts/PDF/U1E00.pdf
         			CharRange('\u1e00', '\u1eff'), 
@@ -743,7 +748,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	return FirstOf(
         	CharRange('a', 'z'),
         	CharRange('A', 'Z'),
-        	'_'
+        	'_',
+        	'-'
         );
     }
     
