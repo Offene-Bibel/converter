@@ -17,7 +17,7 @@ Nehemia,Neh,13
 Ester,Esth,10
 Ijob,Job,42
 Psalm,Ps,150
-Sprüche,Prov,31
+Sprichwörter,Prov,31
 Kohelet,Eccl,12
 Hohelied,Song,8
 Jesaja,Isa,66
