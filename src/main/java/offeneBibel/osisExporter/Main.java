@@ -41,8 +41,8 @@ public class Main
 	//static final String m_urlBase = "http://www.offene-bibel.de/wiki/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
 	static final String m_urlBase = "http://www.offene-bibel.de/wiki/index.php5?action=raw&title=";
 	//the following list was created by combining the wiki page: Vorlage:Kapitelzahl and the OSIS 2.1.1 manual Appendix C.1
-	//static final String m_bibleBooks = "resources/bibleBooks.txt";
-	static final String m_bibleBooks = "resources/testbibleBooks.txt";
+	static final String m_bibleBooks = "resources/bibleBooks.txt";
+	//static final String m_bibleBooks = "resources/testbibleBooks.txt";
 	static final String m_studienFassungTemplate = "resources/offene-bibel-studienfassung_template.txt";
 	static final String m_leseFassungTemplate = "resources/offene-bibel-lesefassung_template.txt";
 	static final String m_studienFassungFilename = "resources/offeneBibelStudienfassungModule.osis";

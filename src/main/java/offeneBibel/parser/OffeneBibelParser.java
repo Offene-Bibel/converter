@@ -76,6 +76,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     				Number(), safeParseIntSet(startVerse), FirstOf('-', " und "),
     				Number(), safeParseIntSet(stopVerse), "}}",
     				((ObChapterNode)peek()).addChapterTag(new ObChapterTag(tagName.get(), startVerse.get(), stopVerse.get()))
+    				),
+    		Sequence("{{",
+    				ChapterTagType(tagName), "|Vers ",
+    				Number(), safeParseIntSet(startVerse),
+    				"}}",
+    				((ObChapterNode)peek()).addChapterTag(new ObChapterTag(tagName.get(), startVerse.get(), startVerse.get()))
     				)
     	);
     }
