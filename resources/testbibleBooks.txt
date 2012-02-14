@@ -1,3 +1,2 @@
-Jesus Sirach,Sir,51
-Tobit,Tob,14
-Weisheit,Wis,19
+Genesis,Gen,50
+Exodus,Exod,40

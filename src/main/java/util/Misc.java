@@ -2,6 +2,7 @@ package util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -46,6 +47,14 @@ public class Misc {
 		out.write(text);
 		out.close();
 	}
+	
+	public static void createFolder(String path)
+	{
+		File folder = new File(path);
+		if(folder.isDirectory())
+			return;
+		folder.mkdir();
+	}
 
 	public static String readFile(String file) throws IOException
 	{
@@ -60,7 +69,6 @@ public class Misc {
 	       objectStream.writeObject(data);
 	       objectStream.flush();
 	       fileStream.close();
-	
 	}
 
 	public static Object deserializeBibleDataToFile(String filename) throws IOException, ClassNotFoundException

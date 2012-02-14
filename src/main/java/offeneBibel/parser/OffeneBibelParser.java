@@ -143,7 +143,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     // "{{" ('S'|'L') '|' NUMBER  "}}" (ws* bibletext)?;
     Rule Verse() {
-    	Var<Integer> verseNumber = new Var<Integer>();
+    	Var<Integer> verseFromNumber = new Var<Integer>();
+    	Var<Integer> verseToNumber = new Var<Integer>();
     	return Sequence(
     		ZeroOrMore(Whitespace()),
     		"{{",
@@ -163,8 +164,18 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 }
             },
     		'|',
-    		Number(), safeParseIntSet(verseNumber), peek().appendChild(new ObVerseNode(verseNumber.get())),
+    		FirstOf(
+				Sequence(
+					Number(), safeParseIntSet(verseFromNumber),
+					FirstOf("/", "-"),
+					Number(), safeParseIntSet(verseToNumber)
+				),
+				Sequence(
+					Number(), safeParseIntSet(verseFromNumber), verseToNumber.set(verseFromNumber.get())
+				)
+    		),
     		"}}",
+    		peek().appendChild(new ObVerseNode(verseFromNumber.get(), verseToNumber.get())),
     		ZeroOrMore(Whitespace())
     	);
     }
@@ -594,7 +605,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     Rule OtBook() {
     	return FirstOf(
-    		"Genesis",
+    		"Genesis", "Gen",
     		"Exodus",
     		"Levitikus", "Lev",
     		"Numeri",
@@ -613,7 +624,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		"Ester",
     		"Ijob",
     		"Psalm",
-    		"Sprüche",
+    		"Sprüche", "Spr",
     		"Kohelet",
     		"Hohelied",
     		"Jesaja",
@@ -646,7 +657,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 			"Römer",
 			"1 Korinther", "1_Korinther",
 			"2 Korinther", "2_Korinther",
-			"Galater",
+			"Galater", "Gal",
 			"Epheser", "Eph",
 			"Philipper",
 			"Kolosser", "Kol",

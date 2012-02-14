@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -43,6 +42,7 @@ public class Main
 	//the following list was created by combining the wiki page: Vorlage:Kapitelzahl and the OSIS 2.1.1 manual Appendix C.1
 	static final String m_bibleBooks = "resources/bibleBooks.txt";
 	//static final String m_bibleBooks = "resources/testbibleBooks.txt";
+	static final String m_pageCache = "resources/pageCache/";
 	static final String m_studienFassungTemplate = "resources/offene-bibel-studienfassung_template.txt";
 	static final String m_leseFassungTemplate = "resources/offene-bibel-lesefassung_template.txt";
 	static final String m_studienFassungFilename = "resources/offeneBibelStudienfassungModule.osis";
@@ -54,13 +54,14 @@ public class Main
 		try {
 		List<Map<String, Object>> bibleTexts = null;
 		File bibleTextObjectFile = new File(m_bibleTextObjectFilename);
-		if(bibleTextObjectFile.exists() == false) {
+//		if(bibleTextObjectFile.exists() == false) {
 			bibleTexts = retrieveBooks();
-			Misc.serializeBibleDataToFile((Serializable) bibleTexts, m_bibleTextObjectFilename);
+/*			Misc.serializeBibleDataToFile((Serializable) bibleTexts, m_bibleTextObjectFilename);
 		}
 		else {
 			bibleTexts = (List<Map<String, Object>>) Misc.deserializeBibleDataToFile(m_bibleTextObjectFilename);
 		}
+*/
 		createOsisTextsForChapters(bibleTexts, true);
 		String studienFassung = constructOsisText(putOsisTextTogether(bibleTexts, false), false);
 		String leseFassung = constructOsisText(putOsisTextTogether(bibleTexts, true), true);
@@ -71,24 +72,41 @@ public class Main
 		
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
+		}
+/*		catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+*/
 	}
 
 	private static String retrieveWikiPage(String wikiPage)
 	{
 		try {
-			URL url = new URL(m_urlBase + URLEncoder.encode(wikiPage, "UTF-8"));
-			System.out.println(url.toString());
-			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
-			String result = Misc.readBufferToString(in);
-	        in.close();
+			String result = null;
+			String fileCacheString = m_pageCache + wikiPage;
+			File fileCache = new File(fileCacheString);
+			if(fileCache.exists()) {
+				if(fileCache.length() == 0)
+					return null;
+				result = Misc.readFile(fileCacheString);
+			}
+			else {
+				URL url = new URL(m_urlBase + URLEncoder.encode(wikiPage, "UTF-8"));
+				System.out.println(url.toString());
+				try {
+					BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
+					result = Misc.readBufferToString(in);
+			        in.close();
+				} catch (FileNotFoundException e) {
+			        Misc.writeFile("", fileCacheString);
+					// chapter not yet created, skip
+		        	return null;
+				}
+		        Misc.createFolder(m_pageCache);
+		        Misc.writeFile(result, fileCacheString);
+			}
 	        return result;
-        } catch (FileNotFoundException e) {
-			// chapter not yet created, skip
-        	return null;
-		} 
+        }
 		catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
