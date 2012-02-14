@@ -18,34 +18,15 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 	private String m_currentFassung = "";
 	
 	private String m_verseStopTag = null;
-	private String m_noteIndexCounter = "a";
 	
-	private void incrementNoteCounter()
-	{
-		int walker = m_noteIndexCounter.length() - 1;
-		
-		while(walker >=0) {
-			String preWalkerString = walker>0 ? m_noteIndexCounter.substring(0, walker) : "";
-			String postWalkerString = walker<m_noteIndexCounter.length()-1 ? m_noteIndexCounter.substring(walker+1, m_noteIndexCounter.length()) : "";
-			if(m_noteIndexCounter.charAt(walker) < 'z') {
-				m_noteIndexCounter = preWalkerString + (char)(m_noteIndexCounter.charAt(walker)+1) + postWalkerString;
-				break;
-			}
-			else {
-				m_noteIndexCounter = preWalkerString + 'a' + postWalkerString;
-			}
-			--walker;
-		}
-		if(walker == -1) {
-			m_noteIndexCounter = "a" + m_noteIndexCounter;
-		}
-	}
+	private NoteIndexCounter m_noteIndexCounter;
 	
 	public ObAstVisitor(int chapter, String book)
 	{
 		m_chapter = chapter;
 		m_book = book;
 		m_verseTagStart = m_book + "." + m_chapter + ".";
+		m_noteIndexCounter = new NoteIndexCounter();
 	}
 	
 	public void visitBefore(ObTreeNode node) throws Throwable
@@ -65,8 +46,7 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		}
 		
 		else if(astNode.getNodeType() == ObAstNode.NodeType.note) {
-			m_currentFassung += "<note type=\"x-footnote\" n=\"" + m_noteIndexCounter + "\">";
-			incrementNoteCounter();
+			m_currentFassung += "<note type=\"x-footnote\" n=\"" + m_noteIndexCounter.getNextNoteString() + "\">";
 		}
 	}
 
@@ -100,6 +80,7 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 			else {
 				m_studienFassung = m_currentFassung;
 			}
+			m_noteIndexCounter.reset();
 		}
 		
 		else if(astNode.getNodeType() == ObAstNode.NodeType.note) {
@@ -113,5 +94,47 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 
 	public String getLeseFassung() {
 		return m_leseFassung;
+	}
+	
+	class NoteIndexCounter {
+		private String m_noteIndexCounter;
+		
+		public NoteIndexCounter()
+		{
+			m_noteIndexCounter = "a";
+		}
+		
+		public void reset()
+		{
+			m_noteIndexCounter = "a";
+		}
+		
+		public String getNextNoteString()
+		{
+			String result = m_noteIndexCounter;
+			incrementNoteCounter();
+			return result;
+		}
+		
+		private void incrementNoteCounter()
+		{
+			int walker = m_noteIndexCounter.length() - 1;
+			
+			while(walker >=0) {
+				String preWalkerString = walker>0 ? m_noteIndexCounter.substring(0, walker) : "";
+				String postWalkerString = walker<m_noteIndexCounter.length()-1 ? m_noteIndexCounter.substring(walker+1, m_noteIndexCounter.length()) : "";
+				if(m_noteIndexCounter.charAt(walker) < 'z') {
+					m_noteIndexCounter = preWalkerString + (char)(m_noteIndexCounter.charAt(walker)+1) + postWalkerString;
+					break;
+				}
+				else {
+					m_noteIndexCounter = preWalkerString + 'a' + postWalkerString;
+				}
+				--walker;
+			}
+			if(walker == -1) {
+				m_noteIndexCounter = "a" + m_noteIndexCounter;
+			}
+		}
 	}
 }
