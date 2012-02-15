@@ -18,6 +18,7 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 	private String m_currentFassung = "";
 	
 	private String m_verseStopTag = null;
+	private boolean m_inHeading = false;
 	
 	private NoteIndexCounter m_noteIndexCounter;
 	
@@ -43,6 +44,27 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 			String verseTag = m_verseTagStart + verse.getNumber();
 			m_currentFassung += "<verse osisID=\"" + verseTag + "\" sID=\"" + verseTag + "\"/>";
 			m_verseStopTag = "<verse eID=\"" + verseTag + "\"/>\n";
+		}
+
+		else if(astNode.getNodeType() == ObAstNode.NodeType.alternative) {
+			m_currentFassung += "(";
+		}
+
+		else if(astNode.getNodeType() == ObAstNode.NodeType.insertion) {
+			m_currentFassung += "[";
+		}
+
+		else if(astNode.getNodeType() == ObAstNode.NodeType.omission) {
+			m_currentFassung += "{";
+		}
+
+		else if(astNode.getNodeType() == ObAstNode.NodeType.heading) {
+			m_currentFassung += "<title>";
+			m_inHeading = true;
+		}
+
+		else if(astNode.getNodeType() == ObAstNode.NodeType.hebrew) {
+			m_currentFassung += "<foreign xml:lang=\"he\">";
 		}
 		
 		else if(astNode.getNodeType() == ObAstNode.NodeType.note) {
@@ -82,7 +104,27 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 			}
 			m_noteIndexCounter.reset();
 		}
+
+		else if(astNode.getNodeType() == ObAstNode.NodeType.alternative) {
+			m_currentFassung += ")";
+		}
+
+		else if(astNode.getNodeType() == ObAstNode.NodeType.insertion) {
+			m_currentFassung += "]";
+		}
+
+		else if(astNode.getNodeType() == ObAstNode.NodeType.omission) {
+			m_currentFassung += "}";
+		}
 		
+		else if(astNode.getNodeType() == ObAstNode.NodeType.heading) {
+			m_currentFassung += "</title>";
+		}
+
+		else if(astNode.getNodeType() == ObAstNode.NodeType.hebrew) {
+			m_currentFassung += "</foreign>";
+		}
+
 		else if(astNode.getNodeType() == ObAstNode.NodeType.note) {
 			m_currentFassung += "</note>";
 		}
