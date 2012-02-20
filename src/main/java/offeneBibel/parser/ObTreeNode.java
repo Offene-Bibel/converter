@@ -80,13 +80,23 @@ public class ObTreeNode implements IVisitorHost<ObTreeNode>{
 	{
 		return m_parent;
 	}
-
+	
 	public void host(IVisitor<ObTreeNode> visitor) throws Throwable {
-		visitor.visitBefore(this);
-		visitor.visit(this);
+		host(visitor, true);
+	}
+
+	public void host(IVisitor<ObTreeNode> visitor, boolean inclusive) throws Throwable {
+		if(inclusive) {
+			visitor.visitBefore(this);
+			visitor.visit(this);
+		}
+		
 		for(ObTreeNode child : m_children) {
 			child.host(visitor);
 		}
-		visitor.visitAfter(this);
+		
+		if(inclusive) {
+			visitor.visitAfter(this);
+		}
 	}
 }

@@ -19,6 +19,7 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 	
 	private String m_verseStopTag = null;
 	private boolean m_inHeading = false;
+	private int m_quoteCounter = 0;
 	
 	private NoteIndexCounter m_noteIndexCounter;
 	
@@ -44,6 +45,25 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 			String verseTag = m_verseTagStart + verse.getNumber();
 			m_currentFassung += "<verse osisID=\"" + verseTag + "\" sID=\"" + verseTag + "\"/>";
 			m_verseStopTag = "<verse eID=\"" + verseTag + "\"/>\n";
+		}
+		
+		else if(astNode.getNodeType() == ObAstNode.NodeType.quote) {
+			if(m_quoteCounter>0)
+			{
+				m_quoteCounter++;
+				m_currentFassung += "»<q level=\" + m_quoteCounter + \" marker=\"\">";
+			}
+			else
+			{
+				QuoteSearcher quoteSearcher = new QuoteSearcher();
+				astNode.host(quoteSearcher, false);
+				if(quoteSearcher.foundQuote == false)
+					m_currentFassung += "„<q marker=\"\">";
+				else {
+					m_quoteCounter++;
+					m_currentFassung += "„<q level=\" + m_quoteCounter + \" marker=\"\">";
+				}
+			}
 		}
 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.alternative) {
@@ -104,6 +124,16 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 			}
 			m_noteIndexCounter.reset();
 		}
+		
+		else if(astNode.getNodeType() == ObAstNode.NodeType.quote) {
+			if(m_quoteCounter>0)
+				m_quoteCounter--;
+			if(m_quoteCounter>0)
+				m_currentFassung += "</q>«";
+			else
+				m_currentFassung += "</q>“";
+				
+		}
 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.alternative) {
 			m_currentFassung += ")";
@@ -136,6 +166,17 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 
 	public String getLeseFassung() {
 		return m_leseFassung;
+	}
+	
+	class QuoteSearcher implements IVisitor<ObTreeNode>
+	{
+		public boolean foundQuote = false; 
+		public void visit(ObTreeNode node) throws Throwable {
+			if(((ObAstNode)node).getNodeType() == ObAstNode.NodeType.quote)
+				foundQuote = true;
+		}
+		public void visitBefore(ObTreeNode hostNode) throws Throwable {}
+		public void visitAfter(ObTreeNode hostNode) throws Throwable {}
 	}
 	
 	class NoteIndexCounter {

@@ -34,6 +34,7 @@ import offeneBibel.parser.ObAstFixuper;
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.OffeneBibelParser;
 import util.Misc;
+import util.Pair;
 	
 public class Main
 {
@@ -53,7 +54,7 @@ public class Main
 	{
 		try {
 		List<Map<String, Object>> bibleTexts = null;
-		File bibleTextObjectFile = new File(m_bibleTextObjectFilename);
+//		File bibleTextObjectFile = new File(m_bibleTextObjectFilename);
 //		if(bibleTextObjectFile.exists() == false) {
 			bibleTexts = retrieveBooks();
 /*			Misc.serializeBibleDataToFile((Serializable) bibleTexts, m_bibleTextObjectFilename);
@@ -125,13 +126,13 @@ public class Main
 			bookData.put("swordName", book.get(1));
 			bookData.put("chapterCount", Integer.parseInt(book.get(2)));
 			
-			Map<Integer, String> chapters = new HashMap<Integer, String>();
+			List<Pair<Integer, String>> chapters = new Vector<Pair<Integer, String>>();
 			//Genesis,Gen,50 == german name, sword name, chapter count
 			for(int i = 1; i <= Integer.parseInt(book.get(2)); ++i) {
 				String wikiPageName = book.get(0) + " " + i;
 				String wikiText = retrieveWikiPage(wikiPageName);
 				if(wikiText != null) {
-					chapters.put(i, wikiText);
+					chapters.add(new Pair<Integer, String>(i, wikiText));
 				}
 			}
 			bookData.put("chapterTexts", chapters);
@@ -152,14 +153,14 @@ public class Main
 		BasicParseRunner<ObAstNode> parseRunner = new BasicParseRunner<ObAstNode>(parser.Page());
 		
 		for(Map<String, Object> bookData : bibleTexts) {
-			Map<Integer, String> osisLesefassungChapterTexts = new HashMap<Integer, String>();
-			Map<Integer, String> osisStudienfassungChapterTexts = new HashMap<Integer, String>();
-			for(Map.Entry<Integer, String> chapterData : ((Map<Integer, String>)(bookData.get("chapterTexts"))).entrySet() ) {
-				ParsingResult<ObAstNode> result = parseRunner.run(chapterData.getValue());
+			List<Pair<Integer, String>> osisLesefassungChapterTexts = new Vector<Pair<Integer, String>>();
+			List<Pair<Integer, String>> osisStudienfassungChapterTexts = new Vector<Pair<Integer, String>>();
+			for(Pair<Integer, String> chapterData : (List<Pair<Integer, String>>)(bookData.get("chapterTexts"))) {
+				ParsingResult<ObAstNode> result = parseRunner.run(chapterData.getY());
 	
 				if(result.matched == false) {
 					TracingParseRunner<ObAstNode> tracingParseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
-					ParsingResult<ObAstNode> tracingResult = tracingParseRunner.run(chapterData.getValue());
+					ParsingResult<ObAstNode> tracingResult = tracingParseRunner.run(chapterData.getY());
 					
 					System.out.println("Tree:");
 					String parseTreePrintOut = ParseTreeUtils.printNodeTree(tracingResult);
@@ -169,7 +170,7 @@ public class Main
 					ErrorUtils.printParseErrors(tracingParseRunner.getParseErrors());
 					
 					System.out.println("Book: " + bookData.get("swordName"));
-					System.out.println("Chapter: " + chapterData.getKey());
+					System.out.println("Chapter: " + chapterData.getX());
 					
 					if(stopOnError) {
 						return;
@@ -179,7 +180,7 @@ public class Main
 					ObAstNode node = result.resultValue;
 					ObAstFixuper.fixupAstTree(node);
 					
-					ObAstVisitor visitor = new ObAstVisitor(chapterData.getKey(), (String)bookData.get("swordName"));
+					ObAstVisitor visitor = new ObAstVisitor(chapterData.getX(), (String)bookData.get("swordName"));
 					try {
 						node.host(visitor);
 					} catch (Throwable e) {
@@ -188,8 +189,8 @@ public class Main
 					}
 					
 	
-					osisStudienfassungChapterTexts.put(chapterData.getKey(), visitor.getStudienFassung());				
-					osisLesefassungChapterTexts.put(chapterData.getKey(), visitor.getLeseFassung());
+					osisStudienfassungChapterTexts.add(new Pair<Integer, String>(chapterData.getX(), visitor.getStudienFassung()));				
+					osisLesefassungChapterTexts.add(new Pair<Integer, String>(chapterData.getX(), visitor.getLeseFassung()));
 				}
 			}
 			bookData.put("osisStudienfassungChapterTexts", osisStudienfassungChapterTexts);
@@ -204,9 +205,9 @@ public class Main
 		
 		for(Map<String, Object> bookData : bibleTexts) {
 			result += "<div type=\"book\" osisID=\"" + bookData.get("swordName") + "\" canonical=\"true\">\n<title type=\"main\">" + bookData.get("germanName") + "</title>\n";
-			for(Map.Entry<Integer, String> chapterData : ((Map<Integer, String>)(bookData.get(studienVsLeseTag))).entrySet() ) {
-				result += "<chapter osisID=\"" + bookData.get("swordName") + "." + chapterData.getKey() + "\">\n<title type=\"chapter\">Kapitel " + chapterData.getKey() + "</title>\n";
-				result += chapterData.getValue();
+			for(Pair<Integer, String> chapterData : (Vector<Pair<Integer, String>>)(bookData.get(studienVsLeseTag)) ) {
+				result += "<chapter osisID=\"" + bookData.get("swordName") + "." + chapterData.getX() + "\">\n<title type=\"chapter\">Kapitel " + chapterData.getX() + "</title>\n";
+				result += chapterData.getY();
 				result += "</chapter>\n";
 			}
 			result += "</div>\n";
