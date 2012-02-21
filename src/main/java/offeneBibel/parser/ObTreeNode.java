@@ -16,13 +16,6 @@ public class ObTreeNode implements IVisitorHost<ObTreeNode>{
 		m_parent = null;
 	}
 	
-	private void clearParent()
-	{
-		if(m_parent != null) {
-			m_parent.removeChild(this);
-		}
-	}
-	
 	public boolean insertChild(int index, ObTreeNode node)
 	{
 		node.setParent(this);
@@ -38,6 +31,12 @@ public class ObTreeNode implements IVisitorHost<ObTreeNode>{
 		return true;
 	}
 	
+	public ObTreeNode removeLastChild()
+	{
+		m_children.peekLast().m_parent = null;
+		return m_children.removeLast();
+	}
+	
 	public boolean pushChild(ObTreeNode node)
 	{
 		node.setParent(this);
@@ -47,7 +46,7 @@ public class ObTreeNode implements IVisitorHost<ObTreeNode>{
 	
 	public ObTreeNode popChild()
 	{
-		m_children.peek().clearParent();
+		m_children.peek().m_parent = null;
 		return m_children.pop();
 	}
 	
@@ -64,14 +63,17 @@ public class ObTreeNode implements IVisitorHost<ObTreeNode>{
 	public boolean removeChild(ObTreeNode node)
 	{
 		if(m_children.remove(node) == true) {
-			node.setParent(null);
+			node.m_parent = null;
 		}
 		return true;
 	}
 	
 	private boolean setParent(ObTreeNode node)
 	{
-		clearParent();
+		if(m_parent != null) {
+			m_parent.m_children.remove(this);
+			m_parent = null;
+		}
 		m_parent = node;
 		return true;
 	}

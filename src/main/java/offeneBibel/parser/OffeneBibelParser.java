@@ -347,6 +347,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         		)),
     		'}',
     		//prevent "{{blabla}}", an omission that contains only one other omission
+			new Action<ObAstNode>() {
+				public boolean run(Context<ObAstNode> context) {
+					context.getValueStack();
+					return true;
+				}
+			},
     		ACTION( peek().childCount()!=1 || ((ObAstNode)(peek().peekChild())).getNodeType()!=NodeType.omission),
     		peek(1).appendChild(pop())
     	);
@@ -464,7 +470,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         	//NoteText(),
     		//BibleText(),
         	'\u201c' // “
-    		
     	);
     }
     
@@ -574,7 +579,17 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 	    				NoneOf("><[]'„“»«{}"),
 	    				Sequence(
 	    					TestNot(breaker.get()),
-	    					TestNot(NoteMarkup()),
+	    					TestNot(
+	    						Sequence(
+	    							NoteMarkup(),
+    								new Action<ObAstNode>() {
+    									public boolean run(Context<ObAstNode> context) {
+    										context.getValueStack().peek().removeLastChild(); // the pop is needed to remove the result of the note markup in case it matched
+    										return true;
+    									}
+    								}
+	    						)
+	    					),
 	    					AnyOf("><[]'„“»«{}") // match the rest
 	    				)
 	    			)
