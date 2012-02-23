@@ -404,7 +404,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	Var<Integer> stopVerse = new Var<Integer>(-1);
     	return Sequence(
 			FirstOf("{{Par|", "{{par|"),
-			Book(), bookName.set(match()),
+			OneOrMore(NoneOf("|")), bookName.set(match()), ACTION(BookNameHelper.getInstance().isValid(bookName.get())),
 			'|',
 			Number(), safeParseIntSet(chapter),
 			'|',
@@ -616,102 +616,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	);
     }
 
-    Rule Book() {
-    	return FirstOf(
-			OtBook(),
-			NtBook(),
-			ApBook()
-    	);
-    }
-    
-    Rule OtBook() {
-    	return FirstOf(
-    		"Genesis", "Gen",
-    		"Exodus",
-    		"Levitikus", "Lev",
-    		"Numeri",
-    		"Deuteronomium",
-    		"Josua",
-    		"Richter",
-    		"Rut",
-    		"1 Samuel", "1_Samuel",
-    		"2 Samuel", "2_Samuel",
-    		"1 Könige", "1_Könige",
-    		"2 Könige", "2_Könige",
-    		"1 Chronik", "1_Chronik",
-    		"2 Chronik", "2_Chronik",
-    		"Esra",
-    		"Nehemia",
-    		"Ester",
-    		"Ijob",
-    		"Psalm",
-    		"Sprüche", "Spr",
-    		"Kohelet",
-    		"Hohelied",
-    		"Jesaja",
-    		"Jeremia", "Jer",
-    		"Klagelieder",
-    		"Ezechiel",
-    		"Daniel",
-    		"Hosea",
-    		"Joel",
-    		"Amos",
-    		"Obadja",
-    		"Jona",
-    		"Micha",
-    		"Nahum",
-    		"Habakuk",
-    		"Zefanja",
-    		"Haggai",
-    		"Sacharja", "Sach",
-    		"Maleachi"
-    	);
-    }
-    
-    Rule NtBook() {
-    	return FirstOf(
-    		"Matthäus", "Mt",
-			"Markus", "Mk",
-			"Lukas",
-			"Johannes", "Joh",
-			"Apostelgeschichte", "Apg",
-			"Römer",
-			"1 Korinther", "1_Korinther",
-			"2 Korinther", "2_Korinther",
-			"Galater", "Gal",
-			"Epheser", "Eph",
-			"Philipper",
-			"Kolosser", "Kol",
-			"1 Thessalonicher", "1_Thessalonicher",
-			"2 Thessalonicher", "2_Thessalonicher",
-			"1 Timotheus", "1_Timotheus",
-			"2 Timotheus", "2_Timotheus",
-			"Titus",
-			"Philemon",
-			"Hebräer", "Hebr",
-			"Jakobus",
-			"1 Petrus", "1_Petrus",
-			"2 Petrus", "2_Petrus",
-			"1 Johannes", "1_Johannes",
-			"2 Johannes", "2_Johannes",
-			"3 Johannes", "3_Johannes",
-			"Judas",
-			"Offenbarung"
-    	);
-    }
-    
-    Rule ApBook() {
-    	return FirstOf(
-			"Baruch",
-			"Judit",
-			"1 Makkabäer",
-			"2 Makkabäer",
-			"Jesus Sirach",
-			"Tobit",
-			"Weisheit"
-    	);
-    }
-    
     Rule HebrewText() {
     	return Sequence(
     			OneOrMore(FirstOf(

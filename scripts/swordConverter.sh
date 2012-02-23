@@ -33,3 +33,6 @@ cp ${resources}/offbist.conf offbistModule/mods.d
 ~/Documents/sword/svn/sword/utilities/osis2mod offbistModule/modules/texts/ztext/offbist/ ${resources}/offeneBibelStudienfassungModule.osis -z
 
 cp -r offbistModule/* ~/.sword
+
+rm OffBiModule.zip
+zip -r OffBiModule.zip offbileModule offbistModule

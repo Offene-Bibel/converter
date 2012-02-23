@@ -8,7 +8,7 @@ public class ObParallelPassageNode extends ObAstNode {
 	
 	public ObParallelPassageNode(String book, int chapter, int verse) {
 		super(NodeType.parallelPassage);
-		m_book = book;
+		m_book = BookNameHelper.getInstance().getUnifiedBookNameForString(book);
 		m_chapter = chapter;
 		m_startVerse = verse;
 		m_stopVerse = -1;
@@ -16,7 +16,7 @@ public class ObParallelPassageNode extends ObAstNode {
 	
 	public ObParallelPassageNode(String book, int chapter, int startVerse, int stopVerse) {
 		super(NodeType.parallelPassage);
-		m_book = book;
+		m_book = BookNameHelper.getInstance().getUnifiedBookNameForString(book);
 		m_chapter = chapter;
 		m_startVerse = startVerse;
 		m_stopVerse = stopVerse;

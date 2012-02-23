@@ -2,6 +2,7 @@ package offeneBibel.osisExporter;
 
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.ObFassungNode;
+import offeneBibel.parser.ObParallelPassageNode;
 import offeneBibel.parser.ObTextNode;
 import offeneBibel.parser.ObTreeNode;
 import offeneBibel.parser.ObVerseNode;
@@ -17,9 +18,10 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 	private String m_leseFassung = null;
 	private String m_currentFassung = "";
 	
-	private String m_verseStopTag = null;
+	private String m_verseTag = null;
 	private boolean m_inHeading = false;
 	private int m_quoteCounter = 0;
+	private boolean m_multiParallelPassage = false;
 	
 	private NoteIndexCounter m_noteIndexCounter;
 	
@@ -42,9 +44,8 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		else if(astNode.getNodeType() == ObAstNode.NodeType.verse) {
 			ObVerseNode verse = (ObVerseNode)node;
 			addStopTag();
-			String verseTag = m_verseTagStart + verse.getNumber();
-			m_currentFassung += "<verse osisID=\"" + verseTag + "\" sID=\"" + verseTag + "\"/>";
-			m_verseStopTag = "<verse eID=\"" + verseTag + "\"/>\n";
+			m_verseTag = m_verseTagStart + verse.getNumber();
+			m_currentFassung += "<verse osisID=\"" + m_verseTag + "\" sID=\"" + m_verseTag + "\"/>";
 		}
 		
 		else if(astNode.getNodeType() == ObAstNode.NodeType.quote) {
@@ -93,9 +94,9 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 	}
 
 	private void addStopTag() {
-		if(m_verseStopTag != null) {
-			m_currentFassung += m_verseStopTag;
-			m_verseStopTag = null;
+		if(m_verseTag != null) {
+			m_currentFassung += "<verse eID=\"" + m_verseTag + "\"/>\n";
+			m_verseTag = null;
 		}
 	}
 
@@ -106,6 +107,27 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		if(astNode.getNodeType() == ObAstNode.NodeType.text) {
 			ObTextNode text = (ObTextNode)node;
 			m_currentFassung += text.getText();
+		}
+		
+		else if(astNode.getNodeType() == ObAstNode.NodeType.parallelPassage) {
+			ObParallelPassageNode passage = (ObParallelPassageNode)node;
+			
+			if(m_multiParallelPassage == false) {
+				m_currentFassung += "<note type=\"crossReference\" osisID=\"" + m_verseTag + "!crossReference\" osisRef=\"" + m_verseTag + "\">";
+			}
+			
+			m_currentFassung += "<reference osisRef=\"" +
+			passage.getBook() + "." + passage.getChapter() + "." + passage.getStartVerse() + "\">" +
+			passage.getBook() + " " + passage.getChapter() + ", " + passage.getStartVerse() + "</reference>";
+			
+			if(((ObAstNode)passage.getNextSibling()).getNodeType() == ObAstNode.NodeType.parallelPassage) {
+				m_multiParallelPassage = true;
+				m_currentFassung += "|"; 
+			}
+			else {
+				m_multiParallelPassage = false;
+				m_currentFassung += "</note>";
+			}
 		}
 	}
 
