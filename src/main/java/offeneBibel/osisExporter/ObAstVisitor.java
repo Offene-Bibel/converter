@@ -22,6 +22,8 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 	private boolean m_inHeading = false;
 	private int m_quoteCounter = 0;
 	private boolean m_multiParallelPassage = false;
+	private boolean m_poemMode;
+	private boolean m_lineStarted = false;
 	
 	private NoteIndexCounter m_noteIndexCounter;
 	
@@ -39,13 +41,6 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		
 		if(astNode.getNodeType() == ObAstNode.NodeType.fassung) {
 			m_currentFassung = "";
-		}
-		
-		else if(astNode.getNodeType() == ObAstNode.NodeType.verse) {
-			ObVerseNode verse = (ObVerseNode)node;
-			addStopTag();
-			m_verseTag = m_verseTagStart + verse.getNumber();
-			m_currentFassung += "<verse osisID=\"" + m_verseTag + "\" sID=\"" + m_verseTag + "\"/>";
 		}
 		
 		else if(astNode.getNodeType() == ObAstNode.NodeType.quote) {
@@ -93,20 +88,32 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		}
 	}
 
-	private void addStopTag() {
-		if(m_verseTag != null) {
-			m_currentFassung += "<verse eID=\"" + m_verseTag + "\"/>\n";
-			m_verseTag = null;
-		}
-	}
-
 	public void visit(ObTreeNode node) throws Throwable
 	{
 		ObAstNode astNode = (ObAstNode)node;
 		
 		if(astNode.getNodeType() == ObAstNode.NodeType.text) {
 			ObTextNode text = (ObTextNode)node;
-			m_currentFassung += text.getText();
+			String textString = text.getText();
+			if(m_poemMode) {
+				if(m_lineStarted == false) {
+					textString = textString.replaceFirst("\n", "<l>");
+					m_lineStarted = true;
+				}
+				textString = textString.replaceAll("\n", "</l><l>");
+			}
+			m_currentFassung += textString;
+		}
+		
+		else if(astNode.getNodeType() == ObAstNode.NodeType.verse) {
+			ObVerseNode verse = (ObVerseNode)node;
+			addStopTag();
+			m_verseTag = m_verseTagStart + verse.getNumber();
+			m_currentFassung += "<verse osisID=\"" + m_verseTag + "\" sID=\"" + m_verseTag + "\"/>";
+			if(m_poemMode){
+				m_currentFassung += "<l>";
+				m_lineStarted = true;
+			}
 		}
 		
 		else if(astNode.getNodeType() == ObAstNode.NodeType.parallelPassage) {
@@ -127,6 +134,18 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 			else {
 				m_multiParallelPassage = false;
 				m_currentFassung += "</note>";
+			}
+		}
+		
+		else if(astNode.getNodeType() == ObAstNode.NodeType.poemStart) {
+			m_poemMode = true;
+		}
+		
+		else if(astNode.getNodeType() == ObAstNode.NodeType.poemStop) {
+			m_poemMode = false;
+			if(m_lineStarted) {
+				m_currentFassung += "</l>";
+				m_lineStarted = false;
 			}
 		}
 	}
@@ -188,6 +207,17 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 
 	public String getLeseFassung() {
 		return m_leseFassung;
+	}
+
+	private void addStopTag() {
+		if(m_verseTag != null) {
+			if(m_poemMode && m_lineStarted) {
+				m_currentFassung += "</l>";
+				m_lineStarted = false;
+			}
+			m_currentFassung += "<verse eID=\"" + m_verseTag + "\"/>\n";
+			m_verseTag = null;
+		}
 	}
 	
 	class QuoteSearcher implements IVisitor<ObTreeNode>
