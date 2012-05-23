@@ -367,10 +367,11 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 				Quote(),
 				Insertion(),
 	    		Alternative(),
+	    		Omission(),
 	    		Note()
 			)),
 			')',
-    		//prevent "((blabla))", an omission that contains only one other omission
+    		//prevent "((blabla))", an alternative that contains only one other alternative
     		ACTION( peek().childCount()!=1 || ((ObAstNode)(peek().peekChild())).getNodeType()!=NodeType.alternative),
     		peek(1).appendChild(pop())
     	);
