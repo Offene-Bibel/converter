@@ -1,4 +1,4 @@
-package offeneBibel.osisExporter;
+package offeneBibel.validator;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

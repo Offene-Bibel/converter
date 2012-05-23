@@ -1,4 +1,7 @@
 #!/bin/bash
+cd ..
+mkdir tmp
+cd tmp
 mkdir luther
 mkdir luther/modules
 mkdir luther/modules/texts

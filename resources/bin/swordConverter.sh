@@ -1,6 +1,8 @@
 #!/bin/bash
+cd ../tmp
+
 resources="../resources"
-rm -r offbileModule
+rm -r offbileModule &> /dev/null
 
 mkdir offbileModule
 mkdir offbileModule/modules
@@ -17,7 +19,7 @@ cp ${resources}/offbile.conf offbileModule/mods.d
 
 cp -r offbileModule/* ~/.sword
 
-rm -r offbistModule
+rm -r offbistModule &> /dev/null
 
 mkdir offbistModule
 mkdir offbistModule/modules

@@ -36,33 +36,25 @@ import offeneBibel.parser.OffeneBibelParser;
 import util.Misc;
 import util.Pair;
 	
-public class Main
+public class Exporter
 {
 	//static final String m_urlBase = "http://www.offene-bibel.de/wiki/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
 	static final String m_urlBase = "http://www.offene-bibel.de/wiki/index.php5?action=raw&title=";
 	//the following list was created by combining the wiki page: Vorlage:Kapitelzahl and the OSIS 2.1.1 manual Appendix C.1
 	static final String m_bibleBooks = "resources/bibleBooks.txt";
 	//static final String m_bibleBooks = "resources/testbibleBooks.txt";
-	static final String m_pageCache = "resources/pageCache/";
+	static final String m_pageCache = "tmp/pageCache/";
 	static final String m_studienFassungTemplate = "resources/offene-bibel-studienfassung_template.txt";
 	static final String m_leseFassungTemplate = "resources/offene-bibel-lesefassung_template.txt";
-	static final String m_studienFassungFilename = "resources/offeneBibelStudienfassungModule.osis";
-	static final String m_leseFassungFilename = "resources/offeneBibelLesefassungModule.osis";
-	static final String m_bibleTextObjectFilename = "resources/bibleTextObjectFile.bin";
+	static final String m_studienFassungFilename = "results/offeneBibelStudienfassungModule.osis";
+	static final String m_leseFassungFilename = "results/offeneBibelLesefassungModule.osis";
 	
 	public static void main(String [] args)
 	{
 		try {
 		List<Map<String, Object>> bibleTexts = null;
-//		File bibleTextObjectFile = new File(m_bibleTextObjectFilename);
-//		if(bibleTextObjectFile.exists() == false) {
-			bibleTexts = retrieveBooks();
-/*			Misc.serializeBibleDataToFile((Serializable) bibleTexts, m_bibleTextObjectFilename);
-		}
-		else {
-			bibleTexts = (List<Map<String, Object>>) Misc.deserializeBibleDataToFile(m_bibleTextObjectFilename);
-		}
-*/
+		bibleTexts = retrieveBooks();
+
 		createOsisTextsForChapters(bibleTexts, true);
 		String studienFassung = constructOsisText(putOsisTextTogether(bibleTexts, false), false);
 		String leseFassung = constructOsisText(putOsisTextTogether(bibleTexts, true), true);
@@ -74,10 +66,6 @@ public class Main
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-/*		catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-*/
 	}
 
 	private static String retrieveWikiPage(String wikiPage)
