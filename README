@@ -1,0 +1,23 @@
+Offene Bibel OSIS Exporter
+--------------------------
+
+To build the project:
+-install maven from http://maven.apache.org/download.html
+-run build.sh
+--> the results reside in the install/ folder
+
+If you're on Windows, then please convert build.sh to a batch script and send it to me. :-)
+
+
+To run the converter call:
+install/bin/export.sh/bat
+This will download the translation from the Offene Bibel and create two .osis files in the install/results/ folder.
+The exporter caches all files it downloads to install/tmp/pageCache/. They won't be redownloaded. To redownload a file, just delete it in the cache.
+
+
+There is also a convenience script that creates two sword modules copies them to ~/.sword and creates a .zip archive in install/bin/swordConverter.sh
+
+
+And then there is the validator that checks a given Wiki page for validity.
+You can run it as follows:
+install/bin/validator.sh path/to/a/wikiPage
