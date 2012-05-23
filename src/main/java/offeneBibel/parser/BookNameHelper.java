@@ -6,7 +6,7 @@ import java.util.List;
 import util.Misc;
 
 public class BookNameHelper {
-	static final String m_bibleBooks = "resources/bibleBooks.txt";
+	static final String m_bibleBooks = Misc.getResourceDir() + "bibleBooks.txt";
 	private List<List<String>> m_bookList;
 	private static BookNameHelper m_instance = null;
 	

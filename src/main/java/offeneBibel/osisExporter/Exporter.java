@@ -41,13 +41,12 @@ public class Exporter
 	//static final String m_urlBase = "http://www.offene-bibel.de/wiki/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
 	static final String m_urlBase = "http://www.offene-bibel.de/wiki/index.php5?action=raw&title=";
 	//the following list was created by combining the wiki page: Vorlage:Kapitelzahl and the OSIS 2.1.1 manual Appendix C.1
-	static final String m_bibleBooks = "resources/bibleBooks.txt";
-	//static final String m_bibleBooks = "resources/testbibleBooks.txt";
-	static final String m_pageCache = "tmp/pageCache/";
-	static final String m_studienFassungTemplate = "resources/offene-bibel-studienfassung_template.txt";
-	static final String m_leseFassungTemplate = "resources/offene-bibel-lesefassung_template.txt";
-	static final String m_studienFassungFilename = "results/offeneBibelStudienfassungModule.osis";
-	static final String m_leseFassungFilename = "results/offeneBibelLesefassungModule.osis";
+	static final String m_bibleBooks = Misc.getResourceDir() + "bibleBooks.txt";
+	//static final String m_bibleBooks = Misc.getResourceDir() + "testbibleBooks.txt";
+	static final String m_studienFassungTemplate = Misc.getResourceDir() + "offene-bibel-studienfassung_template.txt";
+	static final String m_leseFassungTemplate = Misc.getResourceDir() + "offene-bibel-lesefassung_template.txt";
+	static final String m_studienFassungFilename = Misc.getResultsDir() + "offeneBibelStudienfassungModule.osis";
+	static final String m_leseFassungFilename = Misc.getResultsDir() + "offeneBibelLesefassungModule.osis";
 	
 	public static void main(String [] args)
 	{
@@ -72,7 +71,7 @@ public class Exporter
 	{
 		try {
 			String result = null;
-			String fileCacheString = m_pageCache + wikiPage;
+			String fileCacheString = Misc.getPageCacheDir() + wikiPage;
 			File fileCache = new File(fileCacheString);
 			if(fileCache.exists()) {
 				if(fileCache.length() == 0)
@@ -91,7 +90,7 @@ public class Exporter
 					// chapter not yet created, skip
 		        	return null;
 				}
-		        Misc.createFolder(m_pageCache);
+		        Misc.createFolder(Misc.getPageCacheDir());
 		        Misc.writeFile(result, fileCacheString);
 			}
 	        return result;

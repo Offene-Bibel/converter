@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.URISyntaxException;
+import java.security.CodeSource;
 import java.util.List;
 import java.util.Vector;
 
@@ -79,4 +81,37 @@ public class Misc {
 	       return data;
 	}
 
+	public static File getDirOfProgram()
+	{
+		try {
+			CodeSource codeSource = Misc.class.getProtectionDomain().getCodeSource();
+		    File jarFile = new File(codeSource.getLocation().toURI().getPath());
+		    return jarFile.getParentFile();
+
+			
+			/*
+			String path = Misc.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			String decodedPath = URLDecoder.decode(path, "UTF-8");
+			return new File(decodedPath);
+			*/
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public static String getResourceDir()
+	{
+		return getDirOfProgram().getPath() + File.separator + ".." + File.separator + "resources" + File.separator;
+	}
+	
+	public static String getPageCacheDir()
+	{
+		return getDirOfProgram().getPath() + File.separator + ".." + File.separator + "tmp" + File.separator + "pageCache" + File.separator;
+	}
+	
+	public static String getResultsDir()
+	{
+		return getDirOfProgram().getPath() + File.separator + ".." + File.separator + "results" + File.separator;
+	}
 }
