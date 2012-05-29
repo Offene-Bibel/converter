@@ -22,6 +22,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ErrorUtils;
 import org.parboiled.parserunners.BasicParseRunner;
+import org.parboiled.parserunners.RecoveringParseRunner;
+import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.parserunners.TracingParseRunner;
 import org.parboiled.support.ParseTreeUtils;
 import org.parboiled.support.ParsingResult;
@@ -151,6 +153,25 @@ public class Exporter
 				ParsingResult<ObAstNode> result = parseRunner.run(chapterData.getY());
 	
 				if(result.matched == false) {
+					System.out.println("Book: " + bookData.get("swordName"));
+					System.out.println("Chapter: " + chapterData.getX());
+					System.out.println("Error:");
+
+					ReportingParseRunner<ObAstNode> errorParseRunner = new ReportingParseRunner<ObAstNode>(parser.Page());
+					//TracingParseRunner<ObAstNode> errorParseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
+					//RecoveringParseRunner<ObAstNode> errorParseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page());
+					ParsingResult<ObAstNode> validatorParsingResult = errorParseRunner.run(chapterData.getY());
+
+					if(validatorParsingResult.hasErrors()) {
+						System.out.println(ErrorUtils.printParseErrors(validatorParsingResult));
+						System.exit(1);
+					}
+					else {
+						System.out.println("Validated sucessfully. This shouldn't be...");
+						System.exit(0);
+					}
+					
+					/*
 					TracingParseRunner<ObAstNode> tracingParseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
 					ParsingResult<ObAstNode> tracingResult = tracingParseRunner.run(chapterData.getY());
 					
@@ -163,6 +184,7 @@ public class Exporter
 					
 					System.out.println("Book: " + bookData.get("swordName"));
 					System.out.println("Chapter: " + chapterData.getX());
+					*/
 					
 					if(stopOnError) {
 						return;

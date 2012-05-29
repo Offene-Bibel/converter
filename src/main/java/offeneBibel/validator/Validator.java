@@ -10,6 +10,7 @@ import offeneBibel.parser.OffeneBibelParser;
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ErrorUtils;
 import org.parboiled.parserunners.RecoveringParseRunner;
+import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.support.ParsingResult;
 
 public class Validator
@@ -32,8 +33,9 @@ public class Validator
 		}
 
 		OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
-		RecoveringParseRunner<ObAstNode> reportingParseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page());
-		ParsingResult<ObAstNode> result = reportingParseRunner.run(text);
+		ReportingParseRunner<ObAstNode> parseRunner = new ReportingParseRunner<ObAstNode>(parser.Page());
+		//RecoveringParseRunner<ObAstNode> parseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page());
+		ParsingResult<ObAstNode> result = parseRunner.run(text);
 
 		if(result.hasErrors()) {
 			System.out.println(ErrorUtils.printParseErrors(result));
