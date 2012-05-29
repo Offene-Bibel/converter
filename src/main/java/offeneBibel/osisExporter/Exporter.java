@@ -30,8 +30,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.beust.jcommander.JCommander;
+
 import offeneBibel.parser.ObAstFixuper;
 import offeneBibel.parser.ObAstNode;
+import offeneBibel.parser.ObVerseStatus;
 import offeneBibel.parser.OffeneBibelParser;
 import util.Misc;
 import util.Pair;
@@ -47,21 +50,23 @@ public class Exporter
 	static final String m_leseFassungTemplate = Misc.getResourceDir() + "offene-bibel-lesefassung_template.txt";
 	static final String m_studienFassungFilename = Misc.getResultsDir() + "offeneBibelStudienfassungModule.osis";
 	static final String m_leseFassungFilename = Misc.getResultsDir() + "offeneBibelLesefassungModule.osis";
-	
+
 	public static void main(String [] args)
 	{
 		try {
-		List<Map<String, Object>> bibleTexts = null;
-		bibleTexts = retrieveBooks();
-
-		createOsisTextsForChapters(bibleTexts, true);
-		String studienFassung = constructOsisText(putOsisTextTogether(bibleTexts, false), false);
-		String leseFassung = constructOsisText(putOsisTextTogether(bibleTexts, true), true);
-		
-		Misc.writeFile(studienFassung, m_studienFassungFilename);
-		Misc.writeFile(leseFassung, m_leseFassungFilename);
-		System.out.println("done");
-		
+			CommandLineArguments commandLineArguments = new CommandLineArguments();
+			new JCommander(commandLineArguments, args);
+				
+			List<Map<String, Object>> bibleTexts = null;
+			bibleTexts = retrieveBooks();
+	
+			generateOsisChapterFragments(bibleTexts, ObVerseStatus.values()[commandLineArguments.m_exportLevel], true);
+			String studienFassung = generateCompleteOsisString(generateOsisBookFragment(bibleTexts, false), false);
+			String leseFassung = generateCompleteOsisString(generateOsisBookFragment(bibleTexts, true), true);
+			
+			Misc.writeFile(studienFassung, m_studienFassungFilename);
+			Misc.writeFile(leseFassung, m_leseFassungFilename);
+			System.out.println("done");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -134,7 +139,7 @@ public class Exporter
 	 * @param wikiTexts, 0 = german name, 1 = sword name, 2 = chapter count, 3 = wiki text
 	 * @param leseFassung
 	 */
-	private static void createOsisTextsForChapters(List<Map<String, Object>> bibleTexts, boolean stopOnError)
+	private static void generateOsisChapterFragments(List<Map<String, Object>> bibleTexts, ObVerseStatus requiredTranslationStatus, boolean stopOnError)
 	{
 		OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
 		BasicParseRunner<ObAstNode> parseRunner = new BasicParseRunner<ObAstNode>(parser.Page());
@@ -167,7 +172,7 @@ public class Exporter
 					ObAstNode node = result.resultValue;
 					ObAstFixuper.fixupAstTree(node);
 					
-					ObAstVisitor visitor = new ObAstVisitor(chapterData.getX(), (String)bookData.get("swordName"));
+					ObAstVisitor visitor = new ObAstVisitor(chapterData.getX(), (String)bookData.get("swordName"), requiredTranslationStatus);
 					try {
 						node.host(visitor);
 					} catch (Throwable e) {
@@ -185,7 +190,7 @@ public class Exporter
 		}
 	}
 
-	private static String putOsisTextTogether(List<Map<String, Object>> bibleTexts, boolean leseFassung)
+	private static String generateOsisBookFragment(List<Map<String, Object>> bibleTexts, boolean leseFassung)
 	{
 		String result = "";
 		String studienVsLeseTag = leseFassung ? "osisLesefassungChapterTexts" : "osisStudienfassungChapterTexts";
@@ -202,7 +207,7 @@ public class Exporter
 		return result;
 	}
 
-	private static String constructOsisText(String osisText, boolean leseFassung) throws IOException
+	private static String generateCompleteOsisString(String osisText, boolean leseFassung) throws IOException
 	{
 		String result = Misc.readFile(leseFassung ? m_leseFassungTemplate : m_studienFassungTemplate);
 		

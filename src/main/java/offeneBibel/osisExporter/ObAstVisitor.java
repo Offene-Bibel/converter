@@ -6,9 +6,11 @@ import offeneBibel.parser.ObParallelPassageNode;
 import offeneBibel.parser.ObTextNode;
 import offeneBibel.parser.ObTreeNode;
 import offeneBibel.parser.ObVerseNode;
+import offeneBibel.parser.ObVerseStatus;
+import offeneBibel.visitorPattern.DifferentiatingVisitor;
 import offeneBibel.visitorPattern.IVisitor;
 
-public class ObAstVisitor implements IVisitor<ObTreeNode>
+public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements IVisitor<ObTreeNode>
 {
 	private final int m_chapter;
 	private final String m_book;
@@ -19,23 +21,44 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 	private String m_currentFassung = "";
 	
 	private String m_verseTag = null;
-	private boolean m_inHeading = false;
 	private int m_quoteCounter = 0;
 	private boolean m_multiParallelPassage = false;
+	
+	/**
+	 * Started by <poem> and stopped by </poem>.
+	 * If in poem mode, all text nodes will replace \n with </l><l>.
+	 * A <l> is added at the beginning of a <poem> area also, but only if
+	 * there actually was some text. A </l> is added after the last text
+	 * block too.
+	 */
 	private boolean m_poemMode;
+	
+	/**
+	 * If in poem mode and a textual line has started, this is true.
+	 * It is used to securely add the final </l> tag after the last line
+	 * in a poem, but only if there actually was some text.
+	 * It is also used to securely add the <l> before the first text after
+	 * the <poem> tag.
+	 */
 	private boolean m_lineStarted = false;
+	
+	/** Skip the current verse if true. */
+	private boolean m_skipVerse = false;
+	
+	private ObVerseStatus m_requiredTranslationStatus;
 	
 	private NoteIndexCounter m_noteIndexCounter;
 	
-	public ObAstVisitor(int chapter, String book)
+	public ObAstVisitor(int chapter, String book, ObVerseStatus requiredTranslationStatus)
 	{
 		m_chapter = chapter;
 		m_book = book;
 		m_verseTagStart = m_book + "." + m_chapter + ".";
 		m_noteIndexCounter = new NoteIndexCounter();
+		m_requiredTranslationStatus = requiredTranslationStatus;
 	}
 	
-	public void visitBefore(ObTreeNode node) throws Throwable
+	public void visitBeforeDefault(ObTreeNode node) throws Throwable
 	{
 		ObAstNode astNode = (ObAstNode)node;
 		
@@ -44,6 +67,7 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		}
 		
 		else if(astNode.getNodeType() == ObAstNode.NodeType.quote) {
+			if(m_skipVerse) return;
 			if(m_quoteCounter>0)
 			{
 				m_quoteCounter++;
@@ -63,36 +87,41 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		}
 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.alternative) {
+			if(m_skipVerse) return;
 			m_currentFassung += "(";
 		}
 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.insertion) {
+			if(m_skipVerse) return;
 			m_currentFassung += "[";
 		}
 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.omission) {
+			if(m_skipVerse) return;
 			m_currentFassung += "{";
 		}
 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.heading) {
 			m_currentFassung += "<title>";
-			m_inHeading = true;
 		}
 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.hebrew) {
+			if(m_skipVerse) return;
 			m_currentFassung += "<foreign xml:lang=\"he\">";
 		}
 		
 		else if(astNode.getNodeType() == ObAstNode.NodeType.note) {
+			if(m_skipVerse) return;
 			m_currentFassung += "<note type=\"x-footnote\" n=\"" + m_noteIndexCounter.getNextNoteString() + "\">";
 		}
 	}
 
-	public void visit(ObTreeNode node) throws Throwable
+	public void visitDefault(ObTreeNode node) throws Throwable
 	{
 		ObAstNode astNode = (ObAstNode)node;
 		
 		if(astNode.getNodeType() == ObAstNode.NodeType.text) {
+			if(m_skipVerse) return;
 			ObTextNode text = (ObTextNode)node;
 			String textString = text.getText();
 			if(m_poemMode) {
@@ -108,15 +137,23 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		else if(astNode.getNodeType() == ObAstNode.NodeType.verse) {
 			ObVerseNode verse = (ObVerseNode)node;
 			addStopTag();
-			m_verseTag = m_verseTagStart + verse.getNumber();
-			m_currentFassung += "<verse osisID=\"" + m_verseTag + "\" sID=\"" + m_verseTag + "\"/>";
-			if(m_poemMode){
-				m_currentFassung += "<l>";
-				m_lineStarted = true;
+			if(verse.getStatus().ordinal() >= m_requiredTranslationStatus.ordinal()) {
+				m_skipVerse = false;
+				m_verseTag = m_verseTagStart + verse.getNumber();
+				m_currentFassung += "<verse osisID=\"" + m_verseTag + "\" sID=\"" + m_verseTag + "\"/>";
+				if(m_poemMode){
+					m_currentFassung += "<l>";
+					m_lineStarted = true;
+				}
+			}
+			else {
+				// skip this verse
+				m_skipVerse = true;
 			}
 		}
 		
 		else if(astNode.getNodeType() == ObAstNode.NodeType.parallelPassage) {
+			if(m_skipVerse) return;
 			ObParallelPassageNode passage = (ObParallelPassageNode)node;
 			
 			if(m_multiParallelPassage == false) {
@@ -150,7 +187,7 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		}
 	}
 
-	public void visitAfter(ObTreeNode node) throws Throwable
+	public void visitAfterDefault(ObTreeNode node) throws Throwable
 	{
 		ObAstNode astNode = (ObAstNode)node;
 		
@@ -167,6 +204,7 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		}
 		
 		else if(astNode.getNodeType() == ObAstNode.NodeType.quote) {
+			if(m_skipVerse) return;
 			if(m_quoteCounter>0)
 				m_quoteCounter--;
 			if(m_quoteCounter>0)
@@ -177,14 +215,17 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		}
 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.alternative) {
+			if(m_skipVerse) return;
 			m_currentFassung += ")";
 		}
 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.insertion) {
+			if(m_skipVerse) return;
 			m_currentFassung += "]";
 		}
 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.omission) {
+			if(m_skipVerse) return;
 			m_currentFassung += "}";
 		}
 		
@@ -193,10 +234,12 @@ public class ObAstVisitor implements IVisitor<ObTreeNode>
 		}
 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.hebrew) {
+			if(m_skipVerse) return;
 			m_currentFassung += "</foreign>";
 		}
 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.note) {
+			if(m_skipVerse) return;
 			m_currentFassung += "</note>";
 		}
 	}
