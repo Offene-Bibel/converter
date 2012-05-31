@@ -9,7 +9,6 @@ import offeneBibel.parser.OffeneBibelParser;
 
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ErrorUtils;
-import org.parboiled.parserunners.RecoveringParseRunner;
 import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.support.ParsingResult;
 
