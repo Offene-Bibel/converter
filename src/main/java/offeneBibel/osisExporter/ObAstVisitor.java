@@ -124,6 +124,7 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 			if(m_skipVerse) return;
 			ObTextNode text = (ObTextNode)node;
 			String textString = text.getText();
+			
 			if(m_poemMode) {
 				if(m_lineStarted == false) {
 					textString = textString.replaceFirst("\n", "<l>");
@@ -131,6 +132,9 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 				}
 				textString = textString.replaceAll("\n", "</l><l>");
 			}
+			
+			textString = textString.replaceAll("&", "&amp;");
+			
 			m_currentFassung += textString;
 		}
 		
