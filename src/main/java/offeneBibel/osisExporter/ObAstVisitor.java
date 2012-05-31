@@ -2,6 +2,7 @@ package offeneBibel.osisExporter;
 
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.ObFassungNode;
+import offeneBibel.parser.ObNoteNode;
 import offeneBibel.parser.ObParallelPassageNode;
 import offeneBibel.parser.ObTextNode;
 import offeneBibel.parser.ObTreeNode;
@@ -14,13 +15,18 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 {
 	private final int m_chapter;
 	private final String m_book;
-	private final String m_verseTagStart;
 	
 	private String m_studienFassung = null;
 	private String m_leseFassung = null;
 	private String m_currentFassung = "";
 	
+	private final String m_verseTagStart;
 	private String m_verseTag = null;
+	
+	private String m_lTagStart;
+	private String m_lTag = null;
+	private int m_lTagCounter = 1;
+	
 	private int m_quoteCounter = 0;
 	private boolean m_multiParallelPassage = false;
 	
@@ -54,6 +60,7 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 		m_chapter = chapter;
 		m_book = book;
 		m_verseTagStart = m_book + "." + m_chapter + ".";
+		m_lTagStart = m_book + "." + m_chapter + "_l_tag_";
 		m_noteIndexCounter = new NoteIndexCounter();
 		m_requiredTranslationStatus = requiredTranslationStatus;
 	}
@@ -64,6 +71,8 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 		
 		if(astNode.getNodeType() == ObAstNode.NodeType.fassung) {
 			m_currentFassung = "";
+			m_lTag = null;
+			m_lTagCounter = 1;
 		}
 		
 		else if(astNode.getNodeType() == ObAstNode.NodeType.quote) {
@@ -125,12 +134,18 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 			ObTextNode text = (ObTextNode)node;
 			String textString = text.getText();
 			
-			if(m_poemMode) {
-				if(m_lineStarted == false) {
-					textString = textString.replaceFirst("\n", "<l>");
-					m_lineStarted = true;
+			if(m_poemMode && ! astNode.isDescendantOf(ObNoteNode.class)) {
+				if(textString.contains("\n")) {
+					if(m_lineStarted == false) {
+						textString = textString.replaceFirst("\n", getLTagStart());
+						m_lineStarted = true;
+					}
+					while(textString.contains("\n")) {
+						String stop = getLTagStop();
+						String start = getLTagStart();
+						textString = textString.replaceFirst("\n", stop + start);
+					}
 				}
-				textString = textString.replaceAll("\n", "</l><l>");
 			}
 			
 			textString = textString.replaceAll("&", "&amp;");
@@ -145,8 +160,8 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 				m_skipVerse = false;
 				m_verseTag = m_verseTagStart + verse.getNumber();
 				m_currentFassung += "<verse osisID=\"" + m_verseTag + "\" sID=\"" + m_verseTag + "\"/>";
-				if(m_poemMode){
-					m_currentFassung += "<l>";
+				if(m_poemMode && m_lineStarted == false){
+					m_currentFassung += getLTagStart();
 					m_lineStarted = true;
 				}
 			}
@@ -185,7 +200,7 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.poemStop) {
 			m_poemMode = false;
 			if(m_lineStarted) {
-				m_currentFassung += "</l>";
+				m_currentFassung += getLTagStop();
 				m_lineStarted = false;
 			}
 		}
@@ -259,12 +274,27 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 	private void addStopTag() {
 		if(m_verseTag != null) {
 			if(m_poemMode && m_lineStarted) {
-				m_currentFassung += "</l>";
+				m_currentFassung += getLTagStop();
 				m_lineStarted = false;
 			}
 			m_currentFassung += "<verse eID=\"" + m_verseTag + "\"/>\n";
 			m_verseTag = null;
 		}
+	}
+	
+	private String getLTagStop() {
+		if(m_lTag == null) {
+			m_lTag = m_lTagStart + m_lTagCounter;
+		}
+		return "<l eID=\"" + m_lTag + "\"/>";
+	}
+	
+	private String getLTagStart() {
+		if(m_lTag != null) {
+			++m_lTagCounter;
+		}
+		m_lTag = m_lTagStart + m_lTagCounter;
+		return "<l sID=\"" + m_lTag + "\"/>";
 	}
 	
 	class QuoteSearcher implements IVisitor<ObTreeNode>

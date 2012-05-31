@@ -126,4 +126,16 @@ public class ObTreeNode implements IVisitorHost<ObTreeNode>{
 			visitor.visitAfter(this);
 		}
 	}
+	
+	public boolean isDescendantOf(Class<? extends ObTreeNode> classType) {
+		ObTreeNode runner = this;
+		while(runner != null && ! classType.isInstance(runner)) {
+			runner = runner.getParent();
+		}
+		
+		if (runner == null)
+			return false;
+		else
+			return true;
+	}
 }
