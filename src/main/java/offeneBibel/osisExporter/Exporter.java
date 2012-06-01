@@ -219,9 +219,9 @@ public class Exporter
 			for(Pair<Integer, String> chapterData : (Vector<Pair<Integer, String>>)(bookData.get(studienVsLeseTag)) ) {
 				if(chapterData.getY() != null) { // prevent empty chapters
 					chapterExists = true;
-					result += "<chapter osisID=\"" + bookData.get("swordName") + "." + chapterData.getX() + "\">\n<title type=\"chapter\">Kapitel " + chapterData.getX() + "</title>\n";
-					result += chapterData.getY();
-					result += "</chapter>\n";
+					book += "<chapter osisID=\"" + bookData.get("swordName") + "." + chapterData.getX() + "\">\n<title type=\"chapter\">Kapitel " + chapterData.getX() + "</title>\n";
+					book += chapterData.getY();
+					book += "</chapter>\n";
 				}
 			}
 			book += "</div>\n";
