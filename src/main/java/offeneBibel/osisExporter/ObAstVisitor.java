@@ -159,6 +159,7 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 		else if(astNode.getNodeType() == ObAstNode.NodeType.verse) {
 			ObVerseNode verse = (ObVerseNode)node;
 			addStopTag();
+			//System.out.println("Verse:" + m_verseTagStart + verse.getNumber() + " " + verse.getStatus().toString());
 			if(verse.getStatus().ordinal() >= m_requiredTranslationStatus.ordinal()) {
 				m_currentFassungContainsVerses = true;
 				m_skipVerse = false;
