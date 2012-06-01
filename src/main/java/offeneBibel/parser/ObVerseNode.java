@@ -1,6 +1,5 @@
 package offeneBibel.parser;
 
-import offeneBibel.parser.ObChapterTag.ChapterTagName;
 import offeneBibel.parser.ObFassungNode.FassungType;
 
 public class ObVerseNode extends ObAstNode {
@@ -50,23 +49,23 @@ public class ObVerseNode extends ObAstNode {
 						tag.getStartVerse() <= this.getToNumber() && tag.getStopVerse() >= this.getFromNumber()) {
 					// tag applies to this verse
 					if(status == ObVerseStatus.none) {
-						status = tag.getTag().getVerseStatus();
+						status = tag.getTag().getVerseStatus(fassung);
 						isLastTagSpecific = tag.isSpecific();
 					}
 					else if(isLastTagSpecific == false) {
 						if(tag.isSpecific()) { // specific has precedence
 							isLastTagSpecific = true;
-							status = tag.getTag().getVerseStatus();
+							status = tag.getTag().getVerseStatus(fassung);
 						}
 						else {
-							if(tag.getTag().getVerseStatus().ordinal() < status.ordinal()) { // lower status has precedence
-								status = tag.getTag().getVerseStatus();
+							if(tag.getTag().getVerseStatus(fassung).ordinal() < status.ordinal()) { // lower status has precedence
+								status = tag.getTag().getVerseStatus(fassung);
 							}
 						}
 					}
 					else { //isLastTagSpecific == true
-						if(tag.isSpecific() && tag.getTag().getVerseStatus().ordinal() < status.ordinal())
-							status = tag.getTag().getVerseStatus();
+						if(tag.isSpecific() && tag.getTag().getVerseStatus(fassung).ordinal() < status.ordinal())
+							status = tag.getTag().getVerseStatus(fassung);
 					}
 				}
 					

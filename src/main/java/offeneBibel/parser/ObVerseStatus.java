@@ -8,5 +8,5 @@ public enum ObVerseStatus {
 	liegtInRohuebersetzungVor, // ordinal == 4
 	ueberpruefungAngefordert, // ordinal == 5
 	erfuelltDieMeistenKriterien, // ordinal == 6
-	erfuellenDieKriterien; // ordinal == 7
+	erfuelltDieKriterien; // ordinal == 7
 }

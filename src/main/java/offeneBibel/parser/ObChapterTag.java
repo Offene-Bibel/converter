@@ -9,40 +9,64 @@ public class ObChapterTag {
 		lesefassungZuPruefen,
 		studienfassungZuPruefen,
 		studienfassungLiegtInRohuebersetzungVor,
+		lesefassungErfuelltDieMeistenKriterien,
 		studienfassungErfuelltDieMeistenKriterien,
 		studienfassungUndLesefassungErfuellenDieKriterien,
 		ueberpruefungAngefordert,
 		versUnvollstaendigUebersetzt;
 		
-		public ObVerseStatus getVerseStatus() {
-			if (this == lesefassunginArbeit || this == studienfassunginArbeit)
-				return ObVerseStatus.inArbeit;
-			else if (this == lesefassungZuPruefen || this == studienfassungZuPruefen)
+		public ObVerseStatus getVerseStatus(FassungType fassung) {
+			if(fassung == FassungType.lesefassung) {
+				if (this == lesefassunginArbeit)
 					return ObVerseStatus.inArbeit;
-			else if (this == studienfassungLiegtInRohuebersetzungVor)
-				return ObVerseStatus.liegtInRohuebersetzungVor;
-			else if (this == studienfassungErfuelltDieMeistenKriterien)
-				return ObVerseStatus.erfuelltDieMeistenKriterien;
-			else if (this == studienfassungUndLesefassungErfuellenDieKriterien)
-				return ObVerseStatus.erfuellenDieKriterien;
-			else if (this == ueberpruefungAngefordert)
-				return ObVerseStatus.ueberpruefungAngefordert;
-			else if (this == versUnvollstaendigUebersetzt)
-				return ObVerseStatus.versUnvollstaendigUebersetzt;
-			else
-				return ObVerseStatus.none; // should never hit
+				else if (this == lesefassungZuPruefen)
+						return ObVerseStatus.zuPruefen;
+				else if (this == studienfassungUndLesefassungErfuellenDieKriterien)
+					return ObVerseStatus.erfuelltDieKriterien;
+				else if (this == ueberpruefungAngefordert)
+					return ObVerseStatus.ueberpruefungAngefordert;
+				else if (this == versUnvollstaendigUebersetzt)
+					return ObVerseStatus.versUnvollstaendigUebersetzt;
+				else
+					return ObVerseStatus.none; // should never hit
+			}
+			else { // studienfassung
+				if (this == lesefassunginArbeit)
+					return ObVerseStatus.erfuelltDieKriterien;
+				else if (this == studienfassunginArbeit)
+					return ObVerseStatus.inArbeit;
+				else if (this == lesefassungZuPruefen)
+						return ObVerseStatus.erfuelltDieKriterien;
+				else if (this == studienfassungZuPruefen)
+					return ObVerseStatus.zuPruefen;
+				else if (this == studienfassungLiegtInRohuebersetzungVor)
+					return ObVerseStatus.liegtInRohuebersetzungVor;
+				else if (this == studienfassungErfuelltDieMeistenKriterien)
+					return ObVerseStatus.erfuelltDieMeistenKriterien;
+				else if (this == studienfassungUndLesefassungErfuellenDieKriterien)
+					return ObVerseStatus.erfuelltDieKriterien;
+				else if (this == ueberpruefungAngefordert)
+					return ObVerseStatus.ueberpruefungAngefordert;
+				else if (this == versUnvollstaendigUebersetzt)
+					return ObVerseStatus.versUnvollstaendigUebersetzt;
+				else
+					return ObVerseStatus.none; // should never hit
+			}
 		}
 		
 		public boolean doesMatchFassung(FassungType fassung) {
 			if(fassung == FassungType.lesefassung &&
 					(this == ObChapterTag.ChapterTagName.lesefassunginArbeit ||
 					this == ObChapterTag.ChapterTagName.lesefassungZuPruefen ||
+					this == ObChapterTag.ChapterTagName.lesefassungErfuelltDieMeistenKriterien ||
 					this == ObChapterTag.ChapterTagName.studienfassungUndLesefassungErfuellenDieKriterien ||
 					this == ObChapterTag.ChapterTagName.ueberpruefungAngefordert))
 				return true;
 			
 			if(fassung == FassungType.studienfassung &&
-					(this == ObChapterTag.ChapterTagName.studienfassunginArbeit ||
+					(this == ObChapterTag.ChapterTagName.lesefassunginArbeit ||
+					this == ObChapterTag.ChapterTagName.lesefassungErfuelltDieMeistenKriterien ||
+					this == ObChapterTag.ChapterTagName.studienfassunginArbeit ||
 					this == ObChapterTag.ChapterTagName.studienfassungZuPruefen ||
 					this == ObChapterTag.ChapterTagName.studienfassungLiegtInRohuebersetzungVor ||
 					this == ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien ||
