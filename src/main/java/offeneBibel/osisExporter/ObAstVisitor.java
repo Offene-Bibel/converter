@@ -19,6 +19,7 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 	private String m_studienFassung = null;
 	private String m_leseFassung = null;
 	private String m_currentFassung = "";
+	private boolean m_currentFassungContainsVerses = false;
 	
 	private final String m_verseTagStart;
 	private String m_verseTag = null;
@@ -70,7 +71,9 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 		ObAstNode astNode = (ObAstNode)node;
 		
 		if(astNode.getNodeType() == ObAstNode.NodeType.fassung) {
+			m_noteIndexCounter.reset();
 			m_currentFassung = "";
+			m_currentFassungContainsVerses = false;
 			m_lTag = null;
 			m_lTagCounter = 1;
 		}
@@ -157,6 +160,7 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 			ObVerseNode verse = (ObVerseNode)node;
 			addStopTag();
 			if(verse.getStatus().ordinal() >= m_requiredTranslationStatus.ordinal()) {
+				m_currentFassungContainsVerses = true;
 				m_skipVerse = false;
 				m_verseTag = m_verseTagStart + verse.getNumber();
 				m_currentFassung += "<verse osisID=\"" + m_verseTag + "\" sID=\"" + m_verseTag + "\"/>";
@@ -213,13 +217,18 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 		if(astNode.getNodeType() == ObAstNode.NodeType.fassung) {
 			ObFassungNode fassung = (ObFassungNode)node;
 			addStopTag();
+			
+			// prevent empty chapters
+				if(m_currentFassungContainsVerses == false) {
+					m_currentFassung = null;
+				}
+				
 			if(fassung.getFassung() == ObFassungNode.FassungType.lesefassung) {
 				m_leseFassung = m_currentFassung;
 			}
 			else {
 				m_studienFassung = m_currentFassung;
 			}
-			m_noteIndexCounter.reset();
 		}
 		
 		else if(astNode.getNodeType() == ObAstNode.NodeType.quote) {

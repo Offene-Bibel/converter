@@ -199,7 +199,6 @@ public class Exporter
 						return;
 					}
 					
-	
 					osisStudienfassungChapterTexts.add(new Pair<Integer, String>(chapterData.getX(), visitor.getStudienFassung()));				
 					osisLesefassungChapterTexts.add(new Pair<Integer, String>(chapterData.getX(), visitor.getLeseFassung()));
 				}
@@ -215,13 +214,20 @@ public class Exporter
 		String studienVsLeseTag = leseFassung ? "osisLesefassungChapterTexts" : "osisStudienfassungChapterTexts";
 		
 		for(Map<String, Object> bookData : bibleTexts) {
-			result += "<div type=\"book\" osisID=\"" + bookData.get("swordName") + "\" canonical=\"true\">\n<title type=\"main\">" + bookData.get("germanName") + "</title>\n";
+			boolean chapterExists = false;
+			String book = "<div type=\"book\" osisID=\"" + bookData.get("swordName") + "\" canonical=\"true\">\n<title type=\"main\">" + bookData.get("germanName") + "</title>\n";
 			for(Pair<Integer, String> chapterData : (Vector<Pair<Integer, String>>)(bookData.get(studienVsLeseTag)) ) {
-				result += "<chapter osisID=\"" + bookData.get("swordName") + "." + chapterData.getX() + "\">\n<title type=\"chapter\">Kapitel " + chapterData.getX() + "</title>\n";
-				result += chapterData.getY();
-				result += "</chapter>\n";
+				if(chapterData.getY() != null) { // prevent empty chapters
+					chapterExists = true;
+					result += "<chapter osisID=\"" + bookData.get("swordName") + "." + chapterData.getX() + "\">\n<title type=\"chapter\">Kapitel " + chapterData.getX() + "</title>\n";
+					result += chapterData.getY();
+					result += "</chapter>\n";
+				}
 			}
-			result += "</div>\n";
+			book += "</div>\n";
+			
+			if(chapterExists == true) // prevent empty books
+				result += book;
 		}
 		return result;
 	}
