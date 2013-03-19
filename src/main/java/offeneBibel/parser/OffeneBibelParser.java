@@ -142,7 +142,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	);
     }
     
-    // "{{" ('S'|'L') '|' NUMBER  "}}" (ws* bibletext)?;
+    // "{{" ('S'|'L') '|' NUMBER  "}}";
     Rule Verse() {
     	Var<Integer> verseFromNumber = new Var<Integer>();
     	Var<Integer> verseToNumber = new Var<Integer>();
