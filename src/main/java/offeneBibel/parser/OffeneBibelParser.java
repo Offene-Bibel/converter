@@ -11,6 +11,11 @@ import org.parboiled.support.StringVar;
 import org.parboiled.support.ValueStack;
 import org.parboiled.support.Var;
 
+/**
+ * This is the parser class that processes an Offene Bibel wiki page and turns it into
+ * a {@link ObAstNode} tree. It is based on parboiled.
+ * @see <a href="www.parboiled.org/">www.parboiled.org/</a>
+ */
 @BuildParseTree
 public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
@@ -192,6 +197,11 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	);
     }
 
+    /**
+     * Since quotes sometimes start in one chapter and end in a different one it is sometimes not possible to
+     * completely match a quote when parsing chapters separately. Thus we only optionally match the closing tag for now.
+     * @return
+     */
     Rule Quote() {
     	return Sequence(
     		'\u201e', // „
@@ -202,7 +212,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	    		Verse(),
     	    		Note()
         	)),
-        	// TODO: quick fix to get quotes across chapter borders working
+        	// TODO: Once chapters are not parsed separately anymore quotes should forcefully match the closing tag again.
     		Optional('\u201c'), // “
     		peek(1).appendChild(pop())
     	);
@@ -281,7 +291,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     Rule NoteEmphasis() {
     	return Sequence(
-			checkRecursion(),
+			breakRecursion(),
     		"''",
     		push(new ObAstNode(ObAstNode.NodeType.emphasis)),
     		NoteTextWithBreaker(new StringVar("''")),
@@ -293,7 +303,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     Rule NoteItalics() {
     	return FirstOf(
     		Sequence(
-    			checkRecursion(),
+    			breakRecursion(),
 	    		"<em>",
 	    		push(new ObAstNode(ObAstNode.NodeType.italics)),
 	    		NoteTextText(),
@@ -301,7 +311,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 	    		peek(1).appendChild(pop())
     		),
     		Sequence(
-				checkRecursion(),
+				breakRecursion(),
 	    		"<i>",
 	    		push(new ObAstNode(ObAstNode.NodeType.italics)),
 	    		NoteTextText(),
@@ -478,7 +488,13 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         	peek(1).appendChild(pop())
     	);
     }
-    
+
+    /**
+     * This rule is a hack. 
+     * The bible text quote is not used consistently. Thus only allowing {@link BibleText} in a
+     * {@link BibleTextQuote} will fail to match in a lot of different places. Thus we accept any
+     * input inside such a quote for now.
+     */
     Rule NoteBibleQuoteTempFixup() {
     	return Sequence(OneOrMore(NoneOf("“")), peek().appendChild(new ObTextNode(match())));
     }
@@ -497,7 +513,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     Rule WikiLink() {
     	return FirstOf(
     		Sequence(
-    			checkRecursion(),
+    			breakRecursion(),
 	    		"[[",
 	    		OneOrMore(NoneOf("|]")),
 	    		push(new ObWikiLinkNode(match())),
@@ -509,7 +525,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 	    		peek(1).appendChild(pop())
     		),
     		Sequence(
-    			checkRecursion(),
+    			breakRecursion(),
 	    		"[",
 	    		Sequence(
 	        			"http://",
@@ -541,7 +557,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     Rule SuperScript() {
     	return Sequence(
-    		checkRecursion(),
+    		breakRecursion(),
     		"<sup>",
     		push(new ObSuperScriptTextNode()),
     		ScriptureText(),
@@ -552,7 +568,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     Rule NoteSuperScript() {
     	return Sequence(
-    		checkRecursion(),
+    		breakRecursion(),
     		"<sup>",
     		push(new ObSuperScriptTextNode()),
     		NoteTextWithBreaker(new StringVar("</sup>")),
@@ -569,16 +585,38 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	));
     }
 
+    /**
+     * <h1>Why this rule is a hack</h1>
+     * This rule is a hack. It has a very bad performance and as far as I can see prevents the validator to work. It is necessary, because
+     * on some pages characters that usually trigger a NoteMarkup (><[]'„“»«{}) occur in a note text without actually starting any markup.
+     * A simple example would be "3 < 5", here the < would cause the parser to try to search a matching markup rule.
+     * I have not yet found a clean way to work around this limitation.
+     * <h1>How it works</h1>
+     * It is a variation of the {@link NoteText} rule. The difference is, that this version will swallow any
+     * text it finds, including characters that usually trigger a different rule (><[]'„“»«{}). The only way to stop this rule to
+     * swallow more input is when the given breaker string is found on the input. To differentiate between random input and a NoteMarkup
+     * a trick is used. The {@link NoteTextTextWithBreaker} will for every character on the input try every possible NoteMarkup, discard
+     * the result and only if no NoteMarkup matched swallow the next character.
+     * @param breaker The element that, when seen on the input, causes this rule to stop.
+     */
     Rule NoteTextWithBreaker(StringVar breaker) {
     	return OneOrMore(
     			FirstOf(
-	    			NoteWithBreakerText(breaker),
+	    			NoteTextTextWithBreaker(breaker),
 	    			NoteMarkup()
     			)
 			);
     }
     
-    Rule NoteWithBreakerText(StringVar breaker) {
+    /**
+     * This rule is part of the {@link NoteTextWithBreaker} hack. It looks at the input one character at a time. Each "safe" char is
+     * accepted right away. If a trigger char (><[]'„“»«{}) is encountered, it will try to match a NoteMarkup. If the match fails the
+     * char is obviously not the start of a markup rule and is swallowed. If the NoteMarkup matches though, the result of that rule is
+     * discarded (by removing the resulting element from the stack) and this rule finishes (leaving the NoteMarkup text in the input).
+     * In addition the breaker text is not allowed on the input. Finding the breaker also finishes the rule (leaving the breaker in the input).
+     * @param breaker The string sequence that finishes this rule.
+     */
+    Rule NoteTextTextWithBreaker(StringVar breaker) {
     	return Sequence(
     			OneOrMore(
 	    			FirstOf(
@@ -629,6 +667,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		);
     }
     
+    /**
+     * The name of this rule is chosen a little poorly. It represents any normal text in notes.
+     * It is named so strangely because the name {@link NoteText} is already in use for the complete content of a note.
+     */
     Rule NoteTextText() {
     	return Sequence(OneOrMore(NoneOf("><[]'„“»«{}")), peek().appendChild(new ObTextNode(match())));
     }
@@ -713,6 +755,14 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	);
     }
     
+    /**
+     * This method acts as a <i>parboiled action expression</i>.  It takes the <i>previous</i> match object
+     * and tries to turn it into an integer and write it into the given variable <b>ref</b>.
+     * If parsing the number as an integer fails <b>false</b> is returned.
+     * @see <a href="https://github.com/sirthias/parboiled/wiki/Parser-Action-Expressions">action expression documentation</a>
+     * @param ref The variable to write the result to.
+     * @return true if parsing succeeds, false otherwise
+     */
     boolean safeParseIntSet(Var<Integer> ref)
     {
     	try
@@ -726,11 +776,16 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	}
     }
     
-    boolean checkRecursion()
+    /**
+     * Checks whether there is a recursion in the current rule stack.
+     * This function is to be used as a <i>parboiled action expression</i>. Call this at the
+     * beginning of a rule to prevent the rule from calling itself.
+     * @return false if there is a recursion, true otherwise
+     * @see <a href="https://github.com/sirthias/parboiled/wiki/Parser-Action-Expressions">action expression documentation</a>
+     */
+    private boolean breakRecursion()
     {
-    	//String currentRuleName = getContext().getMatcher().getLabel();
-    	//MatcherPath matchedRules = getContext().getPath();
-    	return !getContext().getParent().getPath().contains(getContext().getMatcher());
+    	return false == getContext().getParent().getPath().contains(getContext().getMatcher());
     }
     
 	private static ObFassungNode.FassungType getCurrentFassung(ValueStack<ObAstNode> valueStack) throws Exception
