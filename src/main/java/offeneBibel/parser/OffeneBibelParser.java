@@ -28,7 +28,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             ZeroOrMore(Sequence(ChapterTag(), ZeroOrMore(Whitespace()))),
             "{{Lesefassung}}",
             ZeroOrMore(Whitespace()),
-            Fassung(ObFassungNode.FassungType.lesefassung),
+            FirstOf(
+            	"''(kommt später)''",
+            	Fassung(ObFassungNode.FassungType.lesefassung)
+            ),
             ZeroOrMore(Whitespace()),
             "{{Studienfassung}}",
             ZeroOrMore(Whitespace()),
