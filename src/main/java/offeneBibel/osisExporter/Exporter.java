@@ -5,17 +5,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Vector;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ErrorUtils;
@@ -25,11 +20,6 @@ import org.parboiled.parserunners.RecoveringParseRunner;
 import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.parserunners.TracingParseRunner;
 import org.parboiled.support.ParsingResult;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
 import com.beust.jcommander.JCommander;
 
 import offeneBibel.parser.ObAstFixuper;
@@ -65,12 +55,109 @@ public class Exporter
 	CommandLineArguments m_commandLineArguments;
 	
 	class Chapter {
+		Book book;
 		int number;
 		/** Text of this chapter as retrieved from the wiki. */
 		String wikiText;
 		/** The following two will be filled by {@link generateOsisChapterFragments}. */
 		String studienfassungText;
 		String lesefassungText;
+		
+		public Chapter(Book book, int number) {
+			this.book = book;
+			this.number = number;
+		}
+		
+		/**
+		 * Downloads the wiki page.
+		 * @param wikiPage Page to download.
+		 */
+		public void retrieveWikiPage(boolean forceDownload)
+		{
+			String wikiPage = book.wikiName + " " + number;
+			try {
+				String result = null;
+				String fileCacheString = Misc.getPageCacheDir() + wikiPage;
+				File fileCache = new File(fileCacheString);
+				if(false == forceDownload && fileCache.exists()) {
+					if(fileCache.length() == 0)
+						return;
+					result = Misc.readFile(fileCacheString);
+				}
+				else {
+					URL url = new URL(m_urlBase + URLEncoder.encode(wikiPage, "UTF-8"));
+					System.out.println(url.toString());
+					try {
+						BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
+						result = Misc.readBufferToString(in);
+				        in.close();
+					} catch (FileNotFoundException e) {
+				        Misc.writeFile("", fileCacheString);
+						// chapter not yet created, skip
+			        	return;
+					}
+			        Misc.createFolder(Misc.getPageCacheDir());
+			        Misc.writeFile(result, fileCacheString);
+				}
+		        wikiText = result;
+	        }
+			catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public boolean generateOsisTexts(OffeneBibelParser parser, BasicParseRunner<ObAstNode> parseRunner, ObVerseStatus requiredTranslationStatus) throws Throwable {
+			if(wikiText != null) {
+				ParsingResult<ObAstNode> result = parseRunner.run(wikiText);
+				
+				if(result.matched == false) {
+		
+					ParseRunner<ObAstNode> errorParseRunner = null;
+					if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("tracing")) {
+						errorParseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
+					}
+					else if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("recovering")) {
+						errorParseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page());
+					}
+					else {
+						errorParseRunner = new ReportingParseRunner<ObAstNode>(parser.Page());
+					}
+					ParsingResult<ObAstNode> validatorParsingResult = errorParseRunner.run(wikiText);
+		
+					if(validatorParsingResult.hasErrors()) {
+						System.out.println(ErrorUtils.printParseErrors(validatorParsingResult));
+						/*
+						String parseTreePrintOut = ParseTreeUtils.printNodeTree(tracingResult);
+						ErrorUtils.printParseErrors(tracingParseRunner.getParseErrors());
+						*/
+						System.out.println("=================================================");
+						System.out.println("Book: " + book.osisName);
+						System.out.println("Chapter: " + number);
+					}
+					else {
+						System.out.println("Validated sucessfully. This shouldn't be...");
+					}
+					return false;
+				}
+				else {
+					ObAstNode node = result.resultValue;
+					ObAstFixuper.fixupAstTree(node);
+					
+					ObAstVisitor visitor = new ObAstVisitor(number, book.osisName, requiredTranslationStatus);
+					try {
+						node.host(visitor);
+					} catch (Throwable e) {
+						throw e;
+					}
+					
+					studienfassungText = visitor.getStudienFassung();
+					lesefassungText = visitor.getLeseFassung();
+				}
+			}
+			return true;
+		}
 	}
 	
 	class Book {
@@ -92,18 +179,25 @@ public class Exporter
 	{
 		try {
 			m_commandLineArguments = new CommandLineArguments();
-			new JCommander(m_commandLineArguments, args);
+			JCommander commander = new JCommander(m_commandLineArguments, args);
+			if(m_commandLineArguments.m_help) {
+				commander.usage();
+				return;
+			}
 				
 			List<Book> books = retrieveBooks();
 	
-			generateOsisChapterFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel], true);
+			boolean success = generateOsisChapterFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel], true);
+			if(false == success) {
+				return;
+			}
 			String studienFassung = generateCompleteOsisString(generateOsisBookFragment(books, false), false);
 			String leseFassung = generateCompleteOsisString(generateOsisBookFragment(books, true), true);
 			
 			Misc.writeFile(studienFassung, m_studienFassungFilename);
 			Misc.writeFile(leseFassung, m_leseFassungFilename);
 			System.out.println("done");
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
@@ -126,137 +220,40 @@ public class Exporter
 			book.chapterCount = Integer.parseInt(bookData.get(2));
 			
 			for(int i = 1; i <= book.chapterCount; ++i) {
-				String wikiPageName = book.wikiName + " " + i;
-				String wikiText = retrieveWikiPage(wikiPageName);
-				if(wikiText != null) {
-					Chapter chapter = new Chapter();
-					chapter.number = i;
-					chapter.wikiText = wikiText;
-					book.chapters.add(chapter);
-				}
+				Chapter chapter = new Chapter(book, i);
+				chapter.retrieveWikiPage(false);
+				book.chapters.add(chapter);
 			}
 			bookDataCollection.add(book);
 		}
 		return bookDataCollection;
 	}
-	
-	/**
-	 * Downloads a wiki page.
-	 * @param wikiPage Page to download.
-	 * @return Page contents in String format or null if an error occured.
-	 */
-	private static String retrieveWikiPage(String wikiPage)
-	{
-		try {
-			String result = null;
-			String fileCacheString = Misc.getPageCacheDir() + wikiPage;
-			File fileCache = new File(fileCacheString);
-			if(fileCache.exists()) {
-				if(fileCache.length() == 0)
-					return null;
-				result = Misc.readFile(fileCacheString);
-			}
-			else {
-				URL url = new URL(m_urlBase + URLEncoder.encode(wikiPage, "UTF-8"));
-				System.out.println(url.toString());
-				try {
-					BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
-					result = Misc.readBufferToString(in);
-			        in.close();
-				} catch (FileNotFoundException e) {
-			        Misc.writeFile("", fileCacheString);
-					// chapter not yet created, skip
-		        	return null;
-				}
-		        Misc.createFolder(Misc.getPageCacheDir());
-		        Misc.writeFile(result, fileCacheString);
-			}
-	        return result;
-        }
-		catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 	/**
-	 * Takes a list of {@link Book}s and generates the OSIS Studien/Lesefassung for the wiki text contained therein. 
+	 * Takes a list of {@link Book}s and generates the OSIS Studien/Lesefassung for the wiki text contained therein.
 	 * @param books The books for which the OSIS texts should be generated and filled out.
 	 * @param stopOnError Stop on the first error found. If this is false and an error is found in a chapter, that chapter is skipped.
+	 * @throws Throwable If the {@link ObAstVisitor} failed.
 	 */
-	private void generateOsisChapterFragments(List<Book> books, ObVerseStatus requiredTranslationStatus, boolean stopOnError)
+	private boolean generateOsisChapterFragments(List<Book> books, ObVerseStatus requiredTranslationStatus, boolean stopOnError) throws Throwable
 	{
 		OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
 		BasicParseRunner<ObAstNode> parseRunner = new BasicParseRunner<ObAstNode>(parser.Page());
-		
+		boolean reloadOnError = m_commandLineArguments.m_reloadOnError;
 		for(Book book : books) {
 			for(Chapter chapter : book.chapters) {
-				ParsingResult<ObAstNode> result = parseRunner.run(chapter.wikiText);
-	
-				if(result.matched == false) {
-					System.out.println("Book: " + book.osisName);
-					System.out.println("Chapter: " + chapter.number);
-					System.out.println("Error:");
-
-					ParseRunner<ObAstNode> errorParseRunner = null;
-					if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("tracing")) {
-						errorParseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
-					}
-					else if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("recovering")) {
-						errorParseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page());
-					}
-					else {
-						errorParseRunner = new ReportingParseRunner<ObAstNode>(parser.Page());
-					}
-					ParsingResult<ObAstNode> validatorParsingResult = errorParseRunner.run(chapter.wikiText);
-
-					if(validatorParsingResult.hasErrors()) {
-						System.out.println(ErrorUtils.printParseErrors(validatorParsingResult));
-						System.exit(1);
-					}
-					else {
-						System.out.println("Validated sucessfully. This shouldn't be...");
-						System.exit(0);
-					}
-					
-					/*
-					TracingParseRunner<ObAstNode> tracingParseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
-					ParsingResult<ObAstNode> tracingResult = tracingParseRunner.run(chapterData.getY());
-					
-					System.out.println("Tree:");
-					String parseTreePrintOut = ParseTreeUtils.printNodeTree(tracingResult);
-					System.out.println(parseTreePrintOut);
-					
-					System.out.println("Errors:");
-					ErrorUtils.printParseErrors(tracingParseRunner.getParseErrors());
-					
-					System.out.println("Book: " + bookData.get("swordName"));
-					System.out.println("Chapter: " + chapterData.getX());
-					*/
-					
-					if(stopOnError) {
-						return;
-					}
+				boolean success = chapter.generateOsisTexts(parser, parseRunner, requiredTranslationStatus);
+				if(false == success && reloadOnError) {
+					reloadOnError = false;
+					chapter.retrieveWikiPage(true);
+					success = chapter.generateOsisTexts(parser, parseRunner, requiredTranslationStatus);
 				}
-				else {
-					ObAstNode node = result.resultValue;
-					ObAstFixuper.fixupAstTree(node);
-					
-					ObAstVisitor visitor = new ObAstVisitor(chapter.number, book.osisName, requiredTranslationStatus);
-					try {
-						node.host(visitor);
-					} catch (Throwable e) {
-						e.printStackTrace();
-						return;
-					}
-					
-					chapter.studienfassungText = visitor.getStudienFassung();
-					chapter.lesefassungText = visitor.getLeseFassung();
+				if(false == success && stopOnError) {
+					return false;
 				}
 			}
 		}
+		return true;
 	}
 
 	private String generateOsisBookFragment(List<Book> books, boolean leseFassung)
@@ -290,50 +287,5 @@ public class Exporter
 		result = result.replace("{{year}}", "" + Calendar.getInstance().get(Calendar.YEAR));
 		result = result.replace("{{content}}", osisText);
 		return result;
-	}
-
-	@SuppressWarnings("unused")
-	@Deprecated
-	private String retrieveXmlWikiPage(String wikiPage)
-	{
-		try {
-			URL url = new URL(m_urlBase + URLEncoder.encode(wikiPage, "UTF-8"));
-			System.out.println(url.toString());
-			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
-			String xml = Misc.readBufferToString(in);
-	        in.close();
-	        return getContentFromXml(xml);
-        } catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	@Deprecated
-	private String getContentFromXml(String xml)
-	{
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			InputSource is = new InputSource(new StringReader(xml));
-			Document doc = db.parse(is);
-			doc.getDocumentElement().normalize();
-			NodeList nodeList = doc.getElementsByTagName("rev");
-			if(nodeList.getLength() == 0) {
-				return null;
-			}
-			else {
-				return nodeList.item(0).getFirstChild().getNodeValue();
-			}
-		} catch (ParserConfigurationException e1) {
-			e1.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 }
