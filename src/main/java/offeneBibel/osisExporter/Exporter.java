@@ -10,9 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -22,7 +20,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ErrorUtils;
 import org.parboiled.parserunners.BasicParseRunner;
+import org.parboiled.parserunners.ParseRunner;
+import org.parboiled.parserunners.RecoveringParseRunner;
 import org.parboiled.parserunners.ReportingParseRunner;
+import org.parboiled.parserunners.TracingParseRunner;
 import org.parboiled.support.ParsingResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -36,7 +37,6 @@ import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.ObVerseStatus;
 import offeneBibel.parser.OffeneBibelParser;
 import util.Misc;
-import util.Pair;
 	
 public class Exporter
 {
@@ -61,19 +61,44 @@ public class Exporter
 	 */
 	static final String m_studienFassungFilename = Misc.getResultsDir() + "offeneBibelStudienfassungModule.osis";
 	static final String m_leseFassungFilename = Misc.getResultsDir() + "offeneBibelLesefassungModule.osis";
-
+	
+	CommandLineArguments m_commandLineArguments;
+	
+	class Chapter {
+		int number;
+		/** Text of this chapter as retrieved from the wiki. */
+		String wikiText;
+		/** The following two will be filled by {@link generateOsisChapterFragments}. */
+		String studienfassungText;
+		String lesefassungText;
+	}
+	
+	class Book {
+		/** Name of the book corresponding to the wiki page name. */
+		String wikiName;
+		/** Name of the book corresponding to the OSIS tag. */
+		String osisName;
+		/** Number of chapters in this book. */
+		int chapterCount;
+		Vector<Chapter> chapters = new Vector<Chapter>();
+	}
 	public static void main(String [] args)
 	{
-		try {
-			CommandLineArguments commandLineArguments = new CommandLineArguments();
-			new JCommander(commandLineArguments, args);
-				
-			List<Map<String, Object>> bibleTexts = null;
-			bibleTexts = retrieveBooks();
+		Exporter exporter = new Exporter();
+		exporter.run(args);
+	}
 	
-			generateOsisChapterFragments(bibleTexts, ObVerseStatus.values()[commandLineArguments.m_exportLevel], true);
-			String studienFassung = generateCompleteOsisString(generateOsisBookFragment(bibleTexts, false), false);
-			String leseFassung = generateCompleteOsisString(generateOsisBookFragment(bibleTexts, true), true);
+	public void run(String [] args)
+	{
+		try {
+			m_commandLineArguments = new CommandLineArguments();
+			new JCommander(m_commandLineArguments, args);
+				
+			List<Book> books = retrieveBooks();
+	
+			generateOsisChapterFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel], true);
+			String studienFassung = generateCompleteOsisString(generateOsisBookFragment(books, false), false);
+			String leseFassung = generateCompleteOsisString(generateOsisBookFragment(books, true), true);
 			
 			Misc.writeFile(studienFassung, m_studienFassungFilename);
 			Misc.writeFile(leseFassung, m_leseFassungFilename);
@@ -83,6 +108,43 @@ public class Exporter
 		}
 	}
 
+	/**
+	 * Puts together a list of {@link Book} objects with everything except of
+	 * generated osis text already filled out.
+	 * @return List of {@link Book}s.
+	 * @throws IOException
+	 */
+	private List<Book> retrieveBooks() throws IOException
+	{
+		List<List<String>> bookDataList = Misc.readCsv(m_bibleBooks);
+		List<Book>  bookDataCollection = new Vector<Book>();
+		for(List<String> bookData : bookDataList) {
+			Book book = new Book();
+			//Genesis,Gen,50 == german name, sword name, chapter count
+			book.wikiName = bookData.get(0);
+			book.osisName = bookData.get(1);
+			book.chapterCount = Integer.parseInt(bookData.get(2));
+			
+			for(int i = 1; i <= book.chapterCount; ++i) {
+				String wikiPageName = book.wikiName + " " + i;
+				String wikiText = retrieveWikiPage(wikiPageName);
+				if(wikiText != null) {
+					Chapter chapter = new Chapter();
+					chapter.number = i;
+					chapter.wikiText = wikiText;
+					book.chapters.add(chapter);
+				}
+			}
+			bookDataCollection.add(book);
+		}
+		return bookDataCollection;
+	}
+	
+	/**
+	 * Downloads a wiki page.
+	 * @param wikiPage Page to download.
+	 * @return Page contents in String format or null if an error occured.
+	 */
 	private static String retrieveWikiPage(String wikiPage)
 	{
 		try {
@@ -118,59 +180,37 @@ public class Exporter
 		}
 		return null;
 	}
-	
-	private static List<Map<String, Object>> retrieveBooks() throws IOException
-	{
-		List<List<String>> bookList = Misc.readCsv(m_bibleBooks);
-		List<Map<String, Object>>  bookDataCollection = new Vector<Map<String, Object>>();
-		for(List<String> book : bookList) {
-			Map<String, Object> bookData = new HashMap<String, Object>();
-			bookData.put("germanName", book.get(0));
-			bookData.put("swordName", book.get(1));
-			bookData.put("chapterCount", Integer.parseInt(book.get(2)));
-			
-			List<Pair<Integer, String>> chapters = new Vector<Pair<Integer, String>>();
-			//Genesis,Gen,50 == german name, sword name, chapter count
-			for(int i = 1; i <= Integer.parseInt(book.get(2)); ++i) {
-				String wikiPageName = book.get(0) + " " + i;
-				String wikiText = retrieveWikiPage(wikiPageName);
-				if(wikiText != null) {
-					chapters.add(new Pair<Integer, String>(i, wikiText));
-				}
-			}
-			bookData.put("chapterTexts", chapters);
-			bookDataCollection.add(bookData);
-		}
-		
-		return bookDataCollection;
-	}
 
 	/**
-	 * 4<-studienfassung, 5<-lesefassung
-	 * @param wikiTexts, 0 = german name, 1 = sword name, 2 = chapter count, 3 = wiki text
-	 * @param leseFassung
+	 * Takes a list of {@link Book}s and generates the OSIS Studien/Lesefassung for the wiki text contained therein. 
+	 * @param books The books for which the OSIS texts should be generated and filled out.
+	 * @param stopOnError Stop on the first error found. If this is false and an error is found in a chapter, that chapter is skipped.
 	 */
-	private static void generateOsisChapterFragments(List<Map<String, Object>> bibleTexts,
-			ObVerseStatus requiredTranslationStatus, boolean stopOnError)
+	private void generateOsisChapterFragments(List<Book> books, ObVerseStatus requiredTranslationStatus, boolean stopOnError)
 	{
 		OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
 		BasicParseRunner<ObAstNode> parseRunner = new BasicParseRunner<ObAstNode>(parser.Page());
 		
-		for(Map<String, Object> bookData : bibleTexts) {
-			List<Pair<Integer, String>> osisLesefassungChapterTexts = new Vector<Pair<Integer, String>>();
-			List<Pair<Integer, String>> osisStudienfassungChapterTexts = new Vector<Pair<Integer, String>>();
-			for(Pair<Integer, String> chapterData : (List<Pair<Integer, String>>)(bookData.get("chapterTexts"))) {
-				ParsingResult<ObAstNode> result = parseRunner.run(chapterData.getY());
+		for(Book book : books) {
+			for(Chapter chapter : book.chapters) {
+				ParsingResult<ObAstNode> result = parseRunner.run(chapter.wikiText);
 	
 				if(result.matched == false) {
-					System.out.println("Book: " + bookData.get("swordName"));
-					System.out.println("Chapter: " + chapterData.getX());
+					System.out.println("Book: " + book.osisName);
+					System.out.println("Chapter: " + chapter.number);
 					System.out.println("Error:");
 
-					ReportingParseRunner<ObAstNode> errorParseRunner = new ReportingParseRunner<ObAstNode>(parser.Page());
-					//TracingParseRunner<ObAstNode> errorParseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
-					//RecoveringParseRunner<ObAstNode> errorParseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page());
-					ParsingResult<ObAstNode> validatorParsingResult = errorParseRunner.run(chapterData.getY());
+					ParseRunner<ObAstNode> errorParseRunner = null;
+					if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("tracing")) {
+						errorParseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
+					}
+					else if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("recovering")) {
+						errorParseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page());
+					}
+					else {
+						errorParseRunner = new ReportingParseRunner<ObAstNode>(parser.Page());
+					}
+					ParsingResult<ObAstNode> validatorParsingResult = errorParseRunner.run(chapter.wikiText);
 
 					if(validatorParsingResult.hasErrors()) {
 						System.out.println(ErrorUtils.printParseErrors(validatorParsingResult));
@@ -204,7 +244,7 @@ public class Exporter
 					ObAstNode node = result.resultValue;
 					ObAstFixuper.fixupAstTree(node);
 					
-					ObAstVisitor visitor = new ObAstVisitor(chapterData.getX(), (String)bookData.get("swordName"), requiredTranslationStatus);
+					ObAstVisitor visitor = new ObAstVisitor(chapter.number, book.osisName, requiredTranslationStatus);
 					try {
 						node.host(visitor);
 					} catch (Throwable e) {
@@ -212,40 +252,37 @@ public class Exporter
 						return;
 					}
 					
-					osisStudienfassungChapterTexts.add(new Pair<Integer, String>(chapterData.getX(), visitor.getStudienFassung()));				
-					osisLesefassungChapterTexts.add(new Pair<Integer, String>(chapterData.getX(), visitor.getLeseFassung()));
+					chapter.studienfassungText = visitor.getStudienFassung();
+					chapter.lesefassungText = visitor.getLeseFassung();
 				}
 			}
-			bookData.put("osisStudienfassungChapterTexts", osisStudienfassungChapterTexts);
-			bookData.put("osisLesefassungChapterTexts", osisLesefassungChapterTexts);
 		}
 	}
 
-	private static String generateOsisBookFragment(List<Map<String, Object>> bibleTexts, boolean leseFassung)
+	private String generateOsisBookFragment(List<Book> books, boolean leseFassung)
 	{
 		String result = "";
-		String studienVsLeseTag = leseFassung ? "osisLesefassungChapterTexts" : "osisStudienfassungChapterTexts";
-		
-		for(Map<String, Object> bookData : bibleTexts) {
+		for(Book book : books) {
 			boolean chapterExists = false;
-			String book = "<div type=\"book\" osisID=\"" + bookData.get("swordName") + "\" canonical=\"true\">\n<title type=\"main\">" + bookData.get("germanName") + "</title>\n";
-			for(Pair<Integer, String> chapterData : (Vector<Pair<Integer, String>>)(bookData.get(studienVsLeseTag)) ) {
-				if(chapterData.getY() != null) { // prevent empty chapters
+			String bookString = "<div type=\"book\" osisID=\"" + book.osisName + "\" canonical=\"true\">\n<title type=\"main\">" + book.wikiName + "</title>\n";
+			for(Chapter chapter : book.chapters) {
+				String osisChapterText = leseFassung ? chapter.lesefassungText : chapter.studienfassungText;
+				if(osisChapterText != null) { // prevent empty chapters
 					chapterExists = true;
-					book += "<chapter osisID=\"" + bookData.get("swordName") + "." + chapterData.getX() + "\">\n<title type=\"chapter\">Kapitel " + chapterData.getX() + "</title>\n";
-					book += chapterData.getY();
-					book += "</chapter>\n";
+					bookString += "<chapter osisID=\"" + book.osisName + "." + chapter.number + "\">\n<title type=\"chapter\">Kapitel " + chapter.number + "</title>\n";
+					bookString += osisChapterText;
+					bookString += "</chapter>\n";
 				}
 			}
-			book += "</div>\n";
+			bookString += "</div>\n";
 			
 			if(chapterExists == true) // prevent empty books
-				result += book;
+				result += bookString;
 		}
 		return result;
 	}
 
-	private static String generateCompleteOsisString(String osisText, boolean leseFassung) throws IOException
+	private String generateCompleteOsisString(String osisText, boolean leseFassung) throws IOException
 	{
 		String result = Misc.readFile(leseFassung ? m_leseFassungTemplate : m_studienFassungTemplate);
 		
@@ -257,7 +294,7 @@ public class Exporter
 
 	@SuppressWarnings("unused")
 	@Deprecated
-	private static String retrieveXmlWikiPage(String wikiPage)
+	private String retrieveXmlWikiPage(String wikiPage)
 	{
 		try {
 			URL url = new URL(m_urlBase + URLEncoder.encode(wikiPage, "UTF-8"));
@@ -275,7 +312,7 @@ public class Exporter
 	}
 
 	@Deprecated
-	private static String getContentFromXml(String xml)
+	private String getContentFromXml(String xml)
 	{
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
