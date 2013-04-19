@@ -837,7 +837,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     protected boolean isRuleParent(String ruleLabel)
     {
     	MatcherPath path = getContext().getParent().getPath();
-    	for(int i = path.length(); i >= 0; --i) {
+    	for(int i = path.length() - 1; i >= 0; --i) {
     		if(path.getElementAtLevel(i).matcher.getLabel().equals(ruleLabel)) {
     			return true;
     		}
