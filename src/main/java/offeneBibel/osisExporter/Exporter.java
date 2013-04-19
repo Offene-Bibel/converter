@@ -150,7 +150,8 @@ public class Exporter
 	 * @param wikiTexts, 0 = german name, 1 = sword name, 2 = chapter count, 3 = wiki text
 	 * @param leseFassung
 	 */
-	private static void generateOsisChapterFragments(List<Map<String, Object>> bibleTexts, ObVerseStatus requiredTranslationStatus, boolean stopOnError)
+	private static void generateOsisChapterFragments(List<Map<String, Object>> bibleTexts,
+			ObVerseStatus requiredTranslationStatus, boolean stopOnError)
 	{
 		OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
 		BasicParseRunner<ObAstNode> parseRunner = new BasicParseRunner<ObAstNode>(parser.Page());

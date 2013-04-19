@@ -759,11 +759,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * This method acts as a <i>parboiled action expression</i>.  It takes the <i>previous</i> match object
      * and tries to turn it into an integer and write it into the given variable <b>ref</b>.
      * If parsing the number as an integer fails <b>false</b> is returned.
+     * Action expressions must not be private.
      * @see <a href="https://github.com/sirthias/parboiled/wiki/Parser-Action-Expressions">action expression documentation</a>
      * @param ref The variable to write the result to.
      * @return true if parsing succeeds, false otherwise
      */
-    boolean safeParseIntSet(Var<Integer> ref)
+    protected boolean safeParseIntSet(Var<Integer> ref)
     {
     	try
     	{
@@ -780,10 +781,11 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * Checks whether there is a recursion in the current rule stack.
      * This function is to be used as a <i>parboiled action expression</i>. Call this at the
      * beginning of a rule to prevent the rule from calling itself.
+     * Action expressions must not be private.
      * @return false if there is a recursion, true otherwise
      * @see <a href="https://github.com/sirthias/parboiled/wiki/Parser-Action-Expressions">action expression documentation</a>
      */
-    private boolean breakRecursion()
+    protected boolean breakRecursion()
     {
     	return false == getContext().getParent().getPath().contains(getContext().getMatcher());
     }
