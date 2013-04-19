@@ -7,6 +7,8 @@ import org.parboiled.BaseParser;
 import org.parboiled.Context;
 import org.parboiled.Rule;
 import org.parboiled.annotations.BuildParseTree;
+import org.parboiled.matchers.MatcherUtils;
+import org.parboiled.support.MatcherPath;
 import org.parboiled.support.StringVar;
 import org.parboiled.support.ValueStack;
 import org.parboiled.support.Var;
@@ -136,6 +138,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	return OneOrMore(
 			FirstOf(
 				ScriptureText(),
+				LineQuote(),
 				Quote(),
 				Emphasis(),
 				Italics(),
@@ -201,12 +204,14 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     /**
-     * Since quotes sometimes start in one chapter and end in a different one it is sometimes not possible to
+     * Since quotes sometimes start in one chapter and end in a different one it is not always possible to
      * completely match a quote when parsing chapters separately. Thus we only optionally match the closing tag for now.
      * @return
      */
     Rule Quote() {
     	return Sequence(
+    		/** {@link InnerQuotes} could contain {@link Quotes} via the {@link BibleText}, to prevent this we check here. */
+    		ACTION(false == isRuleParent("InnerQuote")),
     		'\u201e', // „
     		push(new ObAstNode(ObAstNode.NodeType.quote)),
     		OneOrMore(FirstOf(
@@ -233,6 +238,32 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		'\u00AB', // «
     		peek(1).appendChild(pop())
     	);
+    }
+    
+    /**
+     * Quotes that are realized with the MediaWiki <i>Definition List</i> syntax.
+     * In this syntax each line has to start with a ":". The quote extends until the first line without a ":" is found.
+     */
+    Rule LineQuote() {
+    	return Sequence(
+	    	"\n:",
+		    push(new ObAstNode(ObAstNode.NodeType.quote)),
+    		OneOrMore(FirstOf(
+    				BibleText(),
+    	    		Verse(),
+    	    		Note()
+        	)),
+    		ZeroOrMore(Sequence(
+    			"\n:",
+		    	OneOrMore(FirstOf(
+		    		BibleText(),
+		    		Verse(),
+		    		Note()
+		        ))
+	    	)),
+		    '\n',
+		    peek(1).appendChild(pop())
+	    );
     }
 
     Rule Emphasis() {
@@ -361,12 +392,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         		)),
     		'}',
     		//prevent "{{blabla}}", an omission that contains only one other omission
-			new Action<ObAstNode>() {
-				public boolean run(Context<ObAstNode> context) {
-					context.getValueStack();
-					return true;
-				}
-			},
     		ACTION( peek().childCount()!=1 || ((ObAstNode)(peek().peekChild())).getNodeType()!=NodeType.omission),
     		peek(1).appendChild(pop())
     	);
@@ -752,7 +777,16 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     Rule Whitespace() {
     	return FirstOf(
     			' ',
-    			'\n',
+    			/**
+    			 * {@link LineQuotes} start with a "\n:" and extend to the first occurence of "\n" without a ":" following.
+    			 * Thus we must not eat the "\n" if we are in a {@link LineQuote}, or if a colon follows. Otherwise
+    			 * {@link LineQuotes} could neither start, nor end.  
+    			 */
+    			Sequence(
+    				ACTION(false == isRuleParent("LineQuote")),
+    				TestNot("\n:"),
+    				'\n'
+    			),
     			'\t',
     			'\r'
     	);
@@ -791,6 +825,24 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     protected boolean breakRecursion()
     {
     	return false == getContext().getParent().getPath().contains(getContext().getMatcher());
+    }
+    
+    /**
+     * Checks whether the rule with the given name is in the current rule stack.
+     * This function is to be used as a <i>parboiled action expression</i>.
+     * Action expressions must not be private.
+     * @return true if the rule with the given name is a currently in the rule stack, false otherwise.
+     * @see <a href="https://github.com/sirthias/parboiled/wiki/Parser-Action-Expressions">action expression documentation</a>
+     */
+    protected boolean isRuleParent(String ruleLabel)
+    {
+    	MatcherPath path = getContext().getParent().getPath();
+    	for(int i = path.length(); i >= 0; --i) {
+    		if(path.getElementAtLevel(i).matcher.getLabel().equals(ruleLabel)) {
+    			return true;
+    		}
+    	}
+    	return false;
     }
     
 	private static ObFassungNode.FassungType getCurrentFassung(ValueStack<ObAstNode> valueStack) throws Exception
