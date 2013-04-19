@@ -40,13 +40,25 @@ import util.Pair;
 	
 public class Exporter
 {
+	/**
+	 * URL prefix to use for retrieving the translation pages.
+	 */
 	//static final String m_urlBase = "http://www.offene-bibel.de/wiki/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
 	static final String m_urlBase = "http://www.offene-bibel.de/wiki/index.php5?action=raw&title=";
-	//the following list was created by combining the wiki page: Vorlage:Kapitelzahl and the OSIS 2.1.1 manual Appendix C.1
+	/**
+	 * A list of all bible books as they are named on the wiki. 
+	 * It was created by combining the wiki page: Vorlage:Kapitelzahl and the OSIS 2.1.1 manual Appendix C.1
+	 */
 	static final String m_bibleBooks = Misc.getResourceDir() + "bibleBooks.txt";
 	//static final String m_bibleBooks = Misc.getResourceDir() + "testbibleBooks.txt";
+	/**
+	 * The template OSIS files. These files will be populated with the converted pages to form the final .osis document.
+	 */
 	static final String m_studienFassungTemplate = Misc.getResourceDir() + "offene-bibel-studienfassung_template.txt";
 	static final String m_leseFassungTemplate = Misc.getResourceDir() + "offene-bibel-lesefassung_template.txt";
+	/**
+	 * Where the resulting .osis files should be saved.
+	 */
 	static final String m_studienFassungFilename = Misc.getResultsDir() + "offeneBibelStudienfassungModule.osis";
 	static final String m_leseFassungFilename = Misc.getResultsDir() + "offeneBibelLesefassungModule.osis";
 
