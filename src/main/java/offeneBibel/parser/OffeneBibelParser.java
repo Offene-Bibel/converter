@@ -820,7 +820,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		LetterChar(),
         	'_',
         	'-',
-        	' '
+        	' ',
+        	CharRange('0', '9')
         );
     }
     
