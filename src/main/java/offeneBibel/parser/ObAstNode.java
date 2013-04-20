@@ -23,7 +23,8 @@ public class ObAstNode extends ObTreeNode { // implements IVisitorHost<ObAstNode
 		superScript,
 		heading,
 		quote,
-		chapterNotes
+		chapterNotes,
+		alternateReading
 	}
 	private NodeType m_nodeType;
 	

@@ -7,7 +7,10 @@ import org.parboiled.BaseParser;
 import org.parboiled.Context;
 import org.parboiled.Rule;
 import org.parboiled.annotations.BuildParseTree;
-import org.parboiled.matchers.MatcherUtils;
+import org.parboiled.annotations.Cached;
+import org.parboiled.annotations.SkipNode;
+import org.parboiled.annotations.SuppressNode;
+import org.parboiled.annotations.SuppressSubnodes;
 import org.parboiled.support.MatcherPath;
 import org.parboiled.support.StringVar;
 import org.parboiled.support.ValueStack;
@@ -145,6 +148,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 	    		Insertion(),
 	    		Omission(),
 	    		Alternative(),
+	    		AlternateReading(),
 	    		PoemStart(),
 	    		PoemStop(),
 	    		Break(),
@@ -245,25 +249,34 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * In this syntax each line has to start with a ":". The quote extends until the first line without a ":" is found.
      */
     Rule LineQuote() {
-    	return Sequence(
-	    	"\n:",
-		    push(new ObAstNode(ObAstNode.NodeType.quote)),
-    		OneOrMore(FirstOf(
-    				BibleText(),
-    	    		Verse(),
-    	    		Note()
-        	)),
-    		ZeroOrMore(Sequence(
-    			"\n:",
-		    	OneOrMore(FirstOf(
-		    		BibleText(),
-		    		Verse(),
-		    		Note()
-		        ))
-	    	)),
-		    '\n',
-		    peek(1).appendChild(pop())
-	    );
+    	return FirstOf(
+			/**
+			 * {@link LineQuotes} can not be matched in a completely hierarchical fashion, because the "\n:" can occur inside
+			 * other elements. Thus we need a way to eat up "\n:" inside elements nested in {@link LineQuote}s. This is done here.
+			 */
+    		Sequence(
+    			isRuleParent("LineQuote"),
+    			"\n:"
+    		),
+    		/**
+    		 * This is the actual {@link LineQuote} matching part.
+    		 */
+	    	Sequence(
+	    		/**
+	    		 * Without the <i>breakRecursion()</i> there would be a new {@link LineQuote} for every "\n:" found.
+	    		 */
+	    		breakRecursion(),
+		    	"\n:",
+			    push(new ObAstNode(ObAstNode.NodeType.quote)),
+	    		OneOrMore(FirstOf(
+	    				BibleText(),
+	    	    		Verse(),
+	    	    		Note()
+	        	)),
+			    '\n',
+			    peek(1).appendChild(pop())
+		    )
+    	);
     }
 
     Rule Emphasis() {
@@ -276,6 +289,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     				Italics(),
     	    		Insertion(),
     	    		Alternative(),
+    	    		AlternateReading(),
     	    		Break(),
     	    		ParallelPassage(),
     	    		Note()
@@ -296,6 +310,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 	    				Emphasis(),
 	    	    		Insertion(),
 	    	    		Alternative(),
+	    	    		AlternateReading(),
 	    	    		Break(),
 	    	    		ParallelPassage(),
 	    	    		Note()
@@ -312,6 +327,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 	    				Emphasis(),
 	    	    		Insertion(),
 	    	    		Alternative(),
+	    	    		AlternateReading(),
 	    	    		Break(),
 	    	    		ParallelPassage(),
 	    	    		Note()
@@ -365,6 +381,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     				Emphasis(),
     				Italics(),
     	    		Alternative(),
+    	    		AlternateReading(),
     	    		Break(),
     	    		ParallelPassage(),
     	    		Note()
@@ -385,6 +402,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     				Italics(),
     	    		Insertion(),
     	    		Alternative(),
+    	    		AlternateReading(),
     	    		Break(),
     	    		ParallelPassage(),
     	    		Note(),
@@ -406,6 +424,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 				Quote(),
 				Insertion(),
 	    		Alternative(),
+	    		AlternateReading(),
 	    		Omission(),
 	    		Note()
 			)),
@@ -413,6 +432,40 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     		//prevent "((blabla))", an alternative that contains only one other alternative
     		ACTION( peek().childCount()!=1 || ((ObAstNode)(peek().peekChild())).getNodeType()!=NodeType.alternative),
     		peek(1).appendChild(pop())
+    	);
+    }
+    
+    /**
+     * TODO: Flesh out alternate readings better.
+     * Probably should be put in it's own node.
+     * @return
+     */
+    Rule AlternateReading() {
+    	return Sequence(
+    		"(/",
+    		Optional(
+    			OneOrMore(
+    				FirstOf(
+    					'|',
+    					Sequence(
+    						TestNot('/'),
+    						TextChar()
+    					)
+    				)
+    			),
+    			peek().appendChild(new ObTextNode(match())),
+    			'/'
+    		),
+    		OneOrMore(
+    			TestNot('/'),
+    			TextChar()
+    		),
+    		'/',
+    		OneOrMore(
+        		TestNot('/'),
+        		TextChar()
+        	),
+    		"/)"
     	);
     }
     
@@ -707,27 +760,37 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	return Sequence(OneOrMore(TextChar()), peek().appendChild(new ObTextNode(match()))); // this might cause a problem because OneOrMore() fights with ScriptureText() for the chars
     }
     
+    @SuppressSubnodes
+    @SuppressNode
     Rule TextChar() {
     	return FirstOf(
-    		// C0 Controls and Basic Latin, http://unicode.org/charts/PDF/U0000.pdf
-	    		CharRange('\u0041', '\u005a'), // A-Z
-	    		CharRange('\u0061', '\u007a'), // a-z
-    		// C1 Controls and Latin-1 Supplement, http://unicode.org/charts/PDF/U0080.pdf
-	    		CharRange('\u00c0', '\u00d6'), // all letters from C1
-	    		CharRange('\u00d8', '\u00f6'), // all letters from C1
-	    		CharRange('\u00f8', '\u00ff'), // all letters from C1
-	    		/*'\u00c4', // Ä
-	    		'\u00d6', // Ö
-	    		'\u00dc', // Ü
-	    		'\u00df', // ß
-	    		'\u00e4', // ä
-	    		'\u00f6', // ö
-	    		'\u00fc', // ü
-	    		*/
+    		LetterChar(),
     		PunctuationChar()
     	);
     }
     
+    @SkipNode
+    Rule LetterChar() {
+    	return FirstOf(
+        		// C0 Controls and Basic Latin, http://unicode.org/charts/PDF/U0000.pdf
+    	    		CharRange('\u0041', '\u005a'), // A-Z
+    	    		CharRange('\u0061', '\u007a'), // a-z
+        		// C1 Controls and Latin-1 Supplement, http://unicode.org/charts/PDF/U0080.pdf
+    	    		CharRange('\u00c0', '\u00d6'), // all letters from C1
+    	    		CharRange('\u00d8', '\u00f6'), // all letters from C1
+    	    		CharRange('\u00f8', '\u00ff') // all letters from C1
+    	    		/*'\u00c4', // Ä
+    	    		'\u00d6', // Ö
+    	    		'\u00dc', // Ü
+    	    		'\u00df', // ß
+    	    		'\u00e4', // ä
+    	    		'\u00f6', // ö
+    	    		'\u00fc', // ü
+    	    		*/
+        	);
+    }
+    
+    @SkipNode
     Rule PunctuationChar() {
     	return FirstOf(
         		// C0 Controls and Basic Latin, http://unicode.org/charts/PDF/U0000.pdf
@@ -751,6 +814,17 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         	);
     }
     
+    @SkipNode
+    Rule TagChar() {
+    	return FirstOf(
+    		LetterChar(),
+        	'_',
+        	'-',
+        	' '
+        );
+    }
+    
+    @SkipNode
     Rule GreekTextChar() {
     	return OneOrMore(
     		// Greek and Coptic, http://unicode.org/charts/PDF/U0370.pdf
@@ -758,15 +832,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     	);
     }
     
-    Rule TagChar() {
-    	return FirstOf(
-        	CharRange('a', 'z'),
-        	CharRange('A', 'Z'),
-        	'_',
-        	'-'
-        );
-    }
-    
+    @SkipNode
     Rule Number() {
         return Sequence(
         	CharRange('1', '9'),
@@ -815,7 +881,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     /**
-     * Checks whether there is a recursion in the current rule stack.
+     * Checks whether there is a recursion in the current rule stack. Only custom rules are taken into account.
      * This function is to be used as a <i>parboiled action expression</i>. Call this at the
      * beginning of a rule to prevent the rule from calling itself.
      * Action expressions must not be private.
@@ -824,11 +890,28 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      */
     protected boolean breakRecursion()
     {
-    	return false == getContext().getParent().getPath().contains(getContext().getMatcher());
+    	MatcherPath path = getContext().getPath();
+    	while(path != null && false == path.element.matcher.hasCustomLabel()) {
+    		path = path.parent;
+    	}
+    	/**
+    	 * The label of the rule we are currently in (ignoring builtin matchers).
+    	 */
+    	String label = path.element.matcher.getLabel();
+    	path = path.parent;
+    	if(path != null) {
+	    	for(int i = path.length() - 1; i >= 0; --i) {
+	    		if(path.getElementAtLevel(i).matcher.getLabel().equals(label)) {
+	    			return false;
+	    		}
+	    	}
+    	}
+    	return true;
     }
     
     /**
-     * Checks whether the rule with the given name is in the current rule stack.
+     * Checks whether the rule with the given name is in the current rule stack. The current parent rule (ignoring
+     * builtin rules) is ignored.
      * This function is to be used as a <i>parboiled action expression</i>.
      * Action expressions must not be private.
      * @return true if the rule with the given name is a currently in the rule stack, false otherwise.
@@ -836,8 +919,13 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      */
     protected boolean isRuleParent(String ruleLabel)
     {
-    	MatcherPath path = getContext().getParent().getPath();
+    	MatcherPath path = getContext().getPath();
+    	boolean skipParent = true;
     	for(int i = path.length() - 1; i >= 0; --i) {
+    		if(skipParent && path.getElementAtLevel(i).matcher.hasCustomLabel()) {
+    			skipParent = false;
+    			continue;
+    		}
     		if(path.getElementAtLevel(i).matcher.getLabel().equals(ruleLabel)) {
     			return true;
     		}
