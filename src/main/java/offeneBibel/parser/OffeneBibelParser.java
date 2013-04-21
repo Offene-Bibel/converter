@@ -247,6 +247,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     /**
      * Quotes that are realized with the MediaWiki <i>Definition List</i> syntax.
      * In this syntax each line has to start with a ":". The quote extends until the first line without a ":" is found.
+     * To prevent {@link Whitespace} eating up "\n" and thus preventing this rule to finish some special logic was
+     * added there.
      */
     Rule LineQuote() {
     	return FirstOf(
