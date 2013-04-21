@@ -11,6 +11,9 @@ public class CommandLineArguments {
 	@Parameter(names = { "-R", "--reloadOnError" }, description = "If parsing fails for a page, redownload it and retry.")
 	boolean m_reloadOnError = false;
 	
+	@Parameter(names = { "-c", "--continueOnError" }, description = "If an error occurs, skip that chapter and continue.")
+	boolean m_continueOnError = false;
+	
 	@Parameter(names = {"-h", "--help"})
 	boolean m_help;
 }

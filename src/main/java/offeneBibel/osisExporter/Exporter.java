@@ -169,6 +169,7 @@ public class Exporter
 		int chapterCount;
 		Vector<Chapter> chapters = new Vector<Chapter>();
 	}
+	
 	public static void main(String [] args)
 	{
 		Exporter exporter = new Exporter();
@@ -187,7 +188,7 @@ public class Exporter
 				
 			List<Book> books = retrieveBooks();
 	
-			boolean success = generateOsisChapterFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel], true);
+			boolean success = generateOsisChapterFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel], !m_commandLineArguments.m_continueOnError);
 			if(false == success) {
 				return;
 			}
@@ -233,6 +234,7 @@ public class Exporter
 	 * Takes a list of {@link Book}s and generates the OSIS Studien/Lesefassung for the wiki text contained therein.
 	 * @param books The books for which the OSIS texts should be generated and filled out.
 	 * @param stopOnError Stop on the first error found. If this is false and an error is found in a chapter, that chapter is skipped.
+	 * @return true if parsing was successful, false otherwise.
 	 * @throws Throwable If the {@link ObAstVisitor} failed.
 	 */
 	private boolean generateOsisChapterFragments(List<Book> books, ObVerseStatus requiredTranslationStatus, boolean stopOnError) throws Throwable
@@ -240,6 +242,7 @@ public class Exporter
 		OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
 		BasicParseRunner<ObAstNode> parseRunner = new BasicParseRunner<ObAstNode>(parser.Page());
 		boolean reloadOnError = m_commandLineArguments.m_reloadOnError;
+		String errorList = "";
 		for(Book book : books) {
 			for(Chapter chapter : book.chapters) {
 				boolean success = chapter.generateOsisTexts(parser, parseRunner, requiredTranslationStatus);
@@ -248,10 +251,18 @@ public class Exporter
 					chapter.retrieveWikiPage(true);
 					success = chapter.generateOsisTexts(parser, parseRunner, requiredTranslationStatus);
 				}
-				if(false == success && stopOnError) {
-					return false;
+				if(false == success) {
+					if(stopOnError) {
+						return false;
+					}
+					else {
+						errorList += book.wikiName + " " + chapter.number + "\n";
+					}
 				}
 			}
+		}
+		if(false == errorList.isEmpty()) {
+			System.out.println("The following chapters contained errors and were skipped:\n"+errorList);
 		}
 		return true;
 	}
