@@ -395,6 +395,11 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     Rule Omission() {
         return Sequence(
+            /*
+             * For a little better error reporting we catch the most often encountered false positives, before
+             * consuming input.
+             */
+            TestNot(FirstOf("{{Studienfassung}}", "{{Lesefassung}}", "{{Bemerkungen}}", "{{Kapitelseite Fuß}}")),
             '{',
             push(new ObAstNode(ObAstNode.NodeType.omission)),
             OneOrMore(FirstOf(
@@ -411,7 +416,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     Omission()
                 )),
             '}',
-            //prevent "{{blabla}}", an omission that contains only one other omission
+            // Prevent "{{blabla}}", an omission that contains only one other omission.
             ACTION( peek().childCount()!=1 || ((ObAstNode)(peek().peekChild())).getNodeType()!=NodeType.omission),
             peek(1).appendChild(pop())
         );
@@ -546,6 +551,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
+    @SuppressNode
     Rule TagText() {
         return OneOrMore(TagChar());
     }
@@ -739,6 +745,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
 
+    @SuppressNode
     Rule HebrewText() {
         return Sequence(
                 OneOrMore(FirstOf(
@@ -754,15 +761,16 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * The name of this rule is chosen a little poorly. It represents any normal text in notes.
      * It is named so strangely because the name {@link NoteText} is already in use for the complete content of a note.
      */
+    @SuppressNode
     Rule NoteTextText() {
         return Sequence(OneOrMore(NoneOf("><[]'„“»«{}")), peek().appendChild(new ObTextNode(match())));
     }
-    
+
+    @SuppressNode
     Rule ScriptureText() {
         return Sequence(OneOrMore(TextChar()), peek().appendChild(new ObTextNode(match()))); // this might cause a problem because OneOrMore() fights with ScriptureText() for the chars
     }
     
-    @SuppressSubnodes
     @SuppressNode
     Rule TextChar() {
         return FirstOf(
@@ -770,8 +778,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             PunctuationChar()
         );
     }
-    
-    @SkipNode
+
+    @SuppressNode
     Rule LetterChar() {
         return FirstOf(
                 // C0 Controls and Basic Latin, http://unicode.org/charts/PDF/U0000.pdf
@@ -791,8 +799,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     */
             );
     }
-    
-    @SkipNode
+
+    @SuppressNode
     Rule PunctuationChar() {
         return FirstOf(
                 // C0 Controls and Basic Latin, http://unicode.org/charts/PDF/U0000.pdf
@@ -815,8 +823,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 Whitespace()
             );
     }
-    
-    @SkipNode
+
+    @SuppressNode
     Rule TagChar() {
         return FirstOf(
             LetterChar(),
@@ -826,23 +834,24 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             CharRange('0', '9')
         );
     }
-    
-    @SkipNode
+
+    @SuppressNode
     Rule GreekTextChar() {
         return OneOrMore(
             // Greek and Coptic, http://unicode.org/charts/PDF/U0370.pdf
             CharRange('\u0370', '\u03ff')
         );
     }
-    
-    @SkipNode
+
+    @SuppressNode
     Rule Number() {
         return Sequence(
             CharRange('1', '9'),
             ZeroOrMore(CharRange('0', '9'))
         );
     }
-    
+
+    @SuppressNode
     Rule Whitespace() {
         return FirstOf(
                 ' ',
