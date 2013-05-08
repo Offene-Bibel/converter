@@ -486,7 +486,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     Rule Break() {
-        return Sequence(FirstOf("<br/>", "<br />"),
+        return Sequence(FirstOf("<br/>", "<br />", "<br>"),
                 peek().appendChild(new ObAstNode(ObAstNode.NodeType.textBreak))
                 );
     }
