@@ -5,49 +5,79 @@ import java.util.LinkedList;
 import offeneBibel.visitorPattern.IVisitor;
 import offeneBibel.visitorPattern.IVisitorHost;
 
-
-public class ObTreeNode implements IVisitorHost<ObTreeNode>{
-	private LinkedList<ObTreeNode> m_children;
-	private ObTreeNode m_parent;
+/**
+ * A tree structure implementation.
+ * It works with the types of the deriving class.
+ * 
+ * The generics specification guarantees, that SELF will
+ * always be of the objects own type. So "this" can safely be
+ * assumed to be of type SELF.
+ * @author patrick
+ *
+ * @param <SELF>
+ */
+public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements IVisitorHost<SELF>{
+	protected LinkedList<SELF> m_children;
+	protected SELF m_parent;
 	
 	public ObTreeNode()
 	{
-		m_children = new LinkedList<ObTreeNode>();
+		m_children = new LinkedList<SELF>();
 		m_parent = null;
 	}
 	
-	public boolean insertChild(int index, ObTreeNode node)
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#insertChild(int, offeneBibel.parser.ObTreeNode)
+     */
+    @SuppressWarnings("unchecked")
+    public boolean insertChild(int index, SELF node)
 	{
-		node.setParent(this);
+		node.setParent((SELF) this);
 		m_children.add(index, node);
 		
 		return true;
 	}
 	
-	public boolean appendChild(ObTreeNode node)
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#appendChild(offeneBibel.parser.ObTreeNode)
+     */
+    @SuppressWarnings("unchecked")
+    public boolean appendChild(SELF node)
 	{
-		node.setParent(this);
+		node.setParent((SELF) this);
 		m_children.add(node);
 		return true;
 	}
 	
-	public ObTreeNode removeLastChild()
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#removeLastChild()
+     */
+    public SELF removeLastChild()
 	{
 		m_children.peekLast().m_parent = null;
 		return m_children.removeLast();
 	}
 	
-	public ObTreeNode peekChild()
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#peekChild()
+     */
+    public SELF peekChild()
 	{
 		return m_children.peek();
 	}
 	
-	public int childCount()
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#childCount()
+     */
+    public int childCount()
 	{
 		return m_children.size();
 	}
 	
-	public boolean removeChild(ObTreeNode node)
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#removeChild(offeneBibel.parser.ObTreeNode)
+     */
+    public boolean removeChild(SELF node)
 	{
 		if(m_children.remove(node) == true) {
 			node.m_parent = null;
@@ -55,7 +85,10 @@ public class ObTreeNode implements IVisitorHost<ObTreeNode>{
 		return true;
 	}
 	
-	public ObTreeNode getNextChild(ObTreeNode child)
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#getNextChild(offeneBibel.parser.IObTreeNode)
+     */
+    public SELF getNextChild(SELF child)
 	{
 		int position = m_children.indexOf(child);
 		if(position == -1 || position == m_children.size()-1) {
@@ -66,7 +99,10 @@ public class ObTreeNode implements IVisitorHost<ObTreeNode>{
 		}
 	}
 	
-	public ObTreeNode getPreviousChild(ObTreeNode child)
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#getPreviousChild(offeneBibel.parser.IObTreeNode)
+     */
+    public SELF getPreviousChild(SELF child)
 	{
 		int position = m_children.indexOf(child);
 		if(position == -1 || position == 0) {
@@ -77,23 +113,31 @@ public class ObTreeNode implements IVisitorHost<ObTreeNode>{
 		}
 	}
 	
-	public ObTreeNode getNextSibling()
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#getNextSibling()
+     */
+    @SuppressWarnings("unchecked")
+    public SELF getNextSibling()
 	{
 		if(m_parent == null)
 			return null;
 		else
-			return m_parent.getNextChild(this);
+			return (SELF) m_parent.getNextChild((SELF) this);
 	}
 	
-	public ObTreeNode getPreviousSibling()
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#getPreviousSibling()
+     */
+    @SuppressWarnings("unchecked")
+    public SELF getPreviousSibling()
 	{
 		if(m_parent == null)
 			return null;
 		else
-			return m_parent.getPreviousChild(this);
+			return m_parent.getPreviousChild((SELF) this);
 	}
 	
-	private boolean setParent(ObTreeNode node)
+	protected boolean setParent(SELF node)
 	{
 		if(m_parent != null) {
 			m_parent.m_children.remove(this);
@@ -103,32 +147,48 @@ public class ObTreeNode implements IVisitorHost<ObTreeNode>{
 		return true;
 	}
 	
-	public ObTreeNode getParent()
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#getParent()
+     */
+    public SELF getParent()
 	{
 		return m_parent;
 	}
 	
-	public void host(IVisitor<ObTreeNode> visitor) throws Throwable {
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#host(offeneBibel.visitorPattern.IVisitor)
+     */
+	@Override
+    public void host(IVisitor<SELF> visitor) throws Throwable {
 		host(visitor, true);
 	}
 
-	public void host(IVisitor<ObTreeNode> visitor, boolean inclusive) throws Throwable {
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#host(offeneBibel.visitorPattern.IVisitor, boolean)
+     */
+	@SuppressWarnings("unchecked")
+    @Override
+    public void host(IVisitor<SELF> visitor, boolean inclusive) throws Throwable {
 		if(inclusive) {
-			visitor.visitBefore(this);
-			visitor.visit(this);
+			visitor.visitBefore((SELF) this);
+			visitor.visit((SELF) this);
 		}
 		
-		for(ObTreeNode child : m_children) {
+		for(SELF child : m_children) {
 			child.host(visitor);
 		}
 		
 		if(inclusive) {
-			visitor.visitAfter(this);
+			visitor.visitAfter((SELF) this);
 		}
 	}
 	
-	public boolean isDescendantOf(Class<? extends ObTreeNode> classType) {
-		ObTreeNode runner = this;
+	/* (non-Javadoc)
+     * @see offeneBibel.parser.IObTreeNode#isDescendantOf(java.lang.Class)
+     */
+    public boolean isDescendantOf(Class<? extends SELF> classType) {
+		@SuppressWarnings("unchecked")
+        SELF runner = (SELF) this;
 		while(runner != null && ! classType.isInstance(runner)) {
 			runner = runner.getParent();
 		}

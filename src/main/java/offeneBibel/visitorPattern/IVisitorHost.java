@@ -16,7 +16,21 @@ public interface IVisitorHost<H>
 	 * after recursion.
 	 * And call the visitors visit function between the visitBefore
 	 * and visitAfter function.
-	 * @param visitor The visitor that visits this tree structure 
+	 * This method is equivalent to host(visitor, true);
+	 * @param visitor The visitor that visits this tree structure
 	 */
 	void host(IVisitor<H> visitor) throws Throwable;
+
+    /**
+     * This function should take a visitor and call it's visitBefore
+     * function before recursion.
+     * And should call the visitors visitAfter function
+     * after recursion.
+     * And call the visitors visit function between the visitBefore
+     * and visitAfter function.
+     * If inclusive is set to false, only the children should be visited.
+     * @param visitor The visitor that visits this tree structure
+     * @param inclusive Whether the node itself should be visited. 
+     */
+    void host(IVisitor<H> visitor, boolean inclusive) throws Throwable;
 }

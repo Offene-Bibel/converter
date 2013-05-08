@@ -5,13 +5,12 @@ import offeneBibel.parser.ObFassungNode;
 import offeneBibel.parser.ObNoteNode;
 import offeneBibel.parser.ObParallelPassageNode;
 import offeneBibel.parser.ObTextNode;
-import offeneBibel.parser.ObTreeNode;
 import offeneBibel.parser.ObVerseNode;
 import offeneBibel.parser.ObVerseStatus;
 import offeneBibel.visitorPattern.DifferentiatingVisitor;
 import offeneBibel.visitorPattern.IVisitor;
 
-public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements IVisitor<ObTreeNode>
+public class ObAstVisitor extends DifferentiatingVisitor<ObAstNode> implements IVisitor<ObAstNode>
 {
 	private final int m_chapter;
 	private final String m_book;
@@ -66,11 +65,9 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 		m_requiredTranslationStatus = requiredTranslationStatus;
 	}
 	
-	public void visitBeforeDefault(ObTreeNode node) throws Throwable
+	public void visitBeforeDefault(ObAstNode node) throws Throwable
 	{
-		ObAstNode astNode = (ObAstNode)node;
-		
-		if(astNode.getNodeType() == ObAstNode.NodeType.fassung) {
+		if(node.getNodeType() == ObAstNode.NodeType.fassung) {
 			m_noteIndexCounter.reset();
 			m_currentFassung = "";
 			m_currentFassungContainsVerses = false;
@@ -78,7 +75,7 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 			m_lTagCounter = 1;
 		}
 		
-		else if(astNode.getNodeType() == ObAstNode.NodeType.quote) {
+		else if(node.getNodeType() == ObAstNode.NodeType.quote) {
 			if(m_skipVerse) return;
 			if(m_quoteCounter>0)
 			{
@@ -88,7 +85,7 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 			else
 			{
 				QuoteSearcher quoteSearcher = new QuoteSearcher();
-				astNode.host(quoteSearcher, false);
+				node.host(quoteSearcher, false);
 				if(quoteSearcher.foundQuote == false)
 					m_currentFassung += "„<q marker=\"\">";
 				else {
@@ -98,46 +95,44 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 			}
 		}
 
-		else if(astNode.getNodeType() == ObAstNode.NodeType.alternative) {
+		else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
 			if(m_skipVerse) return;
 			m_currentFassung += "(";
 		}
 
-		else if(astNode.getNodeType() == ObAstNode.NodeType.insertion) {
+		else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
 			if(m_skipVerse) return;
 			m_currentFassung += "[";
 		}
 
-		else if(astNode.getNodeType() == ObAstNode.NodeType.omission) {
+		else if(node.getNodeType() == ObAstNode.NodeType.omission) {
 			if(m_skipVerse) return;
 			m_currentFassung += "{";
 		}
 
-		else if(astNode.getNodeType() == ObAstNode.NodeType.heading) {
+		else if(node.getNodeType() == ObAstNode.NodeType.heading) {
 			m_currentFassung += "<title>";
 		}
 
-		else if(astNode.getNodeType() == ObAstNode.NodeType.hebrew) {
+		else if(node.getNodeType() == ObAstNode.NodeType.hebrew) {
 			if(m_skipVerse) return;
 			m_currentFassung += "<foreign xml:lang=\"he\">";
 		}
 		
-		else if(astNode.getNodeType() == ObAstNode.NodeType.note) {
+		else if(node.getNodeType() == ObAstNode.NodeType.note) {
 			if(m_skipVerse) return;
 			m_currentFassung += "<note type=\"x-footnote\" n=\"" + m_noteIndexCounter.getNextNoteString() + "\">";
 		}
 	}
 
-	public void visitDefault(ObTreeNode node) throws Throwable
+	public void visitDefault(ObAstNode node) throws Throwable
 	{
-		ObAstNode astNode = (ObAstNode)node;
-		
-		if(astNode.getNodeType() == ObAstNode.NodeType.text) {
+		if(node.getNodeType() == ObAstNode.NodeType.text) {
 			if(m_skipVerse) return;
 			ObTextNode text = (ObTextNode)node;
 			String textString = text.getText();
 			
-			if(m_poemMode && ! astNode.isDescendantOf(ObNoteNode.class)) {
+			if(m_poemMode && ! node.isDescendantOf(ObNoteNode.class)) {
 				if(textString.contains("\n")) {
 					if(m_lineStarted == false) {
 						textString = textString.replaceFirst("\n", getLTagStart());
@@ -156,7 +151,7 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 			m_currentFassung += textString;
 		}
 		
-		else if(astNode.getNodeType() == ObAstNode.NodeType.verse) {
+		else if(node.getNodeType() == ObAstNode.NodeType.verse) {
 			ObVerseNode verse = (ObVerseNode)node;
 			addStopTag();
 			//System.out.println("Verse:" + m_verseTagStart + verse.getNumber() + " " + verse.getStatus().toString());
@@ -176,7 +171,7 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 			}
 		}
 		
-		else if(astNode.getNodeType() == ObAstNode.NodeType.parallelPassage) {
+		else if(node.getNodeType() == ObAstNode.NodeType.parallelPassage) {
 			if(m_skipVerse) return;
 			ObParallelPassageNode passage = (ObParallelPassageNode)node;
 			
@@ -198,11 +193,11 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 			}
 		}
 		
-		else if(astNode.getNodeType() == ObAstNode.NodeType.poemStart) {
+		else if(node.getNodeType() == ObAstNode.NodeType.poemStart) {
 			m_poemMode = true;
 		}
 		
-		else if(astNode.getNodeType() == ObAstNode.NodeType.poemStop) {
+		else if(node.getNodeType() == ObAstNode.NodeType.poemStop) {
 			m_poemMode = false;
 			if(m_lineStarted) {
 				m_currentFassung += getLTagStop();
@@ -211,11 +206,10 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 		}
 	}
 
-	public void visitAfterDefault(ObTreeNode node) throws Throwable
+	public void visitAfterDefault(ObAstNode node) throws Throwable
 	{
-		ObAstNode astNode = (ObAstNode)node;
 		
-		if(astNode.getNodeType() == ObAstNode.NodeType.fassung) {
+		if(node.getNodeType() == ObAstNode.NodeType.fassung) {
 			ObFassungNode fassung = (ObFassungNode)node;
 			addStopTag();
 			
@@ -232,7 +226,7 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 			}
 		}
 		
-		else if(astNode.getNodeType() == ObAstNode.NodeType.quote) {
+		else if(node.getNodeType() == ObAstNode.NodeType.quote) {
 			if(m_skipVerse) return;
 			if(m_quoteCounter>0)
 				m_quoteCounter--;
@@ -243,31 +237,31 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 				
 		}
 
-		else if(astNode.getNodeType() == ObAstNode.NodeType.alternative) {
+		else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
 			if(m_skipVerse) return;
 			m_currentFassung += ")";
 		}
 
-		else if(astNode.getNodeType() == ObAstNode.NodeType.insertion) {
+		else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
 			if(m_skipVerse) return;
 			m_currentFassung += "]";
 		}
 
-		else if(astNode.getNodeType() == ObAstNode.NodeType.omission) {
+		else if(node.getNodeType() == ObAstNode.NodeType.omission) {
 			if(m_skipVerse) return;
 			m_currentFassung += "}";
 		}
 		
-		else if(astNode.getNodeType() == ObAstNode.NodeType.heading) {
+		else if(node.getNodeType() == ObAstNode.NodeType.heading) {
 			m_currentFassung += "</title>";
 		}
 
-		else if(astNode.getNodeType() == ObAstNode.NodeType.hebrew) {
+		else if(node.getNodeType() == ObAstNode.NodeType.hebrew) {
 			if(m_skipVerse) return;
 			m_currentFassung += "</foreign>";
 		}
 
-		else if(astNode.getNodeType() == ObAstNode.NodeType.note) {
+		else if(node.getNodeType() == ObAstNode.NodeType.note) {
 			if(m_skipVerse) return;
 			m_currentFassung += "</note>";
 		}
@@ -307,15 +301,15 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObTreeNode> implements 
 		return "<l sID=\"" + m_lTag + "\"/>";
 	}
 	
-	class QuoteSearcher implements IVisitor<ObTreeNode>
+	class QuoteSearcher implements IVisitor<ObAstNode>
 	{
 		public boolean foundQuote = false; 
-		public void visit(ObTreeNode node) throws Throwable {
-			if(((ObAstNode)node).getNodeType() == ObAstNode.NodeType.quote)
+		public void visit(ObAstNode node) throws Throwable {
+			if(node.getNodeType() == ObAstNode.NodeType.quote)
 				foundQuote = true;
 		}
-		public void visitBefore(ObTreeNode hostNode) throws Throwable {}
-		public void visitAfter(ObTreeNode hostNode) throws Throwable {}
+		public void visitBefore(ObAstNode hostNode) throws Throwable {}
+		public void visitAfter(ObAstNode hostNode) throws Throwable {}
 	}
 	
 	class NoteIndexCounter {

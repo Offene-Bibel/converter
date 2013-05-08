@@ -76,7 +76,7 @@ public class ObVerseNode extends ObAstNode {
 	}
 	
 	private ObChapterNode getChapterNode() {
-		ObTreeNode runner = this;
+		ObAstNode runner = this;
 		while(runner != null && ! ObChapterNode.class.isInstance(runner)) {
 			runner = runner.getParent();
 		}
@@ -88,7 +88,7 @@ public class ObVerseNode extends ObAstNode {
 	}
 	
 	private ObFassungNode getFassungNode() {
-		ObTreeNode runner = this;
+	    ObAstNode runner = this;
 		while(runner != null && ! ObFassungNode.class.isInstance(runner)) {
 			runner = runner.getParent();
 		}
