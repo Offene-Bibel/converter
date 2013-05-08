@@ -7,7 +7,6 @@ import org.parboiled.BaseParser;
 import org.parboiled.Context;
 import org.parboiled.Rule;
 import org.parboiled.annotations.BuildParseTree;
-import org.parboiled.annotations.Cached;
 import org.parboiled.annotations.SkipNode;
 import org.parboiled.annotations.SuppressNode;
 import org.parboiled.annotations.SuppressSubnodes;
@@ -31,6 +30,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             ZeroOrMore(Whitespace()),
             Optional(Sequence(ChapterNotes(), ZeroOrMore(Whitespace()))),
             ZeroOrMore(Sequence(ChapterTag(), ZeroOrMore(Whitespace()))),
+            Optional(Sequence("<small>", FreeWikiText(), "</small>"), ZeroOrMore(Whitespace())), // just ignore alternate readings for now
             "{{Lesefassung}}",
             ZeroOrMore(Whitespace()),
             FirstOf(
