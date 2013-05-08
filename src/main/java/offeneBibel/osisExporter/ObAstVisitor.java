@@ -183,7 +183,7 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObAstNode> implements I
 			passage.getBook() + "." + passage.getChapter() + "." + passage.getStartVerse() + "\">" +
 			passage.getBook() + " " + passage.getChapter() + ", " + passage.getStartVerse() + "</reference>";
 			
-			if(((ObAstNode)passage.getNextSibling()).getNodeType() == ObAstNode.NodeType.parallelPassage) {
+			if(passage.getNextSibling() != null && passage.getNextSibling().getNodeType() == ObAstNode.NodeType.parallelPassage) {
 				m_multiParallelPassage = true;
 				m_currentFassung += "|"; 
 			}
