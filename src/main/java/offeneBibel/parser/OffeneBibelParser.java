@@ -7,9 +7,7 @@ import org.parboiled.BaseParser;
 import org.parboiled.Context;
 import org.parboiled.Rule;
 import org.parboiled.annotations.BuildParseTree;
-import org.parboiled.annotations.SkipNode;
 import org.parboiled.annotations.SuppressNode;
-import org.parboiled.annotations.SuppressSubnodes;
 import org.parboiled.support.MatcherPath;
 import org.parboiled.support.StringVar;
 import org.parboiled.support.ValueStack;
@@ -79,38 +77,46 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     ;
      */
     Rule ChapterTag() {
-        Var<ObChapterTag.ChapterTagName> tagName = new Var<ObChapterTag.ChapterTagName>();
-        Var<Integer> startVerse = new Var<Integer>();
-        Var<Integer> stopVerse = new Var<Integer>();
+        Var<ObChapterTag> chapterTag = new Var<ObChapterTag>(new ObChapterTag());
         return FirstOf(
-            Sequence("{{", ChapterTagType(tagName), "}}", ((ObChapterNode)peek()).addChapterTag(new ObChapterTag(tagName.get()))),
+            Sequence("{{", ChapterTagType(chapterTag), "}}", ((ObChapterNode)peek()).addChapterTag(chapterTag.get())),
             Sequence("{{",
-                    ChapterTagType(tagName), "|Vers ",
-                    Number(), safeParseIntSet(startVerse), FirstOf('-', " und "),
-                    Number(), safeParseIntSet(stopVerse), "}}",
-                    ((ObChapterNode)peek()).addChapterTag(new ObChapterTag(tagName.get(), startVerse.get(), stopVerse.get()))
-                    ),
-            Sequence("{{",
-                    ChapterTagType(tagName), "|Vers ",
-                    Number(), safeParseIntSet(startVerse),
+                    ChapterTagType(chapterTag), "|Vers ",
+                    VerseRange(chapterTag), ZeroOrMore(" und ", VerseRange(chapterTag)),
                     "}}",
-                    ((ObChapterNode)peek()).addChapterTag(new ObChapterTag(tagName.get(), startVerse.get(), startVerse.get()))
+                    ((ObChapterNode)peek()).addChapterTag(chapterTag.get())
                     )
         );
     }
     
-    Rule ChapterTagType(Var<ObChapterTag.ChapterTagName> tagName) {
+    Rule VerseRange(Var<ObChapterTag> chapterTag) {
+        Var<Integer> startVerse = new Var<Integer>();
+        Var<Integer> stopVerse = new Var<Integer>();
         return FirstOf(
-            Sequence("Lesefassung in Arbeit", tagName.set(ObChapterTag.ChapterTagName.lesefassunginArbeit)),
-            Sequence("Studienfassung in Arbeit", tagName.set(ObChapterTag.ChapterTagName.studienfassunginArbeit)),
-            Sequence("Lesefassung zu prüfen", tagName.set(ObChapterTag.ChapterTagName.lesefassungZuPruefen)),
-            Sequence("Studienfassung zu prüfen", tagName.set(ObChapterTag.ChapterTagName.studienfassungZuPruefen)),
-            Sequence("Studienfassung liegt in Rohübersetzung vor", tagName.set(ObChapterTag.ChapterTagName.studienfassungLiegtInRohuebersetzungVor)),
-            Sequence("Lesefassung erfüllt die meisten Kriterien", tagName.set(ObChapterTag.ChapterTagName.lesefassungErfuelltDieMeistenKriterien)),
-            Sequence("Studienfassung erfüllt die meisten Kriterien", tagName.set(ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien)),
-            Sequence("Studienfassung und Lesefassung erfüllen die Kriterien", tagName.set(ObChapterTag.ChapterTagName.studienfassungUndLesefassungErfuellenDieKriterien)),
-            Sequence("Überprüfung angefordert", tagName.set(ObChapterTag.ChapterTagName.ueberpruefungAngefordert)),
-            Sequence("Vers unvollständig übersetzt", tagName.set(ObChapterTag.ChapterTagName.versUnvollstaendigUebersetzt))
+            Sequence(
+                Number(), safeParseIntSet(startVerse),
+                '-',
+                Number(), safeParseIntSet(stopVerse),
+                chapterTag.get().addVerseRange(startVerse.get(), stopVerse.get())
+            ),
+            Sequence(
+                Number(), safeParseIntSet(startVerse), chapterTag.get().addVerse(startVerse.get())
+            )
+        );
+    }
+    
+    Rule ChapterTagType(Var<ObChapterTag> chapterTag) {
+        return FirstOf(
+            Sequence("Lesefassung in Arbeit", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassunginArbeit)),
+            Sequence("Studienfassung in Arbeit", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassunginArbeit)),
+            Sequence("Lesefassung zu prüfen", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassungZuPruefen)),
+            Sequence("Studienfassung zu prüfen", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungZuPruefen)),
+            Sequence("Studienfassung liegt in Rohübersetzung vor", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungLiegtInRohuebersetzungVor)),
+            Sequence("Lesefassung erfüllt die meisten Kriterien", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassungErfuelltDieMeistenKriterien)),
+            Sequence("Studienfassung erfüllt die meisten Kriterien", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien)),
+            Sequence("Studienfassung und Lesefassung erfüllen die Kriterien", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungUndLesefassungErfuellenDieKriterien)),
+            Sequence("Überprüfung angefordert", chapterTag.get().setTag(ObChapterTag.ChapterTagName.ueberpruefungAngefordert)),
+            Sequence("Vers unvollständig übersetzt", chapterTag.get().setTag(ObChapterTag.ChapterTagName.versUnvollstaendigUebersetzt))
         );
     }
     

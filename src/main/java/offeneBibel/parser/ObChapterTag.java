@@ -1,5 +1,7 @@
 package offeneBibel.parser;
 
+import java.util.Vector;
+
 import offeneBibel.parser.ObFassungNode.FassungType;
 
 public class ObChapterTag {
@@ -79,21 +81,60 @@ public class ObChapterTag {
 		}
 	}
 	
+	private class VerseRange {
+    	private int m_startVerse;
+    	private int m_stopVerse;
+    	
+	   public VerseRange(int startVerse, int stopVerse)
+	    {
+	        m_startVerse = startVerse;
+	        m_stopVerse = stopVerse;
+	    }
+	    public VerseRange(int verse)
+	    {
+	        m_startVerse = verse;
+	        m_stopVerse = verse;
+	    }
+    	
+    	public int getStartVerse() {
+    		return m_startVerse;
+    	}
+    	public int getStopVerse() {
+    		return m_stopVerse;
+    	}
+    	
+    	public boolean verseInRange(int verseStart, int verseStop) {
+    	    if(verseStart >= m_startVerse && verseStop <=m_stopVerse) {
+    	        return true;
+    	    }
+    	    return false;
+    	}
+	}
+	
 	private ChapterTagName m_tag;
-	private int m_startVerse;
-	private int m_stopVerse;
+	private Vector<VerseRange> m_verseRanges = new Vector<VerseRange>();
 	public ObChapterTag(ChapterTagName tag)
 	{
 		m_tag = tag;
-		m_startVerse = 0;
-		m_stopVerse = 0;
 	}
-	public ObChapterTag(ChapterTagName tag, int startVerse, int stopVerse)
-	{
-		m_tag = tag;
-		m_startVerse = startVerse;
-		m_stopVerse = stopVerse;
+	public ObChapterTag()
+	{}
+	public ObChapterTag(ChapterTagName tag, int verse)
+    {
+        m_tag = tag;
+        m_verseRanges.add(new VerseRange(verse));
+    }
+	
+	public boolean addVerse(int verse) {
+        m_verseRanges.add(new VerseRange(verse));
+        return true;
 	}
+    
+    public boolean addVerseRange(int startVerse, int stopVerse) {
+        m_verseRanges.add(new VerseRange(startVerse, stopVerse));
+        return true;
+    }
+	
 	public ChapterTagName getTag() {
 		return m_tag;
 	}
@@ -101,15 +142,22 @@ public class ObChapterTag {
 		m_tag = tag;
 		return true;
 	}
-	public int getStartVerse() {
-		return m_startVerse;
-	}
-	public int getStopVerse() {
-		return m_stopVerse;
-	}
 	
 	public boolean isSpecific() {
-		return getStartVerse() != 0 && getStopVerse() != 0;
+		return false == m_verseRanges.isEmpty();
 	}
-
+	
+	public boolean tagAppliesToVerse(int verseStart, int verseStop) {
+	    if(false == isSpecific()) {
+	        return true;
+	    }
+	    else {
+	        for(VerseRange range : m_verseRanges) {
+	            if(range.verseInRange(verseStart, verseStop)) {
+	                return true;
+	            }
+	        }
+	        return false;
+	    }
+	}
 }

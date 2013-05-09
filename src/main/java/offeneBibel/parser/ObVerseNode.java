@@ -45,8 +45,7 @@ public class ObVerseNode extends ObAstNode {
 		
 		for (ObChapterTag tag  : chapterNode.getChapterTags()) {
 			if(tag.getTag().doesMatchFassung(fassung)) {
-				if(tag.getStartVerse() == 0 && tag.getStopVerse() == 0 ||
-						tag.getStartVerse() <= this.getToNumber() && tag.getStopVerse() >= this.getFromNumber()) {
+				if(tag.tagAppliesToVerse(m_fromNumber, m_toNumber)) {
 					// tag applies to this verse
 					if(status == ObVerseStatus.none) {
 						status = tag.getTag().getVerseStatus(fassung);
