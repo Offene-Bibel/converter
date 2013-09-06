@@ -482,18 +482,26 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
+    /**
+     * {@link PoemStart} and {@link PoemStop} elements can freely interleave with other elements. Thus
+     * it is impossible to represent a poem block as a syntax element with children.
+     * TODO: Check for two PoemStarts without an intermediate PoemStop.
+     */
     Rule PoemStart() {
         return Sequence(
                 "<poem>",
                 peek().appendChild(new ObAstNode(ObAstNode.NodeType.poemStart))
-                ); // todo: create poem stack
+                );
     }
     
+    /**
+     * See {@link PoemStart}.
+     */
     Rule PoemStop() {
         return Sequence(
                 "</poem>",
                 peek().appendChild(new ObAstNode(ObAstNode.NodeType.poemStop))
-                ); // todo: create poem stack
+                );
     }
     
     Rule Break() {
@@ -502,8 +510,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 );
     }
     
-    // '{{par|' book '|' NUMBER '|' NUMBER ('|' NUMBER)? DOUBLEBRACECLOSE
-    Rule ParallelPassage() { // todo: code to verify passage
+    /**
+     * '{{par|' book '|' NUMBER '|' NUMBER ('|' NUMBER)? '}}'
+     * 
+     * TODO: code to verify passage
+     */
+    Rule ParallelPassage() {
         StringVar bookName = new StringVar();
         Var<Integer> chapter = new Var<Integer>();
         Var<Integer> startVerse = new Var<Integer>();
@@ -523,10 +535,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
 
-    /*
-      '<ref>' notetext '</ref>'
-      '<ref name="' tagtext '"' ws* noteend
-    */
     Rule Note() {
         StringVar tagText = new StringVar();
         return FirstOf(
