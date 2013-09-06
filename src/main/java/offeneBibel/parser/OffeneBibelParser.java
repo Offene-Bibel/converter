@@ -568,19 +568,20 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     Rule NoteInnerQuote() {
         return Sequence(
-            '\u00AB', // »
+            '\u201e', // „
             push(new ObAstNode(ObAstNode.NodeType.quote)),
             NoteText(),
-            '\u00BB', // «
+            '\u201c', // “
             peek(1).appendChild(pop())
         );
     }
 
     Rule BibleTextQuote() {
         return Sequence(
-            '\u201e', // „
+            '\u00BB', // »
             push(new ObAstNode(ObAstNode.NodeType.quote)),
-            '\u201c', // “
+            BibleText(),
+            '\u00AB', // «
             peek(1).appendChild(pop())
         );
     }
