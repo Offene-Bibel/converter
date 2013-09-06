@@ -270,10 +270,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
              * This is the actual {@link LineQuote} matching part.
              */
             Sequence(
-                /**
-                 * Without the <i>breakRecursion()</i> there would be a new {@link LineQuote} for every "\n:" found.
-                 */
-                breakRecursion(),
                 "\n:",
                 push(new ObAstNode(ObAstNode.NodeType.quote)),
                 OneOrMore(FirstOf(
