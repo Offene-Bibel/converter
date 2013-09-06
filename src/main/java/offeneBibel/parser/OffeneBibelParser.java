@@ -348,7 +348,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             breakRecursion(),
             "''",
             push(new ObAstNode(ObAstNode.NodeType.emphasis)),
-            NoteTextWithBreaker(new StringVar("''")),
+            NoteText(),
             "''",
             peek(1).appendChild(pop())
         );
@@ -536,7 +536,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return FirstOf(
             Sequence(
                 "<ref>", push(new ObNoteNode()),
-                NoteTextWithBreaker(new StringVar("</ref>")),
+                NoteText(),
                 "</ref>",
                 peek(1).appendChild(pop())
             ),
@@ -554,7 +554,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 "\"",
                 ZeroOrMore(Whitespace()),
                 ">", push(new ObNoteNode(tagText.get())),
-                NoteTextWithBreaker(new StringVar("</ref>")),
+                NoteText(),
                 "</ref>",
                 peek(1).appendChild(pop())
             )
@@ -570,7 +570,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return Sequence(
             '\u00AB', // »
             push(new ObAstNode(ObAstNode.NodeType.quote)),
-            NoteTextWithBreaker(new StringVar("" + '\u00BB')),
+            NoteText(),
             '\u00BB', // «
             peek(1).appendChild(pop())
         );
@@ -580,22 +580,9 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return Sequence(
             '\u201e', // „
             push(new ObAstNode(ObAstNode.NodeType.quote)),
-            NoteBibleQuoteTempFixup(),
-            //NoteText(),
-            //BibleText(),
             '\u201c', // “
             peek(1).appendChild(pop())
         );
-    }
-
-    /**
-     * This rule is a hack. 
-     * The bible text quote is not used consistently. Thus only allowing {@link BibleText} in a
-     * {@link BibleTextQuote} will fail to match in a lot of different places. Thus we accept any
-     * input inside such a quote for now.
-     */
-    Rule NoteBibleQuoteTempFixup() {
-        return Sequence(OneOrMore(NoneOf("“")), peek().appendChild(new ObTextNode(match())));
     }
     
     Rule Hebrew() {
@@ -670,8 +657,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             breakRecursion(),
             "<sup>",
             push(new ObSuperScriptTextNode()),
-            NoteTextWithBreaker(new StringVar("</sup>")),
-            //NoteTextText(),
+            NoteText(),
             "</sup>",
             peek(1).appendChild(pop())
         );
@@ -698,14 +684,14 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * the result and only if no NoteMarkup matched swallow the next character.
      * @param breaker The element that, when seen on the input, causes this rule to stop.
      */
-    Rule NoteTextWithBreaker(StringVar breaker) {
+    /*Rule NoteTextWithBreaker(StringVar breaker) {
         return OneOrMore(
                 FirstOf(
                     NoteTextTextWithBreaker(breaker),
                     NoteMarkup()
                 )
             );
-    }
+    }*/
     
     /**
      * This rule is part of the {@link NoteTextWithBreaker} hack. It looks at the input one character at a time. Each "safe" char is
@@ -715,7 +701,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * In addition the breaker text is not allowed on the input. Finding the breaker also finishes the rule (leaving the breaker in the input).
      * @param breaker The string sequence that finishes this rule.
      */
-    Rule NoteTextTextWithBreaker(StringVar breaker) {
+    /*Rule NoteTextTextWithBreaker(StringVar breaker) {
         return Sequence(
                 OneOrMore(
                     FirstOf(
@@ -739,7 +725,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 ),
                 peek().appendChild(new ObTextNode(match()))
             );
-    }
+    }*/
     
     Rule NoteMarkup() {
         return FirstOf(
@@ -773,14 +759,24 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      */
     @SuppressNode
     Rule NoteTextText() {
-        return Sequence(OneOrMore(NoneOf("><[]'„“»«{}")), peek().appendChild(new ObTextNode(match())));
+        return Sequence(OneOrMore(NoteChar()), peek().appendChild(new ObTextNode(match())));
+        /*StringVar text = new StringVar();
+        return Sequence(
+                   OneOrMore(
+                       TestNot(NoteMarkup()),
+                       ANY,
+                       text.append(match())
+                   ),
+                   peek().appendChild(new ObTextNode(text.get()))
+               );
+        */
     }
 
     @SuppressNode
     Rule ScriptureText() {
         return Sequence(OneOrMore(TextChar()), peek().appendChild(new ObTextNode(match()))); // this might cause a problem because OneOrMore() fights with ScriptureText() for the chars
     }
-    
+
     @SuppressNode
     Rule TextChar() {
         return FirstOf(
@@ -831,6 +827,17 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 // Latin Extended Additional, http://www.unicode.org/charts/PDF/U1E00.pdf
                     CharRange('\u1e00', '\u1eff'), 
                 Whitespace()
+            );
+    }
+    
+    @SuppressNode
+    Rule NoteChar() {
+        return FirstOf(
+                TextChar(),
+                '(',
+                ')',
+                '§',
+                '+'
             );
     }
 
