@@ -666,8 +666,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     Rule NoteText() {
         return OneOrMore(FirstOf(
-                NoteTextText(),
-                NoteMarkup()
+                NoteMarkup(),
+                NoteTextText()
         ));
     }
 
