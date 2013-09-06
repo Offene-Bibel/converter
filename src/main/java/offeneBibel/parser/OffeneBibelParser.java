@@ -221,7 +221,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     Rule Quote() {
         return Sequence(
             /** {@link InnerQuotes} could contain {@link Quotes} via the {@link BibleText}, to prevent this we check here. */
-            ACTION(false == isRuleParent("InnerQuote")),
+            ACTION(false == isRuleAncestor("InnerQuote")),
             '\u201e', // „
             push(new ObAstNode(ObAstNode.NodeType.quote)),
             OneOrMore(FirstOf(
@@ -263,7 +263,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
              * other elements. Thus we need a way to eat up "\n:" inside elements nested in {@link LineQuote}s. This is done here.
              */
             Sequence(
-                isRuleParent("LineQuote"),
+                isRuleAncestor("LineQuote"),
                 "\n:"
             ),
             /**
@@ -867,7 +867,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                  * {@link LineQuotes} could neither start, nor end.  
                  */
                 Sequence(
-                    ACTION(false == isRuleParent("LineQuote")),
+                    ACTION(false == isRuleAncestor("LineQuote")),
                     TestNot("\n:"),
                     '\n'
                 ),
@@ -935,7 +935,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * @return true if the rule with the given name is a currently in the rule stack, false otherwise.
      * @see <a href="https://github.com/sirthias/parboiled/wiki/Parser-Action-Expressions">action expression documentation</a>
      */
-    protected boolean isRuleParent(String ruleLabel)
+    protected boolean isRuleAncestor(String ruleLabel)
     {
         MatcherPath path = getContext().getPath();
         boolean skipParent = true;
