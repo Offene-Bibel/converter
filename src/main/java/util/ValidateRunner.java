@@ -1,4 +1,4 @@
-package offeneBibel.osisExporter;
+package util;
 
 import com.beust.jcommander.IParameterValidator;
 import com.beust.jcommander.ParameterException;

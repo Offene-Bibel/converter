@@ -8,10 +8,12 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.CodeSource;
 import java.util.List;
 import java.util.Vector;
@@ -21,15 +23,16 @@ public class Misc {
 	public static List<List<String>> readCsv(String filename) throws IOException
 	{
 		List<List<String>> result = new Vector<List<String>>();
-		BufferedReader stream = new BufferedReader(new FileReader(filename));
-		String line;
-		while((line = stream.readLine()) != null) {
-			List<String> lineElements = new Vector<String>();
-			for(String element : line.split(",")) {
-				lineElements.add(element.trim());
-			}
-			result.add(lineElements);
-		}
+	    try (BufferedReader stream = new BufferedReader(new FileReader(filename))) {
+    		String line;
+    		while((line = stream.readLine()) != null) {
+    			List<String> lineElements = new Vector<String>();
+    			for(String element : line.split(",")) {
+    				lineElements.add(element.trim());
+    			}
+    			result.add(lineElements);
+    		}
+	    }
 		return result;
 	}
 
@@ -66,19 +69,19 @@ public class Misc {
 
 	public static void serializeBibleDataToFile(Serializable data, String filename) throws IOException
 	{
-	       FileOutputStream fileStream = new FileOutputStream(filename);
-	       ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
-	       objectStream.writeObject(data);
-	       objectStream.flush();
-	       fileStream.close();
+	    FileOutputStream fileStream = new FileOutputStream(filename);
+	    ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
+	    objectStream.writeObject(data);
+	    objectStream.flush();
+	    fileStream.close();
 	}
 
 	public static Object deserializeBibleDataToFile(String filename) throws IOException, ClassNotFoundException
 	{
-	       FileInputStream fileStream = new FileInputStream(filename);
-	       ObjectInputStream objectStream = new ObjectInputStream(fileStream);
-	       Object data = objectStream.readObject();
-	       return data;
+        try (ObjectInputStream objectStream = new ObjectInputStream(new FileInputStream(filename))) {
+            Object data = objectStream.readObject();
+            return data;
+        }
 	}
 
 	public static File getDirOfProgram()
@@ -113,5 +116,12 @@ public class Misc {
 	public static String getResultsDir()
 	{
 		return getDirOfProgram().getPath() + File.separator + ".." + File.separator + "results" + File.separator;
+	}
+	
+	public static String retrieveUrl(String url) throws IOException {
+	    URL urlHandler = new URL(url);
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(urlHandler.openStream(), "UTF-8"))) {
+            return Misc.readBufferToString(in);
+        }
 	}
 }

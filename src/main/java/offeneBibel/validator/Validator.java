@@ -1,64 +1,86 @@
 package offeneBibel.validator;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.OffeneBibelParser;
 
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ErrorUtils;
+import org.parboiled.parserunners.ParseRunner;
+import org.parboiled.parserunners.RecoveringParseRunner;
 import org.parboiled.parserunners.ReportingParseRunner;
+import org.parboiled.parserunners.TracingParseRunner;
 import org.parboiled.support.ParsingResult;
 
-public class Validator
-{
+import util.Misc;
 
-	public static void main(String[] args)
-	{
-		if(args.length != 1) {
-			System.out.println("Invalid number of arguments.");
-			System.exit(3);
-			return;
-		}
-		String text;
-		try {
-			text = readFile(args[0]);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(2);
-			return;
-		}
+import com.beust.jcommander.JCommander;
 
-		OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
-		ReportingParseRunner<ObAstNode> parseRunner = new ReportingParseRunner<ObAstNode>(parser.Page());
-		//RecoveringParseRunner<ObAstNode> parseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page());
-		ParsingResult<ObAstNode> result = parseRunner.run(text);
+public class Validator {
+    CommandLineArguments m_commandLineArguments;
 
-		if(result.hasErrors()) {
-			System.out.println(ErrorUtils.printParseErrors(result));
-			System.exit(1);
-		}
-		else {
-			System.out.println("success");
-			System.exit(0);
-		}
-	}
+    public static void main(String[] args) {
+        Validator validator = new Validator();
+        validator.run(args);
+    }
 
-	private static String readFile(String file) throws IOException
-	{
-		BufferedReader reader = new BufferedReader(new FileReader(file));
-		return readBufferToString(reader);
-	}
-	
-	private static String readBufferToString(BufferedReader reader) throws IOException
-	{
-		String result = "";
-		char[] cbuf = new char[512];
-		int readCount;
-		while((readCount = reader.read(cbuf)) >= 0)
-			result += String.valueOf(cbuf, 0, readCount);
-		return result;
-	}
+    public void run(String[] args) {
+        m_commandLineArguments = new CommandLineArguments();
+        JCommander commander = new JCommander(m_commandLineArguments, args);
+        if (m_commandLineArguments.m_help) {
+            commander.usage();
+            return;
+        }
+
+        if((m_commandLineArguments.m_inputFile != null && m_commandLineArguments.m_inputUrl != null) ||
+           (m_commandLineArguments.m_inputFile == null && m_commandLineArguments.m_inputUrl == null)) {
+            System.out.println("Specify either a file *or* a URL, not both.");
+            commander.usage();
+            return;
+        }
+
+        String text = null;
+        if(m_commandLineArguments.m_inputUrl != null) {
+            // retrieve URL and put into file
+            try {
+                text = Misc.retrieveUrl(URLEncoder.encode(m_commandLineArguments.m_inputUrl, "UTF-8"));
+            } catch (IOException e) {
+                System.err.println("URL could not be retrieved: " + e.getMessage());
+                System.exit(2);
+            }
+        }
+        else { // m_commandLineArguments.m_inputFile != null
+            try {
+                text = Misc.readFile(m_commandLineArguments.m_inputFile);
+            } catch (IOException e) {
+                System.err.println("File could not be read: " + e.getMessage());
+                System.exit(2);
+            }
+        }
+
+        OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
+
+        ParseRunner<ObAstNode> parseRunner = null;
+        if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("tracing")) {
+            parseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
+        }
+        else if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("recovering")) {
+            parseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page());
+        }
+        else {
+            parseRunner = new ReportingParseRunner<ObAstNode>(parser.Page());
+        }
+
+        ParsingResult<ObAstNode> result = parseRunner.run(text);
+
+        if (result.hasErrors()) {
+            System.out.println(ErrorUtils.printParseErrors(result));
+            System.exit(1);
+        } else {
+            System.out.println("valid");
+            System.exit(0);
+        }
+    }
 }
