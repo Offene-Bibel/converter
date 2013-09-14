@@ -614,10 +614,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             Sequence(
                 breakRecursion(),
                 "[",
-                Sequence(
-                        "http://",
-                        OneOrMore(NoneOf(" ]"))
-                ),
+                "http://",
+                OneOrMore(NoneOf(" ]")),
                 push(new ObWikiLinkNode(match())),
                 Optional(
                     ' ',
@@ -835,8 +833,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     Rule NoteChar() {
         return FirstOf(
                 TextChar(),
-                '(',
-                ')',
+                '(', ')',
                 '§',
                 '+'
             );
