@@ -60,7 +60,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return OneOrMore(FirstOf(
                 NoteTextText(),
                 BibleTextQuote(),
-                NoteInnerQuote(),
+                NoteQuote(),
                 NoteEmphasis(),
                 NoteItalics(),
                 Hebrew(),
@@ -566,7 +566,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return OneOrMore(TagChar());
     }
     
-    Rule NoteInnerQuote() {
+    Rule NoteQuote() {
         return Sequence(
             '\u201e', // „
             push(new ObAstNode(ObAstNode.NodeType.quote)),
@@ -633,7 +633,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return OneOrMore(FirstOf(
                 NoteTextText(),
                 BibleTextQuote(),
-                NoteInnerQuote(),
+                NoteQuote(),
                 NoteEmphasis(),
                 NoteItalics(),
                 Hebrew(),
@@ -732,7 +732,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return FirstOf(
             Note(), // recursion is allowed
             BibleTextQuote(),
-            NoteInnerQuote(),
+            NoteQuote(),
             NoteEmphasis(),
             NoteItalics(),
             Hebrew(),
