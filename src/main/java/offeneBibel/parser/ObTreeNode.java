@@ -25,10 +25,7 @@ public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements IVisi
 		m_children = new LinkedList<SELF>();
 		m_parent = null;
 	}
-	
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#insertChild(int, offeneBibel.parser.ObTreeNode)
-     */
+
     @SuppressWarnings("unchecked")
     public boolean insertChild(int index, SELF node)
 	{
@@ -37,10 +34,7 @@ public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements IVisi
 		
 		return true;
 	}
-	
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#appendChild(offeneBibel.parser.ObTreeNode)
-     */
+
     @SuppressWarnings("unchecked")
     public boolean appendChild(SELF node)
 	{
@@ -48,35 +42,23 @@ public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements IVisi
 		m_children.add(node);
 		return true;
 	}
-	
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#removeLastChild()
-     */
+
     public SELF removeLastChild()
 	{
 		m_children.peekLast().m_parent = null;
 		return m_children.removeLast();
 	}
-	
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#peekChild()
-     */
+
     public SELF peekChild()
 	{
-		return m_children.peek();
+		return m_children.peekLast();
 	}
-	
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#childCount()
-     */
+
     public int childCount()
 	{
 		return m_children.size();
 	}
-	
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#removeChild(offeneBibel.parser.ObTreeNode)
-     */
+
     public boolean removeChild(SELF node)
 	{
 		if(m_children.remove(node) == true) {
@@ -84,10 +66,7 @@ public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements IVisi
 		}
 		return true;
 	}
-	
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#getNextChild(offeneBibel.parser.IObTreeNode)
-     */
+
     public SELF getNextChild(SELF child)
 	{
 		int position = m_children.indexOf(child);
@@ -98,10 +77,7 @@ public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements IVisi
 			return m_children.get(position + 1);
 		}
 	}
-	
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#getPreviousChild(offeneBibel.parser.IObTreeNode)
-     */
+
     public SELF getPreviousChild(SELF child)
 	{
 		int position = m_children.indexOf(child);
@@ -112,10 +88,7 @@ public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements IVisi
 			return m_children.get(position - 1);
 		}
 	}
-	
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#getNextSibling()
-     */
+
     @SuppressWarnings("unchecked")
     public SELF getNextSibling()
 	{
@@ -124,10 +97,7 @@ public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements IVisi
 		else
 			return (SELF) m_parent.getNextChild((SELF) this);
 	}
-	
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#getPreviousSibling()
-     */
+
     @SuppressWarnings("unchecked")
     public SELF getPreviousSibling()
 	{
@@ -146,26 +116,17 @@ public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements IVisi
 		m_parent = node;
 		return true;
 	}
-	
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#getParent()
-     */
+
     public SELF getParent()
 	{
 		return m_parent;
 	}
-	
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#host(offeneBibel.visitorPattern.IVisitor)
-     */
+
 	@Override
     public void host(IVisitor<SELF> visitor) throws Throwable {
 		host(visitor, true);
 	}
 
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#host(offeneBibel.visitorPattern.IVisitor, boolean)
-     */
 	@SuppressWarnings("unchecked")
     @Override
     public void host(IVisitor<SELF> visitor, boolean inclusive) throws Throwable {
@@ -182,10 +143,7 @@ public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements IVisi
 			visitor.visitAfter((SELF) this);
 		}
 	}
-	
-	/* (non-Javadoc)
-     * @see offeneBibel.parser.IObTreeNode#isDescendantOf(java.lang.Class)
-     */
+
     public boolean isDescendantOf(Class<? extends SELF> classType) {
 		@SuppressWarnings("unchecked")
         SELF runner = (SELF) this;
