@@ -17,4 +17,8 @@ public class ObTextNode extends ObAstNode { // implements IVisitorHost<ObAstNode
 		m_text = text;
 		return true;
 	}
+
+	public void appendText(String text) {
+	    m_text += text;
+	}
 }
