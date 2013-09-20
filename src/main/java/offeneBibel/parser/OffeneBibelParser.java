@@ -28,7 +28,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             ZeroOrMore(Whitespace()),
             Optional(Sequence(ChapterNotes(), ZeroOrMore(Whitespace()))),
             ZeroOrMore(Sequence(ChapterTag(), ZeroOrMore(Whitespace()))),
-            Optional(Sequence("<small>", FreeWikiText(), "</small>"), ZeroOrMore(Whitespace())), // just ignore alternate readings for now
+            Optional(Sequence("<small>", OneOrMore(FirstOf(FreeWikiMarkup(), Sequence(TestNot("</small>"), NoteChar(), createOrAppendTextNode(match())))), "</small>"), ZeroOrMore(Whitespace())), // just ignore alternate readings for now
             "{{Lesefassung}}",
             ZeroOrMore(Whitespace()),
             FirstOf(
@@ -51,14 +51,13 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 "==Einführende Bemerkungen==",
                 push(new ObAstNode(NodeType.chapterNotes)),
                 ZeroOrMore(Whitespace()),
-                FreeWikiText(),
+                OneOrMore(FirstOf(FreeWikiMarkup(), Sequence(TestNot(ChapterTag()), NoteChar(), createOrAppendTextNode(match())))),
                 peek(1).appendChild(pop())
         );
     }
     
-    Rule FreeWikiText() {
+    Rule FreeWikiMarkup() {
         return OneOrMore(FirstOf(
-                NoteTextText(),
                 BibleTextQuote(),
                 NoteQuote(),
                 NoteEmphasis(),
@@ -360,7 +359,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 breakRecursion(),
                 "<em>",
                 push(new ObAstNode(ObAstNode.NodeType.italics)),
-                NoteTextText(),
+                OneOrMore(Sequence(TestNot("</em>"), NoteChar(), createOrAppendTextNode(match()))),
                 "</em>",
                 peek(1).appendChild(pop())
             ),
@@ -368,7 +367,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 breakRecursion(),
                 "<i>",
                 push(new ObAstNode(ObAstNode.NodeType.italics)),
-                NoteTextText(),
+                OneOrMore(Sequence(TestNot("</i>"), NoteChar(), createOrAppendTextNode(match()))),
                 "</i>",
                 peek(1).appendChild(pop())
             )
@@ -606,15 +605,14 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 push(new ObWikiLinkNode(match())),
                 Optional(
                     '|',
-                    NoteTextText()
+                    OneOrMore(Sequence(TestNot("]]"), NoteChar(), createOrAppendTextNode(match())))
                 ),
                 "]]",
                 peek(1).appendChild(pop())
             ),
             Sequence(
                 breakRecursion(),
-                "[",
-                "http://",
+                "[http://",
                 OneOrMore(NoneOf(" ]")),
                 push(new ObWikiLinkNode(match())),
                 Optional(
@@ -629,14 +627,14 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     Rule NoteWikiLinkText() {
         return OneOrMore(FirstOf(
-                NoteTextText(),
                 BibleTextQuote(),
                 NoteQuote(),
                 NoteEmphasis(),
                 NoteItalics(),
                 Hebrew(),
                 NoteSuperScript(),
-                Break()
+                Break(),
+                Sequence(NoteChar(), createOrAppendTextNode(match()))
         ));
     }    
     
@@ -665,7 +663,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     Rule NoteText() {
         return OneOrMore(FirstOf(
                 NoteMarkup(),
-                NoteTextText()
+                Sequence(NoteChar(), createOrAppendTextNode(match()))
         ));
     }
 
@@ -751,25 +749,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 peek().appendChild(new ObTextNode(match()))
             );
     }
-    
-    /**
-     * The name of this rule is chosen a little poorly. It represents any normal text in notes.
-     * It is named so strangely because the name {@link NoteText} is already in use for the complete content of a note.
-     */
-    @SuppressNode
-    Rule NoteTextText() {
-        return Sequence(OneOrMore(NoteChar()), peek().appendChild(new ObTextNode(match())));
-        /*StringVar text = new StringVar();
-        return Sequence(
-                   OneOrMore(
-                       TestNot(NoteMarkup()),
-                       ANY,
-                       text.append(match())
-                   ),
-                   peek().appendChild(new ObTextNode(text.get()))
-               );
-        */
-    }
 
     @SuppressNode
     Rule ScriptureText() {
@@ -834,6 +813,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return FirstOf(
                 TextChar(),
                 '(', ')',
+                '[', ']',
                 '§',
                 '+'
             );
@@ -958,6 +938,26 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             }
         }
         return false;
+    }
+
+    /**
+     * Add a text to the current node tree. If the latest element is a text node the given text is
+     * appended to that node. If the latest element in the tree is not a text node a text node with
+     * the given text is created and added to the tree.
+     * This function is to be used as a <i>parboiled action expression</i>.
+     * Action expressions must not be private.
+     * @return true
+     * @see <a href="https://github.com/sirthias/parboiled/wiki/Parser-Action-Expressions">action expression documentation</a>
+     */
+    protected boolean createOrAppendTextNode(String text)
+    {
+        if(peek().peekChild() instanceof ObTextNode) {
+            ((ObTextNode)peek().peekChild()).appendText(text);
+        }
+        else {
+            peek().appendChild(new ObTextNode(text));
+        }
+        return true;
     }
     
     private static ObFassungNode.FassungType getCurrentFassung(ValueStack<ObAstNode> valueStack) throws Exception
