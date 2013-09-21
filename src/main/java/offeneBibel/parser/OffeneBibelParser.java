@@ -559,7 +559,28 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             )
         );
     }
-    
+
+    Rule NoteText() {
+        return OneOrMore(FirstOf(
+                NoteMarkup(),
+                Sequence(NoteChar(), createOrAppendTextNode(match()))
+        ));
+    }
+
+    Rule NoteMarkup() {
+        return FirstOf(
+            Note(), // recursion is allowed
+            BibleTextQuote(),
+            NoteQuote(),
+            NoteEmphasis(),
+            NoteItalics(),
+            Hebrew(),
+            WikiLink(),
+            NoteSuperScript(),
+            Break()
+        );
+    }
+
     @SuppressNode
     Rule TagText() {
         return OneOrMore(TagChar());
@@ -636,17 +657,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 Break(),
                 Sequence(TestNot("]"), NoteChar(), createOrAppendTextNode(match()))
         ));
-    }    
-    
-    Rule SuperScript() {
-        return Sequence(
-            breakRecursion(),
-            "<sup>",
-            push(new ObSuperScriptTextNode()),
-            ScriptureText(),
-            "</sup>",
-            peek(1).appendChild(pop())
-        );
     }
     
     Rule NoteSuperScript() {
@@ -657,84 +667,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             NoteText(),
             "</sup>",
             peek(1).appendChild(pop())
-        );
-    }
-    
-    Rule NoteText() {
-        return OneOrMore(FirstOf(
-                NoteMarkup(),
-                Sequence(NoteChar(), createOrAppendTextNode(match()))
-        ));
-    }
-
-    /**
-     * <h1>Why this rule is a hack</h1>
-     * This rule is a hack. It has a very bad performance and as far as I can see prevents the validator to work. It is necessary, because
-     * on some pages characters that usually trigger a NoteMarkup (><[]'„“»«{}) occur in a note text without actually starting any markup.
-     * A simple example would be "3 < 5", here the < would cause the parser to try to search a matching markup rule.
-     * I have not yet found a clean way to work around this limitation.
-     * <h1>How it works</h1>
-     * It is a variation of the {@link NoteText} rule. The difference is, that this version will swallow any
-     * text it finds, including characters that usually trigger a different rule (><[]'„“»«{}). The only way to stop this rule to
-     * swallow more input is when the given breaker string is found on the input. To differentiate between random input and a NoteMarkup
-     * a trick is used. The {@link NoteTextTextWithBreaker} will for every character on the input try every possible NoteMarkup, discard
-     * the result and only if no NoteMarkup matched swallow the next character.
-     * @param breaker The element that, when seen on the input, causes this rule to stop.
-     */
-    /*Rule NoteTextWithBreaker(StringVar breaker) {
-        return OneOrMore(
-                FirstOf(
-                    NoteTextTextWithBreaker(breaker),
-                    NoteMarkup()
-                )
-            );
-    }*/
-    
-    /**
-     * This rule is part of the {@link NoteTextWithBreaker} hack. It looks at the input one character at a time. Each "safe" char is
-     * accepted right away. If a trigger char (><[]'„“»«{}) is encountered, it will try to match a NoteMarkup. If the match fails the
-     * char is obviously not the start of a markup rule and is swallowed. If the NoteMarkup matches though, the result of that rule is
-     * discarded (by removing the resulting element from the stack) and this rule finishes (leaving the NoteMarkup text in the input).
-     * In addition the breaker text is not allowed on the input. Finding the breaker also finishes the rule (leaving the breaker in the input).
-     * @param breaker The string sequence that finishes this rule.
-     */
-    /*Rule NoteTextTextWithBreaker(StringVar breaker) {
-        return Sequence(
-                OneOrMore(
-                    FirstOf(
-                        NoneOf("><[]'„“»«{}"),
-                        Sequence(
-                            TestNot(breaker.get()),
-                            TestNot(
-                                Sequence(
-                                    NoteMarkup(),
-                                    new Action<ObAstNode>() {
-                                        public boolean run(Context<ObAstNode> context) {
-                                            context.getValueStack().peek().removeLastChild(); // the pop is needed to remove the result of the note markup in case it matched
-                                            return true;
-                                        }
-                                    }
-                                )
-                            ),
-                            AnyOf("><[]'„“»«{}") // match the rest
-                        )
-                    )
-                ),
-                peek().appendChild(new ObTextNode(match()))
-            );
-    }*/
-    
-    Rule NoteMarkup() {
-        return FirstOf(
-            Note(), // recursion is allowed
-            BibleTextQuote(),
-            NoteQuote(),
-            NoteEmphasis(),
-            NoteItalics(),
-            Hebrew(),
-            WikiLink(),
-            NoteSuperScript(),
-            Break()
         );
     }
 
