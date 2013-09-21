@@ -45,7 +45,7 @@ public class Validator {
         if(m_commandLineArguments.m_inputUrl != null) {
             // retrieve URL and put into file
             try {
-                text = Misc.retrieveUrl(URLEncoder.encode(m_commandLineArguments.m_inputUrl, "UTF-8"));
+                text = Misc.retrieveUrl(m_commandLineArguments.m_inputUrl);
             } catch (IOException e) {
                 System.err.println("URL could not be retrieved: " + e.getMessage());
                 System.exit(2);
