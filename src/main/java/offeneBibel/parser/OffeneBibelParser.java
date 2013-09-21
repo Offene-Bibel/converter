@@ -767,7 +767,39 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     @SuppressNode
     Rule NoteChar() {
-        return ANY; /*FirstOf(
+        return Sequence(
+                   /*
+                    * This rule generally consumes anything. In all calling cases it is guarded, not to consume
+                    * input that is required by the surrounding rule and also guarded as to not consume elements
+                    * that would form a valid other rule. But if all other guards fail, i.e. no other rule
+                    * is interested in the found input then this rule will consume any input.
+                    * This has the effect that many mistakes are hidden by this rule since broken syntactic constructs
+                    * don't lead to a failure but are instead just consumed away. This behavior is wanted in many
+                    * cases, since it allows successfully parsing text with unknown constructs. Hiding erroneous
+                    * constructs is not wanted though. To at least mitigate some of this hiding-errors-effect
+                    * we add loads of input that should never be matched here because it should be matched by
+                    * other rules. This effectively prevents this rule from covering up (by eating up) broken
+                    * other rules. Not everything can be prevented this way. Completely misspelled constructs that
+                    * can not be recognized in any way will still slip through.
+                    */
+                   TestNot("<ref"), TestNot("</ref"),
+                   TestNot("<i>"), TestNot("</i>"),
+                   TestNot("<sup>"), TestNot("</sup>"),
+                   TestNot("{{hebr"), TestNot("{{Hebr"),
+                   TestNot("{{Lesefassung}}"), TestNot("{{Studienfassung}}"),
+                   TestNot("{{Kapitelseite Fuß}}"),
+                   TestNot("{{Bemerkungen}}"),
+                   TestNot("{{L|"), TestNot("{{S|"),
+                   TestNot('\u201e'), TestNot('\u201c'), // „“
+                   TestNot('\u00BB'), TestNot('\u00AB'), // »«
+                   TestNot("<em>"), TestNot("</em>"), TestNot("<i>"), TestNot("</i>"),
+                   TestNot("<br/>"), TestNot("<br />"),TestNot("<br>"),
+                   //TestNot("\n:"), // Linequotes in comments not yet implemented
+                   TestNot("''"),
+                   TestNot("[["),
+                   ANY
+               );
+            /*FirstOf(
                 TextChar(),
                 '(', ')',
                 '[', ']',
