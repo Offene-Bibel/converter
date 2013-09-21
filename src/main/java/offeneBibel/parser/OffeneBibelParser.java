@@ -634,7 +634,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 Hebrew(),
                 NoteSuperScript(),
                 Break(),
-                Sequence(NoteChar(), createOrAppendTextNode(match()))
+                Sequence(TestNot("]"), NoteChar(), createOrAppendTextNode(match()))
         ));
     }    
     
