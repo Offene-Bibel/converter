@@ -790,14 +790,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     @SuppressNode
-    Rule GreekTextChar() {
-        return OneOrMore(
-            // Greek and Coptic, http://unicode.org/charts/PDF/U0370.pdf
-            CharRange('\u0370', '\u03ff')
-        );
-    }
-
-    @SuppressNode
     Rule Number() {
         return Sequence(
             CharRange('1', '9'),
