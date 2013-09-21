@@ -33,12 +33,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             ZeroOrMore(Whitespace()),
             FirstOf(
                 "''(kommt später)''",
-                Fassung(ObFassungNode.FassungType.lesefassung)
+                Fassung(ObFassungNode.FassungType.lesefassung, new StringVar("{{Studienfassung}}"))
             ),
             ZeroOrMore(Whitespace()),
             "{{Studienfassung}}",
             ZeroOrMore(Whitespace()),
-            Fassung(ObFassungNode.FassungType.studienfassung),
+            Fassung(ObFassungNode.FassungType.studienfassung, new StringVar("{{Kapitelseite Fuß}}")),
             ZeroOrMore(Whitespace()),
             "{{Kapitelseite Fuß}}",
             ZeroOrMore(Whitespace()),
@@ -121,7 +121,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     //(poemstart ws*)? (vers ws*)* '{{Bemerkungen}}';
-    Rule Fassung(ObFassungNode.FassungType fassung) {
+    Rule Fassung(ObFassungNode.FassungType fassung, StringVar breaker) {
         return Sequence(
                 ZeroOrMore(Whitespace()),
                 push(new ObFassungNode(fassung)),
@@ -136,7 +136,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 Optional(Sequence(
                         push(new ObAstNode(NodeType.fassungNotes)),
                         ZeroOrMore(Whitespace()),
-                        NoteText(),
+                        NoteText(breaker),
                         peek(1).insertChild(0, pop()) // put the notes of the Fassung at the beginning
                     )
                 ),
@@ -356,7 +356,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             breakRecursion(),
             "''",
             push(new ObAstNode(ObAstNode.NodeType.emphasis)),
-            NoteText(),
+            NoteText(new StringVar("''")),
             "''",
             peek(1).appendChild(pop())
         );
@@ -547,7 +547,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return FirstOf(
             Sequence(
                 "<ref>", push(new ObNoteNode()),
-                NoteText(),
+                NoteText(new StringVar("</ref>")),
                 "</ref>",
                 peek(1).appendChild(pop())
             ),
@@ -565,17 +565,17 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 "\"",
                 ZeroOrMore(Whitespace()),
                 ">", push(new ObNoteNode(tagText.get())),
-                NoteText(),
+                NoteText(new StringVar("</ref>")),
                 "</ref>",
                 peek(1).appendChild(pop())
             )
         );
     }
 
-    Rule NoteText() {
+    Rule NoteText(StringVar breaker) {
         return OneOrMore(FirstOf(
                 NoteMarkup(),
-                Sequence(NoteChar(), createOrAppendTextNode(match()))
+                Sequence(TestNot(breaker.get()), NoteChar(), createOrAppendTextNode(match()))
         ));
     }
 
@@ -603,7 +603,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return Sequence(
             '\u201e', // „
             push(new ObAstNode(ObAstNode.NodeType.quote)),
-            NoteText(),
+            NoteText(new StringVar("" + '\u201c')),
             '\u201c', // “
             peek(1).appendChild(pop())
         );
@@ -678,7 +678,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             breakRecursion(),
             "<sup>",
             push(new ObSuperScriptTextNode()),
-            NoteText(),
+            NoteText(new StringVar("</sup>")),
             "</sup>",
             peek(1).appendChild(pop())
         );
