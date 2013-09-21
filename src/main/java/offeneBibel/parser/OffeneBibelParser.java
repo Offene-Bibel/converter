@@ -66,7 +66,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 WikiLink(),
                 NoteSuperScript(),
                 Break(),
-                Note()
+                Note(),
+                Comment()
         ));
     }
     
@@ -128,7 +129,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     BibleText(),
                     Verse(),
                     Heading(),
-                    Note()
+                    Note(),
+                    Comment()
                 )),
                 "{{Bemerkungen}}",
                 Optional(Sequence(
@@ -157,7 +159,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 PoemStart(),
                 PoemStop(),
                 Break(),
-                ParallelPassage()
+                ParallelPassage(),
+                Comment()
             )
         );
     }
@@ -227,7 +230,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     BibleText(),
                     InnerQuote(),
                     Verse(),
-                    Note()
+                    Note(),
+                    Comment()
             )),
             // TODO: Once chapters are not parsed separately anymore quotes should forcefully match the closing tag again.
             Optional('\u201c'), // “
@@ -242,7 +246,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             OneOrMore(FirstOf(
                 BibleText(),
                 Verse(),
-                Note()
+                Note(),
+                Comment()
             )),
             '\u00AB', // «
             peek(1).appendChild(pop())
@@ -274,7 +279,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 OneOrMore(FirstOf(
                         BibleText(),
                         Verse(),
-                        Note()
+                        Note(),
+                        Comment()
                 )),
                 '\n',
                 peek(1).appendChild(pop())
@@ -295,7 +301,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     AlternateReading(),
                     Break(),
                     ParallelPassage(),
-                    Note()
+                    Note(),
+                    Comment()
                 )),
             "''",
             peek(1).appendChild(pop())
@@ -316,7 +323,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                         AlternateReading(),
                         Break(),
                         ParallelPassage(),
-                        Note()
+                        Note(),
+                        Comment()
                     )),
                 "</em>",
                 peek(1).appendChild(pop())
@@ -333,7 +341,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                         AlternateReading(),
                         Break(),
                         ParallelPassage(),
-                        Note()
+                        Note(),
+                        Comment()
                     )),
                 "</i>",
                 peek(1).appendChild(pop())
@@ -387,7 +396,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     AlternateReading(),
                     Break(),
                     ParallelPassage(),
-                    Note()
+                    Note(),
+                    Comment()
                 )),
             ']',
             peek(1).appendChild(pop())
@@ -414,7 +424,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     Break(),
                     ParallelPassage(),
                     Note(),
-                    Omission()
+                    Omission(),
+                    Comment()
                 )),
             '}',
             // Prevent "{{blabla}}", an omission that contains only one other omission.
@@ -434,7 +445,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 Alternative(),
                 AlternateReading(),
                 Omission(),
-                Note()
+                Note(),
+                Comment()
             )),
             ')',
             //prevent "((blabla))", an alternative that contains only one other alternative
@@ -577,7 +589,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             Hebrew(),
             WikiLink(),
             NoteSuperScript(),
-            Break()
+            Break(),
+            Comment()
         );
     }
 
@@ -655,6 +668,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 Hebrew(),
                 NoteSuperScript(),
                 Break(),
+                Comment(),
                 Sequence(TestNot("]"), NoteChar(), createOrAppendTextNode(match()))
         ));
     }
@@ -667,6 +681,17 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             NoteText(),
             "</sup>",
             peek(1).appendChild(pop())
+        );
+    }
+    
+    Rule Comment() {
+        return Sequence(
+            "<!--",
+            OneOrMore(
+                TestNot("-->"),
+                ANY
+            ),
+            "-->"
         );
     }
 
@@ -747,7 +772,9 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 '(', ')',
                 '[', ']',
                 '§',
-                '+'
+                '+',
+                '{', '}', '|', '=', '"', // swallow wiki tables for now
+                '*', '#' // swallow wiki lists for now
             );
     }
 
