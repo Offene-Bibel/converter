@@ -767,15 +767,19 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     @SuppressNode
     Rule NoteChar() {
-        return FirstOf(
+        return ANY; /*FirstOf(
                 TextChar(),
                 '(', ')',
                 '[', ']',
                 '§',
                 '+',
+                '\n',
+                CharRange('\u0370', '\u03ff'), // Greek and Coptic, http://unicode.org/charts/PDF/U0370.pdf
+                '<', '>', '/', // swallow all sorts of unsupported XML like markup
                 '{', '}', '|', '=', '"', // swallow wiki tables for now
                 '*', '#' // swallow wiki lists for now
             );
+            */
     }
 
     @SuppressNode
