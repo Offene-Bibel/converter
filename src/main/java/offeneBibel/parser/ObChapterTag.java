@@ -17,43 +17,76 @@ public class ObChapterTag {
 		ueberpruefungAngefordert,
 		versUnvollstaendigUebersetzt;
 		
+		/**
+		 * Returns a priority of the different stati.
+		 * The higher the priority the more dominant that status is.
+		 * So if you are unsure which status applies, pick the one
+		 * with the higher status.
+		 * 
+		 * The worse the status is, the higher the status.
+		 */
+		public int getPriority() {
+	          switch (this) {
+	            case lesefassunginArbeit:
+	                return 4;
+	            case studienfassunginArbeit:
+                    return 8;
+	            case lesefassungZuPruefen:
+                    return 2;
+	            case studienfassungZuPruefen:
+                    return 5;
+	            case studienfassungLiegtInRohuebersetzungVor:
+                    return 7;
+	            case lesefassungErfuelltDieMeistenKriterien:
+                    return 3;
+	            case studienfassungErfuelltDieMeistenKriterien:
+                    return 6;
+	            case studienfassungUndLesefassungErfuellenDieKriterien:
+                    return 1;
+	            case ueberpruefungAngefordert:
+                    return 10;
+	            case versUnvollstaendigUebersetzt:
+                    return 9;
+                default:
+                    return 0; // never reached
+	            }
+		}
+		
 		public ObVerseStatus getVerseStatus(FassungType fassung) {
-			if(fassung == FassungType.lesefassung) {
-				if (this == lesefassunginArbeit)
-					return ObVerseStatus.inArbeit;
-				else if (this == lesefassungZuPruefen)
-						return ObVerseStatus.zuPruefen;
-				else if (this == studienfassungUndLesefassungErfuellenDieKriterien)
-					return ObVerseStatus.erfuelltDieKriterien;
-				else if (this == ueberpruefungAngefordert)
-					return ObVerseStatus.ueberpruefungAngefordert;
-				else if (this == versUnvollstaendigUebersetzt)
-					return ObVerseStatus.versUnvollstaendigUebersetzt;
-				else
-					return ObVerseStatus.none; // should never hit
-			}
-			else { // studienfassung
-				if (this == lesefassunginArbeit)
-					return ObVerseStatus.erfuelltDieKriterien;
-				else if (this == studienfassunginArbeit)
-					return ObVerseStatus.inArbeit;
-				else if (this == lesefassungZuPruefen)
-						return ObVerseStatus.erfuelltDieKriterien;
-				else if (this == studienfassungZuPruefen)
-					return ObVerseStatus.zuPruefen;
-				else if (this == studienfassungLiegtInRohuebersetzungVor)
-					return ObVerseStatus.liegtInRohuebersetzungVor;
-				else if (this == studienfassungErfuelltDieMeistenKriterien)
-					return ObVerseStatus.erfuelltDieMeistenKriterien;
-				else if (this == studienfassungUndLesefassungErfuellenDieKriterien)
-					return ObVerseStatus.erfuelltDieKriterien;
-				else if (this == ueberpruefungAngefordert)
-					return ObVerseStatus.ueberpruefungAngefordert;
-				else if (this == versUnvollstaendigUebersetzt)
-					return ObVerseStatus.versUnvollstaendigUebersetzt;
-				else
-					return ObVerseStatus.none; // should never hit
-			}
+		    switch (this) {
+		    case lesefassunginArbeit:
+		        if(fassung == FassungType.lesefassung) return ObVerseStatus.inArbeit;
+		        else return ObVerseStatus.erfuelltDieKriterien;
+		    case studienfassunginArbeit:
+                if(fassung == FassungType.lesefassung) return ObVerseStatus.none;
+                else return ObVerseStatus.inArbeit;
+		    case lesefassungZuPruefen:
+                if(fassung == FassungType.lesefassung) return ObVerseStatus.zuPruefen;
+                else return ObVerseStatus.erfuelltDieKriterien;
+		    case studienfassungZuPruefen:
+                if(fassung == FassungType.lesefassung) return ObVerseStatus.none;
+                else return ObVerseStatus.zuPruefen;
+		    case studienfassungLiegtInRohuebersetzungVor:
+                if(fassung == FassungType.lesefassung) return ObVerseStatus.none;
+                else return ObVerseStatus.liegtInRohuebersetzungVor;
+		    case lesefassungErfuelltDieMeistenKriterien:
+                if(fassung == FassungType.lesefassung) return ObVerseStatus.erfuelltDieMeistenKriterien;
+                else return ObVerseStatus.erfuelltDieKriterien;
+		    case studienfassungErfuelltDieMeistenKriterien:
+                if(fassung == FassungType.lesefassung) return ObVerseStatus.none;
+                else return ObVerseStatus.erfuelltDieMeistenKriterien;
+		    case studienfassungUndLesefassungErfuellenDieKriterien:
+                if(fassung == FassungType.lesefassung) return ObVerseStatus.erfuelltDieKriterien;
+                else return ObVerseStatus.erfuelltDieKriterien;
+		    case ueberpruefungAngefordert:
+                if(fassung == FassungType.lesefassung) return ObVerseStatus.ueberpruefungAngefordert;
+                else return ObVerseStatus.ueberpruefungAngefordert;
+		    case versUnvollstaendigUebersetzt:
+                if(fassung == FassungType.lesefassung) return ObVerseStatus.versUnvollstaendigUebersetzt;
+                else return ObVerseStatus.versUnvollstaendigUebersetzt;
+            default:
+                return ObVerseStatus.none; // never hits
+		    }
 		}
 		
 		public boolean doesMatchFassung(FassungType fassung) {
