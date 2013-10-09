@@ -54,10 +54,12 @@ public class Exporter
         Book book;
         int number;
         /** Text of this chapter as retrieved from the wiki. */
-        String wikiText;
+        String wikiText = null;
+        /** Result of the parsing of the text. */
+        ObAstNode node = null;
         /** The following two will be filled by {@link generateOsisChapterFragments}. */
-        String studienfassungText;
-        String lesefassungText;
+        String studienfassungText = null;
+        String lesefassungText = null;
         
         public Chapter(Book book, int number) {
             this.book = book;
@@ -101,7 +103,7 @@ public class Exporter
             }
         }
         
-        public boolean generateOsisTexts(OffeneBibelParser parser, BasicParseRunner<ObAstNode> parseRunner, ObVerseStatus requiredTranslationStatus) throws Throwable {
+        public boolean generateAst(OffeneBibelParser parser, BasicParseRunner<ObAstNode> parseRunner) throws Throwable {
             if(wikiText != null) {
                 ParsingResult<ObAstNode> result = parseRunner.run(wikiText);
                 
@@ -135,21 +137,24 @@ public class Exporter
                     return false;
                 }
                 else {
-                    ObAstNode node = result.resultValue;
+                    node = result.resultValue;
                     ObAstFixuper.fixupAstTree(node);
-                    
+                }
+            }
+            return true;
+        }
+        
+        public void generateOsisTexts(ObVerseStatus requiredTranslationStatus) throws Throwable {
+            if(node != null) {
                     ObAstVisitor visitor = new ObAstVisitor(number, book.osisName, requiredTranslationStatus);
                     try {
                         node.host(visitor);
                     } catch (Throwable e) {
                         throw e;
                     }
-                    
                     studienfassungText = visitor.getStudienFassung();
                     lesefassungText = visitor.getLeseFassung();
-                }
             }
-            return true;
         }
     }
     
@@ -181,10 +186,13 @@ public class Exporter
                 
             List<Book> books = retrieveBooks();
     
-            boolean success = generateOsisChapterFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel], !m_commandLineArguments.m_continueOnError);
+            boolean success = generateAsts(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel], !m_commandLineArguments.m_continueOnError);
             if(false == success) {
                 return;
             }
+            
+            generateOsisChapterFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel], !m_commandLineArguments.m_continueOnError);
+            
             String studienFassung = generateCompleteOsisString(generateOsisBookFragment(books, false), false);
             String leseFassung = generateCompleteOsisString(generateOsisBookFragment(books, true), true);
             
@@ -222,15 +230,8 @@ public class Exporter
         }
         return bookDataCollection;
     }
-
-    /**
-     * Takes a list of {@link Book}s and generates the OSIS Studien/Lesefassung for the wiki text contained therein.
-     * @param books The books for which the OSIS texts should be generated and filled out.
-     * @param stopOnError Stop on the first error found. If this is false and an error is found in a chapter, that chapter is skipped.
-     * @return true if parsing was successful, false otherwise.
-     * @throws Throwable If the {@link ObAstVisitor} failed.
-     */
-    private boolean generateOsisChapterFragments(List<Book> books, ObVerseStatus requiredTranslationStatus, boolean stopOnError) throws Throwable
+    
+    private boolean generateAsts(List<Book> books, ObVerseStatus requiredTranslationStatus, boolean stopOnError) throws Throwable
     {
         OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
         BasicParseRunner<ObAstNode> parseRunner = new BasicParseRunner<ObAstNode>(parser.Page());
@@ -238,11 +239,11 @@ public class Exporter
         String errorList = "";
         for(Book book : books) {
             for(Chapter chapter : book.chapters) {
-                boolean success = chapter.generateOsisTexts(parser, parseRunner, requiredTranslationStatus);
+                boolean success = chapter.generateAst(parser, parseRunner);
                 if(false == success && reloadOnError) {
                     reloadOnError = false;
                     chapter.retrieveWikiPage(true);
-                    success = chapter.generateOsisTexts(parser, parseRunner, requiredTranslationStatus);
+                    success = chapter.generateAst(parser, parseRunner);
                 }
                 if(false == success) {
                     if(stopOnError) {
@@ -258,6 +259,22 @@ public class Exporter
             System.out.println("The following chapters contained errors and were skipped:\n"+errorList);
         }
         return true;
+    }
+
+    /**
+     * Takes a list of {@link Book}s and generates the OSIS Studien/Lesefassung for the wiki text contained therein.
+     * @param books The books for which the OSIS texts should be generated and filled out.
+     * @param stopOnError Stop on the first error found. If this is false and an error is found in a chapter, that chapter is skipped.
+     * @return true if parsing was successful, false otherwise.
+     * @throws Throwable If the {@link ObAstVisitor} failed.
+     */
+    private void generateOsisChapterFragments(List<Book> books, ObVerseStatus requiredTranslationStatus, boolean stopOnError) throws Throwable
+    {
+        for(Book book : books) {
+            for(Chapter chapter : book.chapters) {
+                chapter.generateOsisTexts(requiredTranslationStatus);
+            }
+        }
     }
 
     private String generateOsisBookFragment(List<Book> books, boolean leseFassung)

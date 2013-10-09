@@ -1,4 +1,4 @@
-package offeneBibel.webViewerExporter;
+package offeneBibel.osisExporter;
 
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.ObChapterNode;
