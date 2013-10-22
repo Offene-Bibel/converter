@@ -10,6 +10,11 @@ import offeneBibel.parser.ObVerseStatus;
 import offeneBibel.visitorPattern.DifferentiatingVisitor;
 import offeneBibel.visitorPattern.IVisitor;
 
+/**
+ * This visitor constructs a Studienfassung and Lesefassung from an AST tree.
+ * To use this class, first create an instance, then let it visit an ObAstNode,
+ * then retrieve the results via getStudienfassung() and getLesefassung().
+ */
 public class ObAstVisitor extends DifferentiatingVisitor<ObAstNode> implements IVisitor<ObAstNode>
 {
 	private final int m_chapter;
@@ -55,6 +60,11 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObAstNode> implements I
 	
 	private NoteIndexCounter m_noteIndexCounter;
 	
+	/**
+	 * @param chapter The chapter number. Used in verse tags.
+	 * @param book The OSIS book abbreviation. Used in verse tags.
+	 * @param requiredTranslationStatus The minimum translation status verses need to meet to be included.
+	 */
 	public ObAstVisitor(int chapter, String book, ObVerseStatus requiredTranslationStatus)
 	{
 		m_chapter = chapter;
