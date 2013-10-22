@@ -250,6 +250,20 @@ public class Exporter
         return true;
     }
     
+    public void generateWebViewerFragments(List<Book> books, ObVerseStatus requiredTranslationStatus) throws Throwable
+    {
+        for(Book book : books) {
+            for(Chapter chapter : book.chapters) {
+                if(chapter.node != null) {
+                        ObWebViewerVisitor visitor = new ObWebViewerVisitor(requiredTranslationStatus);
+                        chapter.node.host(visitor);
+                        String studienFassung = visitor.getStudienFassung();
+                        String leseFassung = visitor.getLeseFassung();
+                }
+            }
+        }
+    }
+    
     /**
      * Takes a chapter object and generates a Studienfassung OSIS XML fragment and a Lesefassung OSIS XML fragment for it.
      * @param chapter The chapter to generate the OSIS fragments for.
