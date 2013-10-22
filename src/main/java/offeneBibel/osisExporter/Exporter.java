@@ -180,7 +180,7 @@ public class Exporter
                 return;
             }
             
-            generateOsisChapterFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel], !m_commandLineArguments.m_continueOnError);
+            generateOsisChapterFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel]);
             
             String studienFassung = generateCompleteOsisString(generateOsisBookFragment(books, false), false);
             String leseFassung = generateCompleteOsisString(generateOsisBookFragment(books, true), true);
@@ -275,7 +275,7 @@ public class Exporter
      * @return true if parsing was successful, false otherwise.
      * @throws Throwable If the {@link ObAstVisitor} failed.
      */
-    private void generateOsisChapterFragments(List<Book> books, ObVerseStatus requiredTranslationStatus, boolean stopOnError) throws Throwable
+    private void generateOsisChapterFragments(List<Book> books, ObVerseStatus requiredTranslationStatus) throws Throwable
     {
         for(Book book : books) {
             for(Chapter chapter : book.chapters) {
