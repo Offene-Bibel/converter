@@ -4,12 +4,11 @@ import java.util.List;
 import java.util.Vector;
 
 import offeneBibel.parser.ObAstNode;
-import offeneBibel.parser.ObTreeNode;
 import offeneBibel.visitorPattern.IVisitor;
 
 public class ObAstFixuper
 {
-	public static void fixupAstTree(ObTreeNode tree)
+	public static void fixupAstTree(ObAstNode tree)
 	{
 		try {
 			ObAstNoteSearcher noteSearcher = new ObAstNoteSearcher();
@@ -22,7 +21,7 @@ public class ObAstFixuper
 		}
 	}
 	
-	private static class ObAstNoteLinkSetter implements IVisitor<ObTreeNode>
+	private static class ObAstNoteLinkSetter implements IVisitor<ObAstNode>
 	{
 		public List<ObNoteNode> m_noteList = new Vector<ObNoteNode>();
 		
@@ -31,11 +30,9 @@ public class ObAstFixuper
 			m_noteList = noteList;
 		}
 		
-		public void visit(ObTreeNode node) throws Throwable
+		public void visit(ObAstNode node) throws Throwable
 		{
-			ObAstNode astNode = (ObAstNode)node;
-			
-			if(astNode.getNodeType() == ObAstNode.NodeType.noteLink) {
+			if(node.getNodeType() == ObAstNode.NodeType.noteLink) {
 				ObNoteLinkNode link = (ObNoteLinkNode) node;
 				for(ObNoteNode note : m_noteList) {
 					if(link.getTag().equals(note.getTag())) {
@@ -45,23 +42,22 @@ public class ObAstFixuper
 			}
 		}
 	
-		public void visitBefore(ObTreeNode node) throws Throwable {}
-		public void visitAfter(ObTreeNode node) throws Throwable {}
+		public void visitBefore(ObAstNode node) throws Throwable {}
+		public void visitAfter(ObAstNode node) throws Throwable {}
 	}
 	
-	private static class ObAstNoteSearcher implements IVisitor<ObTreeNode>
+	private static class ObAstNoteSearcher implements IVisitor<ObAstNode>
 	{
 		public List<ObNoteNode> m_noteList = new Vector<ObNoteNode>();
 		
-		public void visit(ObTreeNode node) throws Throwable
+		public void visit(ObAstNode node) throws Throwable
 		{
-			ObAstNode astNode = (ObAstNode)node;
-			if(astNode.getNodeType() == ObAstNode.NodeType.note) {
+			if(node.getNodeType() == ObAstNode.NodeType.note) {
 				m_noteList.add((ObNoteNode) node);
 			}
 		}
 	
-		public void visitBefore(ObTreeNode node) throws Throwable {}
-		public void visitAfter(ObTreeNode node) throws Throwable {}
+		public void visitBefore(ObAstNode node) throws Throwable {}
+		public void visitAfter(ObAstNode node) throws Throwable {}
 	}
 }
