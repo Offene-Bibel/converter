@@ -274,7 +274,7 @@ public class Exporter
     public String[] generateOsisTexts(Chapter chapter, ObVerseStatus requiredTranslationStatus) throws Throwable {
         String[] texts = new String[] {null, null};
         if(chapter.node != null) {
-                ObAstVisitor visitor = new ObAstVisitor(chapter.number, chapter.book.osisName, requiredTranslationStatus);
+                ObOsisGeneratorVisitor visitor = new ObOsisGeneratorVisitor(chapter.number, chapter.book.osisName, requiredTranslationStatus);
                 chapter.node.host(visitor);
                 texts[0] = visitor.getStudienFassung();
                 texts[1] = visitor.getLeseFassung();
@@ -287,7 +287,7 @@ public class Exporter
      * @param books The books for which the OSIS texts should be generated and filled out.
      * @param stopOnError Stop on the first error found. If this is false and an error is found in a chapter, that chapter is skipped.
      * @return true if parsing was successful, false otherwise.
-     * @throws Throwable If the {@link ObAstVisitor} failed.
+     * @throws Throwable If the {@link ObOsisGeneratorVisitor} failed.
      */
     private void generateOsisChapterFragments(List<Book> books, ObVerseStatus requiredTranslationStatus) throws Throwable
     {

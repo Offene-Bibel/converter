@@ -15,7 +15,7 @@ import offeneBibel.visitorPattern.IVisitor;
  * To use this class, first create an instance, then let it visit an ObAstNode,
  * then retrieve the results via getStudienfassung() and getLesefassung().
  */
-public class ObAstVisitor extends DifferentiatingVisitor<ObAstNode> implements IVisitor<ObAstNode>
+public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> implements IVisitor<ObAstNode>
 {
 	private final int m_chapter;
 	private final String m_book;
@@ -65,7 +65,7 @@ public class ObAstVisitor extends DifferentiatingVisitor<ObAstNode> implements I
 	 * @param book The OSIS book abbreviation. Used in verse tags.
 	 * @param requiredTranslationStatus The minimum translation status verses need to meet to be included.
 	 */
-	public ObAstVisitor(int chapter, String book, ObVerseStatus requiredTranslationStatus)
+	public ObOsisGeneratorVisitor(int chapter, String book, ObVerseStatus requiredTranslationStatus)
 	{
 		m_chapter = chapter;
 		m_book = book;
