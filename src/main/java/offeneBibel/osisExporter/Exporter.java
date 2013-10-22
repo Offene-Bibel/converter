@@ -16,6 +16,7 @@ import org.parboiled.parserunners.RecoveringParseRunner;
 import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.parserunners.TracingParseRunner;
 import org.parboiled.support.ParsingResult;
+
 import com.beust.jcommander.JCommander;
 
 import offeneBibel.parser.ObAstFixuper;
@@ -57,15 +58,16 @@ public class Exporter
         String wikiText = null;
         /** Result of the parsing of the text. */
         ObAstNode node = null;
-        /** The following two will be filled by {@link generateOsisChapterFragments}. */
+
+        /** The following is used by the {@link generateOsisChapterFragments} method. */
         String studienfassungText = null;
         String lesefassungText = null;
-        
+
         public Chapter(Book book, int number) {
             this.book = book;
             this.number = number;
         }
-        
+
         /**
          * Downloads the wiki page.
          * @param wikiPage Page to download.
@@ -142,19 +144,6 @@ public class Exporter
                 }
             }
             return true;
-        }
-        
-        public void generateOsisTexts(ObVerseStatus requiredTranslationStatus) throws Throwable {
-            if(node != null) {
-                    ObAstVisitor visitor = new ObAstVisitor(number, book.osisName, requiredTranslationStatus);
-                    try {
-                        node.host(visitor);
-                    } catch (Throwable e) {
-                        throw e;
-                    }
-                    studienfassungText = visitor.getStudienFassung();
-                    lesefassungText = visitor.getLeseFassung();
-            }
         }
     }
     
@@ -260,6 +249,24 @@ public class Exporter
         }
         return true;
     }
+    
+    /**
+     * Takes a chapter object and generates a Studienfassung OSIS XML fragment and a Lesefassung OSIS XML fragment for it.
+     * @param chapter The chapter to generate the OSIS fragments for.
+     * @param requiredTranslationStatus The minimum status of the verses have to meet for inclusion.
+     * @return a String array. [0] = Studienfassung or null if not yet existent, [1] = Lesefassung or null if not yet existent.
+     * @throws Throwable
+     */
+    public String[] generateOsisTexts(Chapter chapter, ObVerseStatus requiredTranslationStatus) throws Throwable {
+        String[] texts = new String[] {null, null};
+        if(chapter.node != null) {
+                ObAstVisitor visitor = new ObAstVisitor(chapter.number, chapter.book.osisName, requiredTranslationStatus);
+                chapter.node.host(visitor);
+                texts[0] = visitor.getStudienFassung();
+                texts[1] = visitor.getLeseFassung();
+        }
+        return texts;
+    }
 
     /**
      * Takes a list of {@link Book}s and generates the OSIS Studien/Lesefassung for the wiki text contained therein.
@@ -272,7 +279,9 @@ public class Exporter
     {
         for(Book book : books) {
             for(Chapter chapter : book.chapters) {
-                chapter.generateOsisTexts(requiredTranslationStatus);
+                String[] texts = generateOsisTexts(chapter, requiredTranslationStatus);
+                chapter.studienfassungText = texts[0];
+                chapter.lesefassungText = texts[1];
             }
         }
     }
