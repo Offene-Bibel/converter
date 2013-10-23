@@ -118,6 +118,11 @@ public class Misc {
         return getDirOfProgram().getPath() + File.separator + ".." + File.separator + "results" + File.separator;
     }
     
+    public static String getWebResultsDir()
+    {
+        return getDirOfProgram().getPath() + File.separator + ".." + File.separator + "webResults" + File.separator;
+    }
+    
     public static String retrieveUrl(String url) throws IOException {
         URL urlHandler = new URL(url);
         try (BufferedReader in = new BufferedReader(new InputStreamReader(urlHandler.openStream(), "UTF-8"))) {

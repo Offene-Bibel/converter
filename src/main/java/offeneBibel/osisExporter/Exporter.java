@@ -1,10 +1,13 @@
 package offeneBibel.osisExporter;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.DateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
@@ -252,16 +255,34 @@ public class Exporter
     
     public void generateWebViewerFragments(List<Book> books, ObVerseStatus requiredTranslationStatus) throws Throwable
     {
+        String statusFileString = "";
         for(Book book : books) {
             for(Chapter chapter : book.chapters) {
                 if(chapter.node != null) {
                         ObWebViewerVisitor visitor = new ObWebViewerVisitor(requiredTranslationStatus);
                         chapter.node.host(visitor);
-                        String studienFassung = visitor.getStudienFassung();
-                        String leseFassung = visitor.getLeseFassung();
+                        statusFileString += writeWebScriptureToFile(visitor.getStudienFassung(), book, chapter, visitor.getStudienFassungQuality(), "sf");
+                        statusFileString += writeWebScriptureToFile(visitor.getLeseFassung(), book, chapter, visitor.getLeseFassungQuality(), "lf");
                 }
             }
         }
+        Date date = new Date();
+        DateFormat format = DateFormat.getDateInstance();
+        FileWriter statusFileWriter = new FileWriter(Misc.getWebResultsDir() + "gen_" + format.format(date) + ".status");
+        statusFileWriter.write(statusFileString);
+        statusFileWriter.close();
+    }
+
+    private String writeWebScriptureToFile(String scriptureText, Book book, Chapter chapter, int quality, String type) throws IOException {
+        String statusFileLine = "";
+        if(scriptureText != null) {
+            String filename = book.wikiName + "_" + chapter.number + "_" + type;
+            FileWriter writer = new FileWriter(Misc.getWebResultsDir() + filename);
+            writer.write(scriptureText);
+            writer.close();
+            statusFileLine = book.wikiName + " " + chapter.number + " " + type + " " + quality + " " + filename + "\n";
+        }
+        return statusFileLine;
     }
     
     /**

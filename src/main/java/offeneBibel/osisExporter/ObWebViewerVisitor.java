@@ -153,12 +153,6 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
 		            if(tagName == null || tagName.getPriority() < tag.getTag().getPriority()) {
 		                tagName = tag.getTag();
 		            }
-		            if(tag.getTag().doesMatchFassung(FassungType.lesefassung)) {
-		                m_leseFassungStatus = tag.getTag().ordinal();
-		            }
-		            else if(tag.getTag().doesMatchFassung(FassungType.studienfassung)) {
-                        m_studienFassungStatus = tag.getTag().ordinal();
-                    }
 		        }
 	        }
 		    if(tagName != null) {
@@ -223,19 +217,31 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
 		}
 	}
 
+	/**
+	 * @return Studienfassung string or null if there was no Studienfassung in this text.
+	 */
 	public String getStudienFassung() {
 		return m_studienFassung;
 	}
 
+    /**
+     * @return Lesefassung string or null if there was no Lesefassung in this text.
+     */
 	public String getLeseFassung() {
 		return m_leseFassung;
 	}
 
-    public int getStudienFassungStatus() {
+    /**
+     * @return Status of the Studienfassung according to ObVerseStatus.quality().
+     */
+    public int getStudienFassungQuality() {
         return m_studienFassungStatus;
     }
 
-    public int getLeseFassungStatus() {
+    /**
+     * @return Status of the Lesefassung according to ObVerseStatus.quality().
+     */
+    public int getLeseFassungQuality() {
         return m_leseFassungStatus;
     }
 	
