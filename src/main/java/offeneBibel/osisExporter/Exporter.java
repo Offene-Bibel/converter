@@ -11,6 +11,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
+import offeneBibel.parser.ObAstFixuper;
+import offeneBibel.parser.ObAstNode;
+import offeneBibel.parser.ObVerseStatus;
+import offeneBibel.parser.OffeneBibelParser;
+
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ErrorUtils;
 import org.parboiled.parserunners.BasicParseRunner;
@@ -20,13 +25,9 @@ import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.parserunners.TracingParseRunner;
 import org.parboiled.support.ParsingResult;
 
-import com.beust.jcommander.JCommander;
-
-import offeneBibel.parser.ObAstFixuper;
-import offeneBibel.parser.ObAstNode;
-import offeneBibel.parser.ObVerseStatus;
-import offeneBibel.parser.OffeneBibelParser;
 import util.Misc;
+
+import com.beust.jcommander.JCommander;
 
 public class Exporter
 {
@@ -36,7 +37,7 @@ public class Exporter
     //static final String m_urlBase = "http://www.offene-bibel.de/wiki/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
     static final String m_urlBase = "http://www.offene-bibel.de/wiki/index.php5?action=raw&title=";
     /**
-     * A list of all bible books as they are named on the wiki. 
+     * A list of all bible books as they are named on the wiki.
      * It was created by combining the wiki page: Vorlage:Kapitelzahl and the OSIS 2.1.1 manual Appendix C.1
      */
     static final String m_bibleBooks = Misc.getResourceDir() + "bibleBooks.txt";
@@ -51,9 +52,9 @@ public class Exporter
      */
     static final String m_studienFassungFilename = Misc.getResultsDir() + "offeneBibelStudienfassungModule.osis";
     static final String m_leseFassungFilename = Misc.getResultsDir() + "offeneBibelLesefassungModule.osis";
-    
+
     CommandLineArguments m_commandLineArguments;
-    
+
     class Chapter {
         Book book;
         int number;
@@ -107,13 +108,13 @@ public class Exporter
                 e.printStackTrace();
             }
         }
-        
+
         public boolean generateAst(OffeneBibelParser parser, BasicParseRunner<ObAstNode> parseRunner) throws Throwable {
             if(wikiText != null) {
                 ParsingResult<ObAstNode> result = parseRunner.run(wikiText);
-                
+
                 if(result.matched == false) {
-        
+
                     ParseRunner<ObAstNode> errorParseRunner = null;
                     if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("tracing")) {
                         errorParseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
@@ -125,13 +126,13 @@ public class Exporter
                         errorParseRunner = new ReportingParseRunner<ObAstNode>(parser.Page());
                     }
                     ParsingResult<ObAstNode> validatorParsingResult = errorParseRunner.run(wikiText);
-        
+
                     if(validatorParsingResult.hasErrors()) {
                         System.out.println(ErrorUtils.printParseErrors(validatorParsingResult));
                         /*
                         String parseTreePrintOut = ParseTreeUtils.printNodeTree(tracingResult);
                         ErrorUtils.printParseErrors(tracingParseRunner.getParseErrors());
-                        */
+                         */
                         System.out.println("=================================================");
                         System.out.println("Book: " + book.osisName);
                         System.out.println("Chapter: " + number);
@@ -149,7 +150,7 @@ public class Exporter
             return true;
         }
     }
-    
+
     class Book {
         /** Name of the book corresponding to the wiki page name. */
         String wikiName;
@@ -159,13 +160,13 @@ public class Exporter
         int chapterCount;
         Vector<Chapter> chapters = new Vector<Chapter>();
     }
-    
+
     public static void main(String [] args)
     {
         Exporter exporter = new Exporter();
         exporter.run(args);
     }
-    
+
     public void run(String [] args)
     {
         try {
@@ -186,7 +187,7 @@ public class Exporter
                 return;
             }
             System.out.println("Done parsing wiki pages.");
-            
+
             if(false == m_commandLineArguments.m_skipGenerateOsis) {
                 System.out.print("Generating OSIS documents...");
                 generateOsisChapterFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel]);
@@ -223,7 +224,7 @@ public class Exporter
             book.wikiName = bookData.get(0);
             book.osisName = bookData.get(1);
             book.chapterCount = Integer.parseInt(bookData.get(2));
-            
+
             for(int i = 1; i <= book.chapterCount; ++i) {
                 Chapter chapter = new Chapter(book, i);
                 chapter.retrieveWikiPage(false);
@@ -233,7 +234,7 @@ public class Exporter
         }
         return bookDataCollection;
     }
-    
+
     private boolean generateAsts(List<Book> books, ObVerseStatus requiredTranslationStatus, boolean stopOnError) throws Throwable
     {
         OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
@@ -263,17 +264,17 @@ public class Exporter
         }
         return true;
     }
-    
+
     public void generateWebViewerFragments(List<Book> books, ObVerseStatus requiredTranslationStatus) throws Throwable
     {
         String statusFileString = "";
         for(Book book : books) {
             for(Chapter chapter : book.chapters) {
                 if(chapter.node != null) {
-                        ObWebViewerVisitor visitor = new ObWebViewerVisitor(requiredTranslationStatus);
-                        chapter.node.host(visitor);
-                        statusFileString += writeWebScriptureToFile(visitor.getStudienFassung(), book, chapter, visitor.getStudienFassungQuality(), "sf");
-                        statusFileString += writeWebScriptureToFile(visitor.getLeseFassung(), book, chapter, visitor.getLeseFassungQuality(), "lf");
+                    ObWebViewerVisitor visitor = new ObWebViewerVisitor(requiredTranslationStatus);
+                    chapter.node.host(visitor);
+                    statusFileString += writeWebScriptureToFile(visitor.getStudienFassung(), book, chapter, visitor.getStudienFassungQuality(), "sf");
+                    statusFileString += writeWebScriptureToFile(visitor.getLeseFassung(), book, chapter, visitor.getLeseFassungQuality(), "lf");
                 }
             }
         }
@@ -295,7 +296,7 @@ public class Exporter
         }
         return statusFileLine;
     }
-    
+
     /**
      * Takes a chapter object and generates a Studienfassung OSIS XML fragment and a Lesefassung OSIS XML fragment for it.
      * @param chapter The chapter to generate the OSIS fragments for.
@@ -306,10 +307,10 @@ public class Exporter
     public String[] generateOsisTexts(Chapter chapter, ObVerseStatus requiredTranslationStatus) throws Throwable {
         String[] texts = new String[] {null, null};
         if(chapter.node != null) {
-                ObOsisGeneratorVisitor visitor = new ObOsisGeneratorVisitor(chapter.number, chapter.book.osisName, requiredTranslationStatus);
-                chapter.node.host(visitor);
-                texts[0] = visitor.getStudienFassung();
-                texts[1] = visitor.getLeseFassung();
+            ObOsisGeneratorVisitor visitor = new ObOsisGeneratorVisitor(chapter.number, chapter.book.osisName, requiredTranslationStatus);
+            chapter.node.host(visitor);
+            texts[0] = visitor.getStudienFassung();
+            texts[1] = visitor.getLeseFassung();
         }
         return texts;
     }
@@ -348,7 +349,7 @@ public class Exporter
                 }
             }
             bookString += "</div>\n";
-            
+
             if(chapterExists == true) // prevent empty books
                 result += bookString;
         }
@@ -358,7 +359,7 @@ public class Exporter
     private String generateCompleteOsisString(String osisText, boolean leseFassung) throws IOException
     {
         String result = Misc.readFile(leseFassung ? m_leseFassungTemplate : m_studienFassungTemplate);
-        
+
         result = result.replace("{{revision}}", "TODO");
         result = result.replace("{{year}}", "" + Calendar.getInstance().get(Calendar.YEAR));
         result = result.replace("{{content}}", osisText);

@@ -13,27 +13,27 @@ package offeneBibel.visitorPattern;
  */
 public interface IVisitor<H>
 {
-	/**
-	 * This function is called by all host nodes.
-	 * Recursing nodes call it after the recursion step.
-	 * @param hostNode The host node that is currently visited 
-	 * @throws Throwable 
-	 */
-	void visitBefore(H hostNode) throws Throwable;
+    /**
+     * This function is called by all host nodes.
+     * Recursing nodes call it after the recursion step.
+     * @param hostNode The host node that is currently visited
+     * @throws Throwable
+     */
+    void visitBefore(H hostNode) throws Throwable;
 
-	/**
-	 * This function is called on every node. No further guarantees are made.
-	 * @param hostNode The host node that is currently visited
-	 * @throws Throwable 
-	 */
-	void visit(H hostNode) throws Throwable;
-	
-	/**
-	 * This function is called by all host nodes.
-	 * Recursing nodes call it after the recursion step.
-	 * @param hostNode The host node that is currently visited
-	 * @return
-	 * @throws Throwable 
-	 */
-	void visitAfter(H hostNode) throws Throwable;
+    /**
+     * This function is called on every node. No further guarantees are made.
+     * @param hostNode The host node that is currently visited
+     * @throws Throwable
+     */
+    void visit(H hostNode) throws Throwable;
+
+    /**
+     * This function is called by all host nodes.
+     * Recursing nodes call it after the recursion step.
+     * @param hostNode The host node that is currently visited
+     * @return
+     * @throws Throwable
+     */
+    void visitAfter(H hostNode) throws Throwable;
 }

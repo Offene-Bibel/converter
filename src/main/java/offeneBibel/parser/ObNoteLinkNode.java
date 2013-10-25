@@ -7,24 +7,24 @@ package offeneBibel.parser;
  * 2. In a second run the target will be searched and set.
  */
 public class ObNoteLinkNode extends ObAstNode {
-	private String m_noteTag;
-	private ObNoteNode m_linkTarget;
-	
-	public ObNoteLinkNode(String tag) {
-		super(NodeType.noteLink);
-		m_noteTag = tag;
-		m_linkTarget = null;
-	}
-	
-	public String getTag() {
-		return m_noteTag;
-	}
-	
-	public void setLinkTarget(ObNoteNode target) {
-		m_linkTarget = target;
-	}
-	
-	public ObNoteNode getLinkTarget() {
-		return m_linkTarget;
-	}
+    private String m_noteTag;
+    private ObNoteNode m_linkTarget;
+
+    public ObNoteLinkNode(String tag) {
+        super(NodeType.noteLink);
+        m_noteTag = tag;
+        m_linkTarget = null;
+    }
+
+    public String getTag() {
+        return m_noteTag;
+    }
+
+    public void setLinkTarget(ObNoteNode target) {
+        m_linkTarget = target;
+    }
+
+    public ObNoteNode getLinkTarget() {
+        return m_linkTarget;
+    }
 }

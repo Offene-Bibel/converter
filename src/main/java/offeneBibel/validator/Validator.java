@@ -1,7 +1,6 @@
 package offeneBibel.validator;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.OffeneBibelParser;
@@ -35,7 +34,7 @@ public class Validator {
         }
 
         if((m_commandLineArguments.m_inputFile != null && m_commandLineArguments.m_inputUrl != null) ||
-           (m_commandLineArguments.m_inputFile == null && m_commandLineArguments.m_inputUrl == null)) {
+                                        (m_commandLineArguments.m_inputFile == null && m_commandLineArguments.m_inputUrl == null)) {
             System.out.println("Specify either a file *or* a URL, not both.");
             commander.usage();
             return;
