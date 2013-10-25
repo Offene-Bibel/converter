@@ -529,7 +529,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         Var<Integer> stopVerse = new Var<Integer>(-1);
         return Sequence(
             FirstOf("{{Par|", "{{par|"),
-            OneOrMore(NoneOf("|")), bookName.set(match()), ACTION(BookNameHelper.getInstance().isValid(bookName.get())),
+            // No validation of book name for now
+            OneOrMore(NoneOf("|")), bookName.set(match()), //ACTION(BookNameHelper.getInstance().isValid(bookName.get())),
             '|',
             Number(), safeParseIntSet(chapter),
             '|',
