@@ -175,22 +175,33 @@ public class Exporter
                 commander.usage();
                 return;
             }
-                
+
+            System.out.print("Retrieving wiki pages...");
             List<Book> books = retrieveBooks();
-    
+            System.out.println(" Done.");
+
+            System.out.println("Parsing wiki pages...");
             boolean success = generateAsts(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel], !m_commandLineArguments.m_continueOnError);
             if(false == success) {
                 return;
             }
+            System.out.println("Done parsing wiki pages.");
             
-            generateOsisChapterFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel]);
-            
-            String studienFassung = generateCompleteOsisString(generateOsisBookFragment(books, false), false);
-            String leseFassung = generateCompleteOsisString(generateOsisBookFragment(books, true), true);
-            
-            Misc.writeFile(studienFassung, m_studienFassungFilename);
-            Misc.writeFile(leseFassung, m_leseFassungFilename);
-            System.out.println("done");
+            if(false == m_commandLineArguments.m_skipGenerateOsis) {
+                System.out.print("Generating OSIS documents...");
+                generateOsisChapterFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel]);
+                String studienFassung = generateCompleteOsisString(generateOsisBookFragment(books, false), false);
+                String leseFassung = generateCompleteOsisString(generateOsisBookFragment(books, true), true);
+                Misc.writeFile(studienFassung, m_studienFassungFilename);
+                Misc.writeFile(leseFassung, m_leseFassungFilename);
+                System.out.println(" Done.");
+            }
+
+            if(false == m_commandLineArguments.m_skipGenerateOsis) {
+                System.out.print("Generating website backing files...");
+                generateWebViewerFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel]);
+                System.out.println(" Done.");
+            }
         } catch (Throwable e) {
             e.printStackTrace();
         }
