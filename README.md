@@ -7,15 +7,19 @@ To build the project:
 
 - install a Java 7
     - automatically
-        sudo apt-get install openjdk-7-jdk
-        yum install java-1.7.0-openjdk
+
+            sudo apt-get install openjdk-7-jdk
+            yum install java-1.7.0-openjdk
+
     - manually
         - download and unzip/install from <http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html>
         - `export JAVA_HOME=/wherever/you/unzipped/jdk1.7.0_17/`
 - install maven
     - automatically
+
             sudo apt-get install maven2
             yum install maven2
+
     - manually from <http://maven.apache.org/download.html>
 - run `build.sh`
 
