@@ -4,6 +4,7 @@ Offene Bibel Parser
 Building
 --------
 To build the project:
+
 - install a Java 7
     - automatically
         sudo apt-get install openjdk-7-jdk
@@ -32,6 +33,7 @@ You can run it as follows: `install/bin/validator.sh --help`.
 Web viewer file generation
 --------------------------
 The parser can generate files suitable as input for the *Offene Bibel Web Viewer*. It generates a file structure as follows:
+
     webResults/Matthäus_12_lf
     webResults/Matthäus_12_sf
     webResults/Matthäus_12_ls
