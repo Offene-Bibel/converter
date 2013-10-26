@@ -78,7 +78,7 @@ public class Exporter
          */
         public void retrieveWikiPage(boolean forceDownload)
         {
-            String wikiPage = book.wikiName + " " + number;
+            String wikiPage = book.urlName + "_" + number;
             try {
                 String result = null;
                 String fileCacheString = Misc.getPageCacheDir() + wikiPage;
@@ -154,6 +154,8 @@ public class Exporter
     class Book {
         /** Name of the book corresponding to the wiki page name. */
         String wikiName;
+        /** Name of the book corresponding to the wiki URL. */
+        String urlName;
         /** Name of the book corresponding to the OSIS tag. */
         String osisName;
         /** Number of chapters in this book. */
@@ -222,6 +224,7 @@ public class Exporter
             Book book = new Book();
             //Genesis,Gen,50 == german name, sword name, chapter count
             book.wikiName = bookData.get(0);
+            book.urlName = book.wikiName.replaceAll(" ", "_");
             book.osisName = bookData.get(1);
             book.chapterCount = Integer.parseInt(bookData.get(2));
 
@@ -289,11 +292,11 @@ public class Exporter
     private String writeWebScriptureToFile(String scriptureText, Book book, Chapter chapter, int quality, String type) throws IOException {
         String statusFileLine = "";
         if(scriptureText != null) {
-            String filename = book.wikiName + "_" + chapter.number + "_" + type;
+            String filename = book.urlName + "_" + chapter.number + "_" + type;
             FileWriter writer = new FileWriter(Misc.getWebResultsDir() + filename);
             writer.write(scriptureText);
             writer.close();
-            statusFileLine = book.wikiName + " " + chapter.number + " " + type + " " + quality + " " + filename + "\n";
+            statusFileLine = book.urlName + " " + chapter.number + " " + type + " " + quality + " " + filename + "\n";
         }
         return statusFileLine;
     }
