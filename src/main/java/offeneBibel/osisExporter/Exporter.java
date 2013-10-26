@@ -198,7 +198,7 @@ public class Exporter
                 System.out.println(" Done.");
             }
 
-            if(false == m_commandLineArguments.m_skipGenerateOsis) {
+            if(false == m_commandLineArguments.m_skipGenerateWeb) {
                 System.out.print("Generating website backing files...");
                 generateWebViewerFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel]);
                 System.out.println(" Done.");
