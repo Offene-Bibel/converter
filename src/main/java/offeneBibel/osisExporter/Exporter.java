@@ -281,7 +281,7 @@ public class Exporter
                 }
             }
         }
-        FileWriter statusFileWriter = new FileWriter(Misc.getWebResultsDir() + "generated.status");
+        FileWriter statusFileWriter = new FileWriter(Misc.getWebResultsDir() + "generated.index");
         statusFileWriter.write(statusFileString);
         statusFileWriter.close();
     }

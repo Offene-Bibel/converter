@@ -41,7 +41,7 @@ The parser can generate files suitable as input for the *Offene Bibel Web Viewer
     webResults/Matthäus_12_lf
     webResults/Matthäus_12_sf
     webResults/Matthäus_12_ls
-    webResults/generated.status
+    webResults/generated.index
 
-Multiple runs will overwrite both, chapter files and the status file. The *generated.status* file will have a comment at the start indicating the date and parameters used for generation.
+Multiple runs will overwrite both, chapter files and the status file. The *generated.index* file will have a comment at the start indicating the date and parameters used for generation.
 
