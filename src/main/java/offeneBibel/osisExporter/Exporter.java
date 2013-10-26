@@ -267,10 +267,13 @@ public class Exporter
 
     public void generateWebViewerFragments(List<Book> books, ObVerseStatus requiredTranslationStatus) throws Throwable
     {
-        String statusFileString = "";
-        for(Book book : books) {
-            for(Chapter chapter : book.chapters) {
-                if(chapter.node != null) {
+        Date date = new Date();
+        DateFormat format = DateFormat.getDateInstance();
+        String statusFileString = "# Generated on " + format.format(date) + ".\n";
+        statusFileString += "# Export level: " + m_commandLineArguments.m_exportLevel + "\n";
+        for (Book book : books) {
+            for (Chapter chapter : book.chapters) {
+                if (chapter.node != null) {
                     ObWebViewerVisitor visitor = new ObWebViewerVisitor(requiredTranslationStatus);
                     chapter.node.host(visitor);
                     statusFileString += writeWebScriptureToFile(visitor.getStudienFassung(), book, chapter, visitor.getStudienFassungQuality(), "sf");
@@ -278,9 +281,7 @@ public class Exporter
                 }
             }
         }
-        Date date = new Date();
-        DateFormat format = DateFormat.getDateInstance();
-        FileWriter statusFileWriter = new FileWriter(Misc.getWebResultsDir() + "gen_" + format.format(date) + ".status");
+        FileWriter statusFileWriter = new FileWriter(Misc.getWebResultsDir() + "generated.status");
         statusFileWriter.write(statusFileString);
         statusFileWriter.close();
     }
