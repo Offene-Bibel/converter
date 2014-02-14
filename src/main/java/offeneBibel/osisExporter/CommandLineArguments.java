@@ -21,7 +21,7 @@ class CommandLineArguments {
     boolean m_skipGenerateOsis = false;
 
     @Parameter(names = { "--skipGenerateWeb" }, description = "Skip generation of the website backing files.")
-    boolean m_skipGenerateWeb = false;
+    boolean m_skipGenerateWeb = true;
 
     @Parameter(names = {"-h", "--help"})
     boolean m_help;
