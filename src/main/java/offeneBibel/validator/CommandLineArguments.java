@@ -15,6 +15,9 @@ class CommandLineArguments {
     @Parameter(names = { "-u", "--url" }, description = "URL to download content from to validate.")
     String m_inputUrl = null;
 
+    @Parameter(names = { "-t", "--timeout" }, description = "Number of milliseconds to wait for the parser before aborting.")
+    long m_timeout = 10000;
+
     @Parameter(names = {"-h", "--help"})
     boolean m_help;
 }

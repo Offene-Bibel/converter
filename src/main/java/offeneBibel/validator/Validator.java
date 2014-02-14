@@ -66,7 +66,7 @@ public class Validator {
             parseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
         }
         else if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("recovering")) {
-            parseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page());
+            parseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page(), m_commandLineArguments.m_timeout);
         }
         else {
             parseRunner = new ReportingParseRunner<ObAstNode>(parser.Page());
@@ -75,6 +75,7 @@ public class Validator {
         ParsingResult<ObAstNode> result = parseRunner.run(text);
 
         if (result.hasErrors()) {
+            System.out.println("invalid");
             System.out.println(ErrorUtils.printParseErrors(result));
             System.exit(1);
         } else {
