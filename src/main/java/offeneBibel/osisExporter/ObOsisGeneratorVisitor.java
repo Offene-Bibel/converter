@@ -159,6 +159,8 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             }
 
             textString = textString.replaceAll("&", "&amp;");
+            textString = textString.replaceAll(">", "&gt;");
+            textString = textString.replaceAll("<", "&lt;");
 
             m_currentFassung += textString;
         }
