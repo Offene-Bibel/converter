@@ -491,7 +491,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     public Rule SecondaryContent() {
         return Sequence(
-                 "{{Sekundär}}",
+                 FirstOf("{{Sekundär}}", "{{sekundär}}"),
                  push(new ObAstNode(ObAstNode.NodeType.secondaryContent)),
                  OneOrMore(FirstOf(
                      ScriptureText(),
@@ -507,7 +507,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                      Omission(),
                      Comment()
                  )),
-                 "{{Sekundär ende}}",
+                 FirstOf("{{Sekundär ende}}", "{{sekundär ende}}"),
                  peek(1).appendChild(pop())
                  );
     }
