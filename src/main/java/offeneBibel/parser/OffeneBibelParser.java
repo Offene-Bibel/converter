@@ -46,7 +46,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule ChapterNotes() {
+    public Rule ChapterNotes() {
         return Sequence(
                 "==Einführende Bemerkungen==",
                 push(new ObAstNode(NodeType.chapterNotes)),
@@ -56,7 +56,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule FreeWikiMarkup() {
+    public Rule FreeWikiMarkup() {
         return OneOrMore(FirstOf(
                 BibleTextQuote(),
                 NoteQuote(),
@@ -76,7 +76,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     |    "{{" chaptertagtype '|Vers ' NUMBER '-' NUMBER "}}"
     ;
      */
-    Rule ChapterTag() {
+    public Rule ChapterTag() {
         Var<ObChapterTag> chapterTag = new Var<ObChapterTag>(new ObChapterTag());
         return FirstOf(
             Sequence("{{", ChapterTagType(chapterTag), "}}", ((ObChapterNode)peek()).addChapterTag(chapterTag.get())),
@@ -89,7 +89,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule VerseRange(Var<ObChapterTag> chapterTag) {
+    public Rule VerseRange(Var<ObChapterTag> chapterTag) {
         Var<Integer> startVerse = new Var<Integer>();
         Var<Integer> stopVerse = new Var<Integer>();
         return FirstOf(
@@ -105,7 +105,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule ChapterTagType(Var<ObChapterTag> chapterTag) {
+    public Rule ChapterTagType(Var<ObChapterTag> chapterTag) {
         return FirstOf(
             Sequence("Lesefassung in Arbeit", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassunginArbeit)),
             Sequence("Studienfassung in Arbeit", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassunginArbeit)),
@@ -121,7 +121,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     //(poemstart ws*)? (vers ws*)* '{{Bemerkungen}}';
-    Rule Fassung(ObFassungNode.FassungType fassung, StringVar breaker) {
+    public Rule Fassung(ObFassungNode.FassungType fassung, StringVar breaker) {
         return Sequence(
                 ZeroOrMore(Whitespace()),
                 push(new ObFassungNode(fassung)),
@@ -144,7 +144,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule BibleText() {
+    public Rule BibleText() {
         return OneOrMore(
             FirstOf(
                 ScriptureText(),
@@ -166,7 +166,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     // "{{" ('S'|'L') '|' NUMBER  "}}";
-    Rule Verse() {
+    public Rule Verse() {
         Var<Integer> verseFromNumber = new Var<Integer>();
         Var<Integer> verseToNumber = new Var<Integer>();
         return Sequence(
@@ -204,7 +204,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
 
-    Rule Heading() {
+    public Rule Heading() {
         return Sequence(
                 ACTION( ((ObFassungNode)(peek())).getFassung() == ObFassungNode.FassungType.lesefassung ),
                 "((",
@@ -220,7 +220,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * completely match a quote when parsing chapters separately. Thus we only optionally match the closing tag for now.
      * @return
      */
-    Rule Quote() {
+    public Rule Quote() {
         return Sequence(
             /** {@link InnerQuotes} could contain {@link Quotes} via the {@link BibleText}, to prevent this we check here. */
             ACTION(false == isRuleAncestor("InnerQuote")),
@@ -239,7 +239,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
 
-    Rule InnerQuote() {
+    public Rule InnerQuote() {
         return Sequence(
             '\u00BB', // »
             push(new ObAstNode(ObAstNode.NodeType.quote)),
@@ -260,7 +260,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * To prevent {@link Whitespace} eating up "\n" and thus preventing this rule to finish some special logic was
      * added there.
      */
-    Rule LineQuote() {
+    public Rule LineQuote() {
         return FirstOf(
             /**
              * {@link LineQuotes} can not be matched in a completely hierarchical fashion, because the "\n:" can occur inside
@@ -288,7 +288,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
 
-    Rule Emphasis() {
+    public Rule Emphasis() {
         return Sequence(
             "''",
             push(new ObAstNode(ObAstNode.NodeType.emphasis)),
@@ -309,7 +309,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule Italics() {
+    public Rule Italics() {
         return FirstOf(
             Sequence(
                 "<em>",
@@ -351,7 +351,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             
     }
     
-    Rule NoteEmphasis() {
+    public Rule NoteEmphasis() {
         return Sequence(
             breakRecursion(),
             "''",
@@ -362,7 +362,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule NoteItalics() {
+    public Rule NoteItalics() {
         return FirstOf(
             Sequence(
                 breakRecursion(),
@@ -383,7 +383,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule Insertion() {
+    public Rule Insertion() {
         return Sequence(
             '[',
             push(new ObAstNode(ObAstNode.NodeType.insertion)),
@@ -404,13 +404,13 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule Omission() {
+    public Rule Omission() {
         return Sequence(
             /*
              * For a little better error reporting we catch the most often encountered false positives, before
              * consuming input.
              */
-            TestNot(FirstOf("{{Studienfassung}}", "{{Lesefassung}}", "{{Bemerkungen}}", "{{Kapitelseite Fuß}}")),
+            TestNot(FirstOf("{{Studienfassung}}", "{{Lesefassung}}", "{{Bemerkungen}}", "{{Kapitelseite Fuß}}", "{{Sekundär}}", "{{Sekundär ende}}", "{{Hebr}}", "{{Hebr ende}}")),
             '{',
             push(new ObAstNode(ObAstNode.NodeType.omission)),
             OneOrMore(FirstOf(
@@ -434,7 +434,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule Alternative() {
+    public Rule Alternative() {
         return Sequence(
             '(',
             push(new ObAstNode(ObAstNode.NodeType.alternative)),
@@ -460,7 +460,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * Probably should be put in it's own node.
      * @return
      */
-    Rule AlternateReading() {
+    public Rule AlternateReading() {
         return Sequence(
             "(/",
             Optional(
@@ -489,12 +489,35 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
+    public Rule SecondaryContent() {
+        return Sequence(
+                 "{{Sekundär}}",
+                 push(new ObAstNode(ObAstNode.NodeType.secondaryContent)),
+                 OneOrMore(FirstOf(
+                     ScriptureText(),
+                     Quote(),
+                     Emphasis(),
+                     Italics(),
+                     Insertion(),
+                     Alternative(),
+                     AlternateReading(),
+                     Break(),
+                     ParallelPassage(),
+                     Note(),
+                     Omission(),
+                     Comment()
+                 )),
+                 "{{Sekundär ende}}",
+                 peek(1).appendChild(pop())
+                 );
+    }
+    
     /**
      * {@link PoemStart} and {@link PoemStop} elements can freely interleave with other elements. Thus
      * it is impossible to represent a poem block as a syntax element with children.
      * TODO: Check for two PoemStarts without an intermediate PoemStop.
      */
-    Rule PoemStart() {
+    public Rule PoemStart() {
         return Sequence(
                 "<poem>",
                 peek().appendChild(new ObAstNode(ObAstNode.NodeType.poemStart))
@@ -504,14 +527,14 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     /**
      * See {@link PoemStart}.
      */
-    Rule PoemStop() {
+    public Rule PoemStop() {
         return Sequence(
                 "</poem>",
                 peek().appendChild(new ObAstNode(ObAstNode.NodeType.poemStop))
                 );
     }
     
-    Rule Break() {
+    public Rule Break() {
         return Sequence(FirstOf("<br/>", "<br />", "<br>"),
                 peek().appendChild(new ObAstNode(ObAstNode.NodeType.textBreak))
                 );
@@ -522,7 +545,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * 
      * TODO: code to verify passage
      */
-    Rule ParallelPassage() {
+    public Rule ParallelPassage() {
         StringVar bookName = new StringVar();
         Var<Integer> chapter = new Var<Integer>();
         Var<Integer> startVerse = new Var<Integer>();
@@ -543,7 +566,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
 
-    Rule Note() {
+    public Rule Note() {
         StringVar tagText = new StringVar();
         return FirstOf(
             Sequence(
@@ -573,14 +596,14 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
 
-    Rule NoteText(StringVar breaker) {
+    public Rule NoteText(StringVar breaker) {
         return OneOrMore(FirstOf(
                 NoteMarkup(),
                 Sequence(TestNot(breaker.get()), NoteChar(), createOrAppendTextNode(match()))
         ));
     }
 
-    Rule NoteMarkup() {
+    public Rule NoteMarkup() {
         return FirstOf(
             Note(), // recursion is allowed
             BibleTextQuote(),
@@ -596,11 +619,11 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     @SuppressNode
-    Rule TagText() {
+    public Rule TagText() {
         return OneOrMore(TagChar());
     }
     
-    Rule NoteQuote() {
+    public Rule NoteQuote() {
         return Sequence(
             '\u201e', // „
             push(new ObAstNode(ObAstNode.NodeType.quote)),
@@ -610,7 +633,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
 
-    Rule BibleTextQuote() {
+    public Rule BibleTextQuote() {
         return Sequence(
             '\u00BB', // »
             push(new ObAstNode(ObAstNode.NodeType.quote)),
@@ -620,7 +643,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule Hebrew() {
+    public Rule Hebrew() {
         return Sequence(
             FirstOf("{{Hebr}}", "{{hebr}}"),
             ZeroOrMore(Whitespace()),
@@ -631,7 +654,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule WikiLink() {
+    public Rule WikiLink() {
         return FirstOf(
             Sequence(
                 breakRecursion(),
@@ -660,7 +683,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule NoteWikiLinkText() {
+    public Rule NoteWikiLinkText() {
         return OneOrMore(FirstOf(
                 BibleTextQuote(),
                 NoteQuote(),
@@ -674,7 +697,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         ));
     }
     
-    Rule NoteSuperScript() {
+    public Rule NoteSuperScript() {
         return Sequence(
             breakRecursion(),
             "<sup>",
@@ -685,7 +708,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
-    Rule Comment() {
+    public Rule Comment() {
         return Sequence(
             "<!--",
             OneOrMore(
@@ -697,7 +720,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     @SuppressNode
-    Rule HebrewText() {
+    public Rule HebrewText() {
         return Sequence(
                 OneOrMore(FirstOf(
                     CharRange('\u0590', '\u05ff'), // hebrew alphabet
@@ -709,12 +732,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     @SuppressNode
-    Rule ScriptureText() {
+    public Rule ScriptureText() {
         return Sequence(OneOrMore(TextChar()), peek().appendChild(new ObTextNode(match()))); // this might cause a problem because OneOrMore() fights with ScriptureText() for the chars
     }
 
     @SuppressNode
-    Rule TextChar() {
+    public Rule TextChar() {
         return FirstOf(
             LetterChar(),
             PunctuationChar()
@@ -722,7 +745,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     @SuppressNode
-    Rule LetterChar() {
+    public Rule LetterChar() {
         return FirstOf(
                 // C0 Controls and Basic Latin, http://unicode.org/charts/PDF/U0000.pdf
                     CharRange('\u0041', '\u005a'), // A-Z
@@ -743,7 +766,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     @SuppressNode
-    Rule PunctuationChar() {
+    public Rule PunctuationChar() {
         return FirstOf(
                 // C0 Controls and Basic Latin, http://unicode.org/charts/PDF/U0000.pdf
                     '=', // TODO: DELETE THIS
@@ -767,7 +790,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     @SuppressNode
-    Rule NoteChar() {
+    public Rule NoteChar() {
         return Sequence(
                    /*
                     * This rule generally consumes anything. In all calling cases it is guarded, not to consume
@@ -816,7 +839,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     @SuppressNode
-    Rule TagChar() {
+    public Rule TagChar() {
         return FirstOf(
             LetterChar(),
             '_',
@@ -827,7 +850,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     @SuppressNode
-    Rule Number() {
+    public Rule Number() {
         return Sequence(
             CharRange('1', '9'),
             ZeroOrMore(CharRange('0', '9'))
@@ -835,7 +858,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     @SuppressNode
-    Rule Whitespace() {
+    public Rule Whitespace() {
         return FirstOf(
                 ' ',
                 /**
