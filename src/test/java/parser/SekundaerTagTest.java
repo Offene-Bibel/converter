@@ -1,11 +1,11 @@
-package test.java;
+package parser;
 
 import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
-import main.java.offeneBibel.parser.ObAstNode;
-import main.java.offeneBibel.parser.ObAstNode.NodeType;
-import main.java.offeneBibel.parser.ObTextNode;
-import main.java.offeneBibel.parser.OffeneBibelParser;
+import offeneBibel.parser.ObAstNode;
+import offeneBibel.parser.ObAstNode.NodeType;
+import offeneBibel.parser.ObTextNode;
+import offeneBibel.parser.OffeneBibelParser;
 
 import org.parboiled.Parboiled;
 import org.parboiled.parserunners.BasicParseRunner;
