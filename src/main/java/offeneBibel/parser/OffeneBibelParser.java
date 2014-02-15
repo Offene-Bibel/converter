@@ -160,7 +160,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 PoemStop(),
                 Break(),
                 ParallelPassage(),
-                Comment()
+                Comment(),
+                SecondaryContent()
             )
         );
     }
@@ -302,7 +303,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     Break(),
                     ParallelPassage(),
                     Note(),
-                    Comment()
+                    Comment(),
+                    SecondaryContent()
                 )),
             "''",
             peek(1).appendChild(pop())
@@ -324,7 +326,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                         Break(),
                         ParallelPassage(),
                         Note(),
-                        Comment()
+                        Comment(),
+                        SecondaryContent()
                     )),
                 "</em>",
                 peek(1).appendChild(pop())
@@ -342,7 +345,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                         Break(),
                         ParallelPassage(),
                         Note(),
-                        Comment()
+                        Comment(),
+                        SecondaryContent()
                     )),
                 "</i>",
                 peek(1).appendChild(pop())
@@ -397,7 +401,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     Break(),
                     ParallelPassage(),
                     Note(),
-                    Comment()
+                    Comment(),
+                    SecondaryContent()
                 )),
             ']',
             peek(1).appendChild(pop())
@@ -425,7 +430,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     ParallelPassage(),
                     Note(),
                     Omission(),
-                    Comment()
+                    Comment(),
+                    SecondaryContent()
                 )),
             '}',
             // Prevent "{{blabla}}", an omission that contains only one other omission.
@@ -446,7 +452,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 AlternateReading(),
                 Omission(),
                 Note(),
-                Comment()
+                Comment(),
+                SecondaryContent()
             )),
             ')',
             //prevent "((blabla))", an alternative that contains only one other alternative
