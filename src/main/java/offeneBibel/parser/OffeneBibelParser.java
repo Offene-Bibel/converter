@@ -729,7 +729,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 push(new ObWikiLinkNode(match())),
                 Optional(
                     '|',
-                    OneOrMore(Sequence(TestNot("]]"), NoteChar(), createOrAppendTextNode(match())))
+                    NoteText(new StringVar("]]"))
                 ),
                 "]]",
                 peek(1).appendChild(pop())
