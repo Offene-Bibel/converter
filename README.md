@@ -24,7 +24,7 @@ To build the project:
 - run `build.sh`
 
 The results reside in the *install/* folder.
-To run the converter `install/bin/export.sh --help`.
+To run the converter `install/bin/exporter.sh --help`.
 
 The converter will download the translation from the Offene Bibel and create two *.osis* files in the *install/results/* folder.
 The exporter caches all files it downloads to *install/tmp/pageCache/*. They won't be redownloaded. To redownload a file, just delete it in the cache.
