@@ -60,7 +60,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return OneOrMore(FirstOf(
                 BibleTextQuote(),
                 NoteQuote(),
-                NoteEmphasis(),
+                NoteFat(),
                 NoteItalics(),
                 Hebrew(),
                 WikiLink(),
@@ -150,7 +150,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 ScriptureText(),
                 LineQuote(),
                 Quote(),
-                Emphasis(),
+                Fat(),
                 Italics(),
                 Insertion(),
                 Omission(),
@@ -289,37 +289,77 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
 
-    public Rule Emphasis() {
-        return Sequence(
-            "''",
-            push(new ObAstNode(ObAstNode.NodeType.emphasis)),
-            OneOrMore(FirstOf(
-                    ScriptureText(),
-                    Quote(),
-                    Italics(),
-                    Insertion(),
-                    Alternative(),
-                    AlternateReading(),
-                    Break(),
-                    ParallelPassage(),
-                    Note(),
-                    Comment(),
-                    SecondaryContent()
-                )),
-            "''",
-            peek(1).appendChild(pop())
+    public Rule Fat() {
+        return FirstOf(
+            Sequence(
+                "'''",
+                push(new ObAstNode(ObAstNode.NodeType.fat)),
+                OneOrMore(FirstOf(
+                        ScriptureText(),
+                        Quote(),
+                        Italics(),
+                        Insertion(),
+                        Alternative(),
+                        AlternateReading(),
+                        Break(),
+                        ParallelPassage(),
+                        Note(),
+                        Comment(),
+                        SecondaryContent()
+                    )),
+                "'''",
+                peek(1).appendChild(pop())
+            ),
+            Sequence(
+                "<b>",
+                push(new ObAstNode(ObAstNode.NodeType.fat)),
+                OneOrMore(FirstOf(
+                        ScriptureText(),
+                        Quote(),
+                        Italics(),
+                        Insertion(),
+                        Alternative(),
+                        AlternateReading(),
+                        Break(),
+                        ParallelPassage(),
+                        Note(),
+                        Comment(),
+                        SecondaryContent()
+                    )),
+                "</b>",
+                peek(1).appendChild(pop())
+            )
         );
     }
     
     public Rule Italics() {
         return FirstOf(
             Sequence(
+                "''",
+                push(new ObAstNode(ObAstNode.NodeType.italics)),
+                OneOrMore(FirstOf(
+                        ScriptureText(),
+                        Quote(),
+                        Fat(),
+                        Insertion(),
+                        Alternative(),
+                        AlternateReading(),
+                        Break(),
+                        ParallelPassage(),
+                        Note(),
+                        Comment(),
+                        SecondaryContent()
+                    )),
+                "''",
+                peek(1).appendChild(pop())
+            ),
+            Sequence(
                 "<em>",
                 push(new ObAstNode(ObAstNode.NodeType.italics)),
                 OneOrMore(FirstOf(
                         ScriptureText(),
                         Quote(),
-                        Emphasis(),
+                        Fat(),
                         Insertion(),
                         Alternative(),
                         AlternateReading(),
@@ -338,7 +378,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 OneOrMore(FirstOf(
                         ScriptureText(),
                         Quote(),
-                        Emphasis(),
+                        Fat(),
                         Insertion(),
                         Alternative(),
                         AlternateReading(),
@@ -351,23 +391,40 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 "</i>",
                 peek(1).appendChild(pop())
             )
-            );
-            
+        );
     }
     
-    public Rule NoteEmphasis() {
-        return Sequence(
-            breakRecursion(),
-            "''",
-            push(new ObAstNode(ObAstNode.NodeType.emphasis)),
-            NoteText(new StringVar("''")),
-            "''",
-            peek(1).appendChild(pop())
+    public Rule NoteFat() {
+        return FirstOf(
+            Sequence(
+                breakRecursion(),
+                "'''",
+                push(new ObAstNode(ObAstNode.NodeType.fat)),
+                NoteText(new StringVar("'''")),
+                "'''",
+                peek(1).appendChild(pop())
+            ),
+            Sequence(
+                breakRecursion(),
+                "<b>",
+                push(new ObAstNode(ObAstNode.NodeType.fat)),
+                OneOrMore(Sequence(TestNot("</b>"), NoteChar(), createOrAppendTextNode(match()))),
+                "</b>",
+                peek(1).appendChild(pop())
+            )
         );
     }
     
     public Rule NoteItalics() {
         return FirstOf(
+            Sequence(
+                breakRecursion(),
+                "''",
+                push(new ObAstNode(ObAstNode.NodeType.italics)),
+                NoteText(new StringVar("''")),
+                "''",
+                peek(1).appendChild(pop())
+            ),
             Sequence(
                 breakRecursion(),
                 "<em>",
@@ -394,7 +451,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             OneOrMore(FirstOf(
                     ScriptureText(),
                     Quote(),
-                    Emphasis(),
+                    Fat(),
                     Italics(),
                     Alternative(),
                     AlternateReading(),
@@ -421,7 +478,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             OneOrMore(FirstOf(
                     ScriptureText(),
                     Quote(),
-                    Emphasis(),
+                    Fat(),
                     Italics(),
                     Insertion(),
                     Alternative(),
@@ -503,7 +560,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                  OneOrMore(FirstOf(
                      ScriptureText(),
                      Quote(),
-                     Emphasis(),
+                     Fat(),
                      Italics(),
                      Insertion(),
                      Alternative(),
@@ -615,7 +672,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             Note(), // recursion is allowed
             BibleTextQuote(),
             NoteQuote(),
-            NoteEmphasis(),
+            NoteFat(),
             NoteItalics(),
             Hebrew(),
             WikiLink(),
@@ -694,7 +751,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return OneOrMore(FirstOf(
                 BibleTextQuote(),
                 NoteQuote(),
-                NoteEmphasis(),
+                NoteFat(),
                 NoteItalics(),
                 Hebrew(),
                 NoteSuperScript(),
@@ -827,6 +884,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                    TestNot("<br/>"), TestNot("<br />"),TestNot("<br>"),
                    //TestNot("\n:"), // Linequotes in comments not yet implemented
                    TestNot("''"),
+                   TestNot("'''"),
                    TestNot("[["),
                    ANY
                );

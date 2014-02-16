@@ -7,7 +7,7 @@ public class ObAstNode extends ObTreeNode<ObAstNode> { // implements IVisitorHos
         chapter,
         verse,
         text,
-        emphasis,
+        fat,
         italics,
         insertion,
         omission,
