@@ -710,9 +710,11 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     public Rule Hebrew() {
         return Sequence(
             FirstOf("{{Hebr}}", "{{hebr}}"),
-            ZeroOrMore(Whitespace()),
             push(new ObAstNode(NodeType.hebrew)),
-            HebrewText(),
+            FirstOf(
+                Sequence('\u202b',HebrewText(),'\u202c'), // optional directional markers
+                HebrewText()
+            ),
             FirstOf("{{Hebr ende}}", "{{hebr ende}}"),
             peek(1).appendChild(pop())
         );
