@@ -242,7 +242,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     public Rule InnerQuote() {
         return Sequence(
-            '\u00BB', // »
+            '\u201A', // ‚
             push(new ObAstNode(ObAstNode.NodeType.quote)),
             OneOrMore(FirstOf(
                 BibleText(),
@@ -250,7 +250,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 Note(),
                 Comment()
             )),
-            '\u00AB', // «
+            '\u2018', // ‘
             peek(1).appendChild(pop())
         );
     }
