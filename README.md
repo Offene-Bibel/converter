@@ -5,10 +5,12 @@ Building
 --------
 To build the project:
 
-- install a Java 7
+- install a Java 7 (or larger)
     - automatically
 
-            sudo apt-get install openjdk-7-jdk
+            # ubuntu
+            apt-get install openjdk-7-jdk
+            # redhat
             yum install java-1.7.0-openjdk
 
     - manually
@@ -17,7 +19,9 @@ To build the project:
 - install maven
     - automatically
 
+            # ubuntu
             sudo apt-get install maven2
+            # redhat
             yum install maven2
 
     - manually from <http://maven.apache.org/download.html>
