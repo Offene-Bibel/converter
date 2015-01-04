@@ -147,6 +147,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     public Rule BibleText() {
         return OneOrMore(
             FirstOf(
+                UnsupportedMarkup(),
                 ScriptureText(),
                 LineQuote(),
                 Quote(),
@@ -211,6 +212,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 "((",
                 push(new ObAstNode(ObAstNode.NodeType.heading)),
                 ScriptureText(),
+                Optional(Note()),
                 "))",
                 peek(1).appendChild(pop())
         );
@@ -246,6 +248,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             push(new ObAstNode(ObAstNode.NodeType.quote)),
             OneOrMore(FirstOf(
                 BibleText(),
+                InnerQuote(),
                 Verse(),
                 Note(),
                 Comment()
@@ -281,6 +284,9 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                         BibleText(),
                         Verse(),
                         Note(),
+                        Sequence("“", createOrAppendTextNode("“")),
+                        Sequence("‘", createOrAppendTextNode("‘")),
+                        InnerQuote(),
                         Comment()
                 )),
                 '\n',
@@ -394,6 +400,43 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
+    // Parses/skips stuff that exists in the wiki but is not supported by the parser
+    public Rule UnsupportedMarkup() {
+        return FirstOf(
+            // verse subsplitting with roman and greek letters
+            Sequence(
+                "<span style=\"color:gray\"><sup><i>",
+                ZeroOrMore(AnyOf("0123456789")),
+                OneOrMore(AnyOf("abcdefghijklmnopqrstuvwxyz")),
+                ZeroOrMore(AnyOf("αβγδεζηθικλμνξοπρςστυφχψω")),
+                "</i></sup></span>"
+            ),
+            // ((blabla))
+            Sequence(
+                    "((",createOrAppendTextNode(match()),
+                    ScriptureText(),
+                    "))",createOrAppendTextNode(match())
+                ),
+            // superscript slash (Lesefassung Mk. 7,15)
+            Sequence("<sup>/</sup>", createOrAppendTextNode("/")),
+            // non-breaking spaces
+            Sequence("&#160;", createOrAppendTextNode(" ")),
+            // nowiki tags
+            Sequence(
+                "<nowiki>",
+                ZeroOrMore(FirstOf(CharRange(' ', ';'),CharRange('?','~'))),
+                createOrAppendTextNode(match()),
+                "</nowiki>"
+            ),
+            // underscores (Psalm 90)
+            Sequence("_", createOrAppendTextNode("_")),
+            // Asterisk (Markus 15)
+            Sequence("*", createOrAppendTextNode("*")),
+            // empty footnotes (Genesis 10, 1Chronik 1, Johannes 15, Jakobus 1)
+            "<ref></ref>"
+        );
+    }
+
     public Rule NoteFat() {
         return FirstOf(
             Sequence(
@@ -503,7 +546,9 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             push(new ObAstNode(ObAstNode.NodeType.alternative)),
             OneOrMore(FirstOf(
                 ScriptureText(),
+                Sequence("<s>", createOrAppendTextNode(match()), ScriptureText(), "</s>", createOrAppendTextNode(match())),
                 Quote(),
+                InnerQuote(),
                 Insertion(),
                 Alternative(),
                 AlternateReading(),
@@ -569,6 +614,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                      ParallelPassage(),
                      Note(),
                      Omission(),
+                     Sequence("“", createOrAppendTextNode("“")),
                      Comment()
                  )),
                  FirstOf("{{Sekundär ende}}", "{{sekundär ende}}"),
@@ -671,6 +717,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return FirstOf(
             Note(), // recursion is allowed
             BibleTextQuote(),
+            UnsupportedMarkup(),
             NoteQuote(),
             NoteFat(),
             NoteItalics(),
@@ -710,11 +757,24 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     public Rule Hebrew() {
         return Sequence(
             FirstOf("{{Hebr}}", "{{hebr}}"),
+            FirstOf(Sequence(
+                    "[http://",
+                    OneOrMore(NoneOf(" ]")),
+                    push(new ObWikiLinkNode(match())),
+                    ' ',
+                    push(new ObAstNode(NodeType.hebrew)),
+                    FirstOf(
+                        Sequence('\u202b',HebrewText(),'\u202c'), // optional directional markers
+                        HebrewText()
+                    ),
+                    "]",
+                    peek(1).appendChild(pop())
+            ), Sequence(
             push(new ObAstNode(NodeType.hebrew)),
             FirstOf(
                 Sequence('\u202b',HebrewText(),'\u202c'), // optional directional markers
                 HebrewText()
-            ),
+            ))),
             FirstOf("{{Hebr ende}}", "{{hebr ende}}"),
             peek(1).appendChild(pop())
         );
@@ -888,6 +948,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                    TestNot("''"),
                    TestNot("'''"),
                    TestNot("[["),
+                   TestNot("<nowiki>"),
                    ANY
                );
             /*FirstOf(
@@ -911,6 +972,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             LetterChar(),
             '_',
             '-',
+            '.',
             ' ',
             CharRange('0', '9')
         );
