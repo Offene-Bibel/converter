@@ -84,23 +84,24 @@ public class Misc {
         }
     }
 
-    public static File getDirOfProgram()
-    {
-        try {
-            CodeSource codeSource = Misc.class.getProtectionDomain().getCodeSource();
-            File jarFile = new File(codeSource.getLocation().toURI().getPath());
-            return jarFile.getParentFile();
+    private static File dirOfProgram = null;
 
-
-            /*
-            String path = Misc.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-            String decodedPath = URLDecoder.decode(path, "UTF-8");
-            return new File(decodedPath);
-             */
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+    public static File getDirOfProgram() {
+        if (dirOfProgram == null) {
+            try {
+                CodeSource codeSource = Misc.class.getProtectionDomain().getCodeSource();
+                if (!codeSource.getLocation().getFile().endsWith(".jar")) {
+                    dirOfProgram = new File(new File(codeSource.getLocation().toURI()), "../../install/lib");
+                } else {
+                    File jarFile = new File(codeSource.getLocation().toURI().getPath());
+                    dirOfProgram = jarFile.getParentFile();
+                }
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
         }
+        return dirOfProgram;
     }
 
     public static String getResourceDir()
