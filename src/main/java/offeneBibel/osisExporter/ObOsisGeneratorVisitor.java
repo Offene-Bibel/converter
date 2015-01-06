@@ -2,6 +2,7 @@ package offeneBibel.osisExporter;
 
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.ObFassungNode;
+import offeneBibel.parser.ObFassungNode.FassungType;
 import offeneBibel.parser.ObNoteNode;
 import offeneBibel.parser.ObParallelPassageNode;
 import offeneBibel.parser.ObTextNode;
@@ -24,6 +25,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
     private String m_leseFassung = null;
     private StringBuilder m_currentFassung = new StringBuilder();
     private boolean m_currentFassungContainsVerses = false;
+    private String m_currentVerseStatus = "";
 
     private final String m_verseTagStart;
     private String m_verseTag = null;
@@ -60,12 +62,15 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
     private NoteIndexCounter m_noteIndexCounter;
 
+    private boolean m_inlineVersStatus;
+
     /**
      * @param chapter The chapter number. Used in verse tags.
      * @param book The OSIS book abbreviation. Used in verse tags.
      * @param requiredTranslationStatus The minimum translation status verses need to meet to be included.
+     * @param inlineVerseStatus Whether to include inline verse status in footnotes.
      */
-    public ObOsisGeneratorVisitor(int chapter, String book, ObVerseStatus requiredTranslationStatus)
+    public ObOsisGeneratorVisitor(int chapter, String book, ObVerseStatus requiredTranslationStatus, boolean inlineVerseStatus)
     {
         m_chapter = chapter;
         m_book = book;
@@ -73,6 +78,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         m_lTagStart = m_book + "." + m_chapter + "_l_tag_";
         m_noteIndexCounter = new NoteIndexCounter();
         m_requiredTranslationStatus = requiredTranslationStatus;
+        m_inlineVersStatus = inlineVerseStatus;
     }
 
     @Override
@@ -84,6 +90,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             m_currentFassungContainsVerses = false;
             m_lTag = null;
             m_lTagCounter = 1;
+            m_currentVerseStatus = "";
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.quote) {
@@ -174,6 +181,23 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                 m_skipVerse = false;
                 m_verseTag = m_verseTagStart + verse.getNumber();
                 m_currentFassung.append("<verse osisID=\"" + m_verseTag + "\" sID=\"" + m_verseTag + "\"/>");
+                if (m_inlineVersStatus) {
+                    ObVerseStatus status = verse.getStatus();
+                    ObVerseStatus leseStatus = verse.getStatus(FassungType.lesefassung);
+                    ObVerseStatus studienStatus = verse.getStatus(FassungType.studienfassung);
+                    String verseStatus;
+                    if (leseStatus == studienStatus || status == studienStatus) {
+                        // all statuses the same or this is actually the
+                        // Studienfassung
+                        verseStatus = studienStatus.toHumanReadableString();
+                    } else {
+                        verseStatus = "Studienfassung: " + studienStatus.toHumanReadableString() + "; Lesefassung: " + leseStatus.toHumanReadableString();
+                    }
+                    if (!m_currentVerseStatus.equals(verseStatus)) {
+                        m_currentVerseStatus = verseStatus;
+                        m_currentFassung.append("<note type=\"x-footnote\" n=\"Status\">" + verseStatus + "</note> ");
+                    }
+                }
                 if(m_poemMode && m_lineStarted == false){
                     m_currentFassung.append(getLTagStart());
                     m_lineStarted = true;

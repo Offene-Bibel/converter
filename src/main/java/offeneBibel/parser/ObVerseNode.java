@@ -35,9 +35,13 @@ public class ObVerseNode extends ObAstNode {
     }
 
     public ObVerseStatus getStatus() {
-        ObChapterNode chapterNode = getChapterNode();
         ObFassungNode fassungNode = getFassungNode();
         FassungType fassung = fassungNode.getFassung();
+        return getStatus(fassung);
+    }
+
+    public ObVerseStatus getStatus(FassungType fassung) {
+        ObChapterNode chapterNode = getChapterNode();
 
         ObVerseStatus status = ObVerseStatus.none;
         // whether the last set status was a generic status or one with a range, specific ones have precedence
