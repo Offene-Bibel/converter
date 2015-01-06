@@ -1,10 +1,15 @@
 package offeneBibel.osisExporter;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -17,6 +22,7 @@ import offeneBibel.parser.ObVerseStatus;
 import offeneBibel.parser.OffeneBibelParser;
 
 import org.parboiled.Parboiled;
+import org.parboiled.common.Base64;
 import org.parboiled.errors.ErrorUtils;
 import org.parboiled.parserunners.BasicParseRunner;
 import org.parboiled.parserunners.ParseRunner;
@@ -111,6 +117,19 @@ public class Exporter
 
         public boolean generateAst(OffeneBibelParser parser, BasicParseRunner<ObAstNode> parseRunner) throws Throwable {
             if(wikiText != null) {
+                File cacheFile = null;
+                if (m_commandLineArguments.m_cacheAST) {
+                    MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+                    sha1.update(wikiText.getBytes("UTF-8"));
+                    cacheFile = new File(Misc.getPageCacheDir() + ".." + File.separator + "asts" + File.separator + Base64.custom().encodeToString(sha1.digest(), false) + ".ast");
+                    if (cacheFile.exists()) {
+                        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
+                            node = (ObAstNode) ois.readObject();
+                        }
+                        return true;
+                    }
+                }
+
                 ParsingResult<ObAstNode> result = parseRunner.run(wikiText);
 
                 if(result.matched == false) {
@@ -145,6 +164,12 @@ public class Exporter
                 else {
                     node = result.resultValue;
                     ObAstFixuper.fixupAstTree(node);
+                    if (cacheFile != null) {
+                        cacheFile.getParentFile().mkdirs();
+                        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
+                            oos.writeObject(node);
+                        }
+                    }
                 }
             }
             return true;

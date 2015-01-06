@@ -1,5 +1,6 @@
 package offeneBibel.parser;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
 import offeneBibel.visitorPattern.IVisitor;
@@ -16,7 +17,7 @@ import offeneBibel.visitorPattern.IVisitorHost;
  *
  * @param <SELF>
  */
-public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements IVisitorHost<SELF>{
+public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements Serializable, IVisitorHost<SELF>{
     protected LinkedList<SELF> m_children;
     protected SELF m_parent;
 
