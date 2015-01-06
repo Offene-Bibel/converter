@@ -20,7 +20,7 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
     private int m_leseFassungStatus = 1;
     private String m_studienFassung = null;
     private String m_leseFassung = null;
-    private String m_currentFassung = "";
+    private StringBuilder m_currentFassung = new StringBuilder();
     private boolean m_currentFassungContainsVerses = false;
 
     private int m_quoteCounter = 0;
@@ -52,7 +52,7 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
     {
         if(node.getNodeType() == ObAstNode.NodeType.fassung) {
             m_noteIndexCounter.reset();
-            m_currentFassung = "";
+            m_currentFassung = new StringBuilder();
             m_currentFassungContainsVerses = false;
         }
 
@@ -61,43 +61,43 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
             if(m_quoteCounter>0)
             {
                 m_quoteCounter++;
-                m_currentFassung += "»";
+                m_currentFassung.append("»");
             }
             else
             {
                 QuoteSearcher quoteSearcher = new QuoteSearcher();
                 node.host(quoteSearcher, false);
                 if(quoteSearcher.foundQuote == false)
-                    m_currentFassung += "„";
+                    m_currentFassung.append("„");
                 else {
                     m_quoteCounter++;
-                    m_currentFassung += "„";
+                    m_currentFassung.append("„");
                 }
             }
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
             if(m_skipVerse) return;
-            m_currentFassung += "<span class=\"alternative\">(";
+            m_currentFassung.append("<span class=\"alternative\">(");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
             if(m_skipVerse) return;
-            m_currentFassung += "<span class=\"insertion-start\">[</span><span class=\"insertion\">";
+            m_currentFassung.append("<span class=\"insertion-start\">[</span><span class=\"insertion\">");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.omission) {
             if(m_skipVerse) return;
-            m_currentFassung += "<span class=\"omission\">{";
+            m_currentFassung.append("<span class=\"omission\">{");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.heading) {
-            m_currentFassung += "<h3>";
+            m_currentFassung.append("<h3>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.note) {
             if(m_skipVerse) return;
-            m_currentFassung += "<a href=\"#\" data-toggle=\"tooltip\" data-placement=\"auto bottom\" title=\"";
+            m_currentFassung.append("<a href=\"#\" data-toggle=\"tooltip\" data-placement=\"auto bottom\" title=\"");
         }
     }
 
@@ -115,7 +115,7 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
 
             textString = textString.replaceAll("&", "&amp;");
 
-            m_currentFassung += textString;
+            m_currentFassung.append(textString);
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.verse) {
@@ -123,7 +123,7 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
             if(verse.getStatus().ordinal() >= m_requiredTranslationStatus.ordinal()) {
                 m_currentFassungContainsVerses = true;
                 m_skipVerse = false;
-                m_currentFassung += "<span class=\"verse_num\">" + verse.getNumber() + "</span>";
+                m_currentFassung.append("<span class=\"verse_num\">" + verse.getNumber() + "</span>");
             }
             else {
                 // skip this verse
@@ -134,9 +134,9 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
         else if(node.getNodeType() == ObAstNode.NodeType.parallelPassage) {
             if(m_skipVerse) return;
             ObParallelPassageNode passage = (ObParallelPassageNode)node;
-            m_currentFassung += "<a href=\"" + passage.getBook() + "_" + passage.getChapter() + "?verse=" + passage.getStartVerse() +
+            m_currentFassung.append("<a href=\"" + passage.getBook() + "_" + passage.getChapter() + "?verse=" + passage.getStartVerse() +
                                             "\" data-toggle=\"tooltip\" data-placement=\"auto bottom\" title=\"" +
-                                            passage.getBook() + " " + passage.getChapter() + ", " + passage.getStartVerse() + "\">℘</a>";
+                                            passage.getBook() + " " + passage.getChapter() + ", " + passage.getStartVerse() + "\">℘</a>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.poemStart) {
@@ -177,10 +177,10 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
             }
 
             if(fassung.getFassung() == ObFassungNode.FassungType.lesefassung) {
-                m_leseFassung = m_currentFassung;
+                m_leseFassung = m_currentFassung == null ? null : m_currentFassung.toString();
             }
             else {
-                m_studienFassung = m_currentFassung;
+                m_studienFassung = m_currentFassung == null ? null : m_currentFassung.toString();
             }
         }
 
@@ -189,34 +189,34 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
             if(m_quoteCounter>0)
                 m_quoteCounter--;
             if(m_quoteCounter>0)
-                m_currentFassung += "«";
+                m_currentFassung.append("«");
             else
-                m_currentFassung += "“";
+                m_currentFassung.append("“");
 
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
             if(m_skipVerse) return;
-            m_currentFassung += ")</span>";
+            m_currentFassung.append(")</span>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
             if(m_skipVerse) return;
-            m_currentFassung += "</span><span class=\"insertion-end\">]</span>";
+            m_currentFassung.append("</span><span class=\"insertion-end\">]</span>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.omission) {
             if(m_skipVerse) return;
-            m_currentFassung += "}</span>";
+            m_currentFassung.append("}</span>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.heading) {
-            m_currentFassung += "</h3>";
+            m_currentFassung.append("</h3>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.note) {
             if(m_skipVerse) return;
-            m_currentFassung += "\">〈" + m_noteIndexCounter.getNextNoteString() + "〉</a>";
+            m_currentFassung.append("\">〈" + m_noteIndexCounter.getNextNoteString() + "〉</a>");
         }
     }
 

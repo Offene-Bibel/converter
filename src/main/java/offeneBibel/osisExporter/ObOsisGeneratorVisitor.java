@@ -22,7 +22,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
     private String m_studienFassung = null;
     private String m_leseFassung = null;
-    private String m_currentFassung = "";
+    private StringBuilder m_currentFassung = new StringBuilder();
     private boolean m_currentFassungContainsVerses = false;
 
     private final String m_verseTagStart;
@@ -80,7 +80,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
     {
         if(node.getNodeType() == ObAstNode.NodeType.fassung) {
             m_noteIndexCounter.reset();
-            m_currentFassung = "";
+            m_currentFassung = new StringBuilder("");
             m_currentFassungContainsVerses = false;
             m_lTag = null;
             m_lTagCounter = 1;
@@ -91,48 +91,48 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             if(m_quoteCounter>0)
             {
                 m_quoteCounter++;
-                m_currentFassung += "»<q level=\" + m_quoteCounter + \" marker=\"\">";
+                m_currentFassung.append("»<q level=\" + m_quoteCounter + \" marker=\"\">");
             }
             else
             {
                 QuoteSearcher quoteSearcher = new QuoteSearcher();
                 node.host(quoteSearcher, false);
                 if(quoteSearcher.foundQuote == false)
-                    m_currentFassung += "„<q marker=\"\">";
+                    m_currentFassung.append("„<q marker=\"\">");
                 else {
                     m_quoteCounter++;
-                    m_currentFassung += "„<q level=\" + m_quoteCounter + \" marker=\"\">";
+                    m_currentFassung.append("„<q level=\" + m_quoteCounter + \" marker=\"\">");
                 }
             }
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
             if(m_skipVerse) return;
-            m_currentFassung += "(";
+            m_currentFassung.append("(");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
             if(m_skipVerse) return;
-            m_currentFassung += "[";
+            m_currentFassung.append("[");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.omission) {
             if(m_skipVerse) return;
-            m_currentFassung += "{";
+            m_currentFassung.append("{");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.heading) {
-            m_currentFassung += "<title>";
+            m_currentFassung.append("<title>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.hebrew) {
             if(m_skipVerse) return;
-            m_currentFassung += "<foreign xml:lang=\"he\">";
+            m_currentFassung.append("<foreign xml:lang=\"he\">");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.note) {
             if(m_skipVerse) return;
-            m_currentFassung += "<note type=\"x-footnote\" n=\"" + m_noteIndexCounter.getNextNoteString() + "\">";
+            m_currentFassung.append("<note type=\"x-footnote\" n=\"" + m_noteIndexCounter.getNextNoteString() + "\">");
         }
     }
 
@@ -162,7 +162,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             textString = textString.replaceAll(">", "&gt;");
             textString = textString.replaceAll("<", "&lt;");
 
-            m_currentFassung += textString;
+            m_currentFassung.append(textString);
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.verse) {
@@ -173,9 +173,9 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                 m_currentFassungContainsVerses = true;
                 m_skipVerse = false;
                 m_verseTag = m_verseTagStart + verse.getNumber();
-                m_currentFassung += "<verse osisID=\"" + m_verseTag + "\" sID=\"" + m_verseTag + "\"/>";
+                m_currentFassung.append("<verse osisID=\"" + m_verseTag + "\" sID=\"" + m_verseTag + "\"/>");
                 if(m_poemMode && m_lineStarted == false){
-                    m_currentFassung += getLTagStart();
+                    m_currentFassung.append(getLTagStart());
                     m_lineStarted = true;
                 }
             }
@@ -190,20 +190,20 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             ObParallelPassageNode passage = (ObParallelPassageNode)node;
 
             if(m_multiParallelPassage == false) {
-                m_currentFassung += "<note type=\"crossReference\" osisID=\"" + m_verseTag + "!crossReference\" osisRef=\"" + m_verseTag + "\">";
+                m_currentFassung.append("<note type=\"crossReference\" osisID=\"" + m_verseTag + "!crossReference\" osisRef=\"" + m_verseTag + "\">");
             }
 
-            m_currentFassung += "<reference osisRef=\"" +
+            m_currentFassung.append("<reference osisRef=\"" +
                                             passage.getBook() + "." + passage.getChapter() + "." + passage.getStartVerse() + "\">" +
-                                            passage.getBook() + " " + passage.getChapter() + ", " + passage.getStartVerse() + "</reference>";
+                                            passage.getBook() + " " + passage.getChapter() + ", " + passage.getStartVerse() + "</reference>");
 
             if(passage.getNextSibling() != null && passage.getNextSibling().getNodeType() == ObAstNode.NodeType.parallelPassage) {
                 m_multiParallelPassage = true;
-                m_currentFassung += "|";
+                m_currentFassung.append("|");
             }
             else {
                 m_multiParallelPassage = false;
-                m_currentFassung += "</note>";
+                m_currentFassung.append("</note>");
             }
         }
 
@@ -214,7 +214,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         else if(node.getNodeType() == ObAstNode.NodeType.poemStop) {
             m_poemMode = false;
             if(m_lineStarted) {
-                m_currentFassung += getLTagStop();
+                m_currentFassung.append(getLTagStop());
                 m_lineStarted = false;
             }
         }
@@ -234,10 +234,10 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             }
 
             if(fassung.getFassung() == ObFassungNode.FassungType.lesefassung) {
-                m_leseFassung = m_currentFassung;
+                m_leseFassung = m_currentFassung == null ? null : m_currentFassung.toString();
             }
             else {
-                m_studienFassung = m_currentFassung;
+                m_studienFassung = m_currentFassung == null ? null : m_currentFassung.toString();
             }
         }
 
@@ -246,39 +246,39 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             if(m_quoteCounter>0)
                 m_quoteCounter--;
             if(m_quoteCounter>0)
-                m_currentFassung += "</q>«";
+                m_currentFassung.append("</q>«");
             else
-                m_currentFassung += "</q>“";
+                m_currentFassung.append("</q>“");
 
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
             if(m_skipVerse) return;
-            m_currentFassung += ")";
+            m_currentFassung.append(")");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
             if(m_skipVerse) return;
-            m_currentFassung += "]";
+            m_currentFassung.append("]");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.omission) {
             if(m_skipVerse) return;
-            m_currentFassung += "}";
+            m_currentFassung.append("}");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.heading) {
-            m_currentFassung += "</title>";
+            m_currentFassung.append("</title>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.hebrew) {
             if(m_skipVerse) return;
-            m_currentFassung += "</foreign>";
+            m_currentFassung.append("</foreign>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.note) {
             if(m_skipVerse) return;
-            m_currentFassung += "</note>";
+            m_currentFassung.append("</note>");
         }
     }
 
@@ -293,10 +293,10 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
     private void addStopTag() {
         if(m_verseTag != null) {
             if(m_poemMode && m_lineStarted) {
-                m_currentFassung += getLTagStop();
+                m_currentFassung.append(getLTagStop());
                 m_lineStarted = false;
             }
-            m_currentFassung += "<verse eID=\"" + m_verseTag + "\"/>\n";
+            m_currentFassung.append("<verse eID=\"" + m_verseTag + "\"/>\n");
             m_verseTag = null;
         }
     }

@@ -243,7 +243,7 @@ public class Exporter
         OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
         BasicParseRunner<ObAstNode> parseRunner = new BasicParseRunner<ObAstNode>(parser.Page());
         boolean reloadOnError = m_commandLineArguments.m_reloadOnError;
-        String errorList = "";
+        StringBuilder errorList = new StringBuilder();
         for(Book book : books) {
             for(Chapter chapter : book.chapters) {
                 boolean success = chapter.generateAst(parser, parseRunner);
@@ -257,13 +257,13 @@ public class Exporter
                         return false;
                     }
                     else {
-                        errorList += book.wikiName + " " + chapter.number + "\n";
+                        errorList.append(book.wikiName + " " + chapter.number + "\n");
                     }
                 }
             }
         }
-        if(false == errorList.isEmpty()) {
-            System.out.println("The following chapters contained errors and were skipped:\n"+errorList);
+        if(errorList.length() != 0) {
+            System.out.println("The following chapters contained errors and were skipped:\n"+errorList.toString());
         }
         return true;
     }
@@ -272,20 +272,20 @@ public class Exporter
     {
         Date date = new Date();
         DateFormat format = DateFormat.getDateInstance();
-        String statusFileString = "# Generated on " + format.format(date) + ".\n";
-        statusFileString += "# Export level: " + m_commandLineArguments.m_exportLevel + "\n";
+        StringBuilder statusFileString = new StringBuilder("# Generated on " + format.format(date) + ".\n");
+        statusFileString.append("# Export level: " + m_commandLineArguments.m_exportLevel + "\n");
         for (Book book : books) {
             for (Chapter chapter : book.chapters) {
                 if (chapter.node != null) {
                     ObWebViewerVisitor visitor = new ObWebViewerVisitor(requiredTranslationStatus);
                     chapter.node.host(visitor);
-                    statusFileString += writeWebScriptureToFile(visitor.getStudienFassung(), book, chapter, visitor.getStudienFassungQuality(), "sf");
-                    statusFileString += writeWebScriptureToFile(visitor.getLeseFassung(), book, chapter, visitor.getLeseFassungQuality(), "lf");
+                    statusFileString.append(writeWebScriptureToFile(visitor.getStudienFassung(), book, chapter, visitor.getStudienFassungQuality(), "sf"));
+                    statusFileString.append(writeWebScriptureToFile(visitor.getLeseFassung(), book, chapter, visitor.getLeseFassungQuality(), "lf"));
                 }
             }
         }
         FileWriter statusFileWriter = new FileWriter(Misc.getWebResultsDir() + "generated.index");
-        statusFileWriter.write(statusFileString);
+        statusFileWriter.write(statusFileString.toString());
         statusFileWriter.close();
     }
 
@@ -339,25 +339,25 @@ public class Exporter
 
     private String generateOsisBookFragment(List<Book> books, boolean leseFassung)
     {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for(Book book : books) {
             boolean chapterExists = false;
-            String bookString = "<div type=\"book\" osisID=\"" + book.osisName + "\" canonical=\"true\">\n<title type=\"main\">" + book.wikiName + "</title>\n";
+            StringBuilder bookString = new StringBuilder("<div type=\"book\" osisID=\"" + book.osisName + "\" canonical=\"true\">\n<title type=\"main\">" + book.wikiName + "</title>\n");
             for(Chapter chapter : book.chapters) {
                 String osisChapterText = leseFassung ? chapter.lesefassungText : chapter.studienfassungText;
                 if(osisChapterText != null) { // prevent empty chapters
                     chapterExists = true;
-                    bookString += "<chapter osisID=\"" + book.osisName + "." + chapter.number + "\">\n<title type=\"chapter\">Kapitel " + chapter.number + "</title>\n";
-                    bookString += osisChapterText;
-                    bookString += "</chapter>\n";
+                    bookString.append("<chapter osisID=\"" + book.osisName + "." + chapter.number + "\">\n<title type=\"chapter\">Kapitel " + chapter.number + "</title>\n");
+                    bookString.append(osisChapterText);
+                    bookString.append("</chapter>\n");
                 }
             }
-            bookString += "</div>\n";
+            bookString.append("</div>\n");
 
             if(chapterExists == true) // prevent empty books
-                result += bookString;
+                result.append(bookString);
         }
-        return result;
+        return result.toString();
     }
 
     private String generateCompleteOsisString(String osisText, boolean leseFassung) throws IOException
