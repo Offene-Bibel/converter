@@ -23,6 +23,12 @@ class CommandLineArguments {
     @Parameter(names = { "--skipGenerateWeb" }, description = "Skip generation of the website backing files.")
     boolean m_skipGenerateWeb = true;
 
+    @Parameter(names = { "-a", "--cacheAST" }, description = "Cache the already parsed ASTs. Delete them manually if you edited the parser code.")
+    boolean m_cacheAST = false;
+
+    @Parameter(names = { "-i", "--inlineVersStatus" }, description = "Show verse status as a footnote at the beginning of the verse.")
+    boolean m_inlineVerseStatus = false;
+
     @Parameter(names = {"-h", "--help"})
     boolean m_help;
 }

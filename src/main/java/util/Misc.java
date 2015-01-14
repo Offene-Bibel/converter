@@ -38,12 +38,12 @@ public class Misc {
 
     public static String readBufferToString(BufferedReader reader) throws IOException
     {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         char[] cbuf = new char[512];
         int readCount;
         while((readCount = reader.read(cbuf)) >= 0)
-            result += String.valueOf(cbuf, 0, readCount);
-        return result;
+            result.append(cbuf, 0, readCount);
+        return result.toString();
     }
 
     public static void writeFile(String text, String filename) throws IOException

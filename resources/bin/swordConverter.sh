@@ -1,9 +1,10 @@
 #!/bin/bash
+set -e
 cd ../tmp
 
 resources="../resources"
 results="../results"
-rm -r offbileModule &> /dev/null
+rm -r offbileModule &> /dev/null || true
 
 mkdir offbileModule
 mkdir offbileModule/modules
@@ -20,7 +21,7 @@ cp ${resources}/offbile.conf offbileModule/mods.d
 
 cp -r offbileModule/* ~/.sword
 
-rm -r offbistModule &> /dev/null
+rm -r offbistModule &> /dev/null || true
 
 mkdir offbistModule
 mkdir offbistModule/modules
@@ -37,5 +38,5 @@ cp ${resources}/offbist.conf offbistModule/mods.d
 
 cp -r offbistModule/* ~/.sword
 
-rm OffBiModule.zip
+rm OffBiModule.zip || true
 zip -r OffBiModule.zip offbileModule offbistModule

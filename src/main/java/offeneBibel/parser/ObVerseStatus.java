@@ -33,4 +33,26 @@ public enum ObVerseStatus {
             return 0; //never reached
         }
     }
+
+    public String toHumanReadableString() {
+        switch(this) {
+        case none:
+            return "Unbekannt";
+        case versUnvollstaendigUebersetzt:
+            return "Unvollständig übersetzt";
+        case inArbeit:
+            return "in Arbeit";
+        case zuPruefen:
+            return "zu prüfen";
+        case liegtInRohuebersetzungVor:
+            return "liegt in Rohübersetzung vor";
+        case ueberpruefungAngefordert:
+            return "Überprüfung angefordert";
+        case erfuelltDieMeistenKriterien:
+            return "erfüllt die meisten Kriterien";
+        case erfuelltDieKriterien:
+            return "erfüllt die Kriterien";
+        default: throw new IllegalStateException("No translation for "+this);
+        }
+    }
 }

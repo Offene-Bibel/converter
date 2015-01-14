@@ -1,10 +1,11 @@
 package offeneBibel.parser;
 
+import java.io.Serializable;
 import java.util.Vector;
 
 import offeneBibel.parser.ObFassungNode.FassungType;
 
-public class ObChapterTag {
+public class ObChapterTag implements Serializable {
     public enum ChapterTagName {
         lesefassunginArbeit,
         studienfassunginArbeit,
@@ -114,7 +115,7 @@ public class ObChapterTag {
         }
     }
 
-    private class VerseRange {
+    private class VerseRange implements Serializable {
         private int m_startVerse;
         private int m_stopVerse;
 
