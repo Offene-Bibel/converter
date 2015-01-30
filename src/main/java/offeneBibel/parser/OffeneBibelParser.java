@@ -148,6 +148,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return OneOrMore(
             FirstOf(
                 UnsupportedMarkup(),
+                SubVerseNumber(),
+                NowikiTag(),
                 ScriptureText(),
                 LineQuote(),
                 Quote(),
@@ -242,13 +244,30 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
 
+    public Rule NowikiTag() {
+        return Sequence(
+            "<nowiki>",
+            ZeroOrMore(FirstOf(CharRange(' ', ';'),CharRange('?','~'))),
+            createOrAppendTextNode(match()),
+            "</nowiki>");
+    }
+
+    public Rule SubVerseNumber() {
+        return Sequence(
+            "<span style=\"color:gray\"><sup><i>",
+            ZeroOrMore(AnyOf("0123456789")),
+            OneOrMore(AnyOf("abcdefghijklmnopqrstuvwxyz")),
+            ZeroOrMore(AnyOf("αβγδεζηθικλμνξοπρςστυφχψω")),
+            "</i></sup></span>");
+    }
+
     public Rule InnerQuote() {
         return Sequence(
             '\u201A', // ‚
             push(new ObAstNode(ObAstNode.NodeType.quote)),
             OneOrMore(FirstOf(
                 BibleText(),
-                InnerQuote(),
+                InnerQuote(), // @@ Exod 3,14; Mark 7, 11
                 Verse(),
                 Note(),
                 Comment()
@@ -284,9 +303,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                         BibleText(),
                         Verse(),
                         Note(),
-                        Sequence("“", createOrAppendTextNode("“")),
-                        Sequence("‘", createOrAppendTextNode("‘")),
-                        InnerQuote(),
+                        Sequence("“", createOrAppendTextNode("“")), // LineQuotes that are inside <poem> @@ Psalm 2, Psalm 4, Psalm 30
+                        InnerQuote(), // LineQuotes that are inside <poem> @@ Psalm 30
                         Comment()
                 )),
                 '\n',
@@ -403,31 +421,16 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     // Parses/skips stuff that exists in the wiki but is not supported by the parser
     public Rule UnsupportedMarkup() {
         return FirstOf(
-            // verse subsplitting with roman and greek letters
-            Sequence(
-                "<span style=\"color:gray\"><sup><i>",
-                ZeroOrMore(AnyOf("0123456789")),
-                OneOrMore(AnyOf("abcdefghijklmnopqrstuvwxyz")),
-                ZeroOrMore(AnyOf("αβγδεζηθικλμνξοπρςστυφχψω")),
-                "</i></sup></span>"
-            ),
-            // ((blabla))
+            // ((blabla)) @ Mark 14,47, Mark 15,22, Mark 15,42
             Sequence(
                     "((",createOrAppendTextNode(match()),
                     ScriptureText(),
                     "))",createOrAppendTextNode(match())
                 ),
-            // superscript slash (Lesefassung Mk. 7,15)
+            // superscript slash (@@ Lesefassung Mk. 7,15, Mk 7,25)
             Sequence("<sup>/</sup>", createOrAppendTextNode("/")),
-            // non-breaking spaces
+            // non-breaking spaces @@ Gen 10
             Sequence("&#160;", createOrAppendTextNode(" ")),
-            // nowiki tags
-            Sequence(
-                "<nowiki>",
-                ZeroOrMore(FirstOf(CharRange(' ', ';'),CharRange('?','~'))),
-                createOrAppendTextNode(match()),
-                "</nowiki>"
-            ),
             // underscores (Psalm 90)
             Sequence("_", createOrAppendTextNode("_")),
             // Asterisk (Markus 15)
@@ -546,9 +549,9 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             push(new ObAstNode(ObAstNode.NodeType.alternative)),
             OneOrMore(FirstOf(
                 ScriptureText(),
-                Sequence("<s>", createOrAppendTextNode(match()), ScriptureText(), "</s>", createOrAppendTextNode(match())),
+                Sequence("<s>", createOrAppendTextNode(match()), ScriptureText(), "</s>", createOrAppendTextNode(match())), // @@ Mark 8, 22
                 Quote(),
-                InnerQuote(),
+                InnerQuote(), // @@ John 9, 35
                 Insertion(),
                 Alternative(),
                 AlternateReading(),
@@ -614,7 +617,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                      ParallelPassage(),
                      Note(),
                      Omission(),
-                     Sequence("“", createOrAppendTextNode("“")),
+                     Sequence("“", createOrAppendTextNode("“")), // @@ Mark 16,18 (closed from Mark 16,15)
                      Comment()
                  )),
                  FirstOf("{{Sekundär ende}}", "{{sekundär ende}}"),
@@ -717,7 +720,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return FirstOf(
             Note(), // recursion is allowed
             BibleTextQuote(),
-            UnsupportedMarkup(),
             NoteQuote(),
             NoteFat(),
             NoteItalics(),
@@ -725,6 +727,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             WikiLink(),
             NoteSuperScript(),
             Break(),
+            NowikiTag(),
             Comment()
         );
     }
