@@ -294,6 +294,9 @@ public class Exporter
         StringBuilder errorList = new StringBuilder();
         for(Book book : books) {
             for(Chapter chapter : book.chapters) {
+                if (m_commandLineArguments.m_laxParsing) {
+                    parser.setLaxChapter(book.wikiName + " " + chapter.number);
+                }
                 boolean success = chapter.generateAst(parser, parseRunner);
                 if(false == success && reloadOnError) {
                     reloadOnError = false;

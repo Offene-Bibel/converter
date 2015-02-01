@@ -1,5 +1,7 @@
 package offeneBibel.parser;
 
+import java.util.Arrays;
+
 import offeneBibel.parser.ObAstNode.NodeType;
 
 import org.parboiled.Action;
@@ -20,6 +22,12 @@ import org.parboiled.support.Var;
  */
 @BuildParseTree
 public class OffeneBibelParser extends BaseParser<ObAstNode> {
+
+    protected String laxChapter;
+
+    public void setLaxChapter(String laxChapter) {
+        this.laxChapter = laxChapter;
+    }
 
     //page    :    ws* (chaptertag ws*)* lesefassung ws* studienfassung ws* '{{Kapitelseite Fuß}}' ws* EOF;
     public Rule Page() {
@@ -267,7 +275,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             push(new ObAstNode(ObAstNode.NodeType.quote)),
             OneOrMore(FirstOf(
                 BibleText(),
-                InnerQuote(), // @@ Exod 3,14; Mark 7, 11
+                LaxOnly(InnerQuote(), "Exodus 3", "Markus 7"), // @@ Exod 3,14; Mark 7, 11
                 Verse(),
                 Note(),
                 Comment()
@@ -303,14 +311,21 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                         BibleText(),
                         Verse(),
                         Note(),
-                        Sequence("“", createOrAppendTextNode("“")), // LineQuotes that are inside <poem> @@ Psalm 2, Psalm 4, Psalm 30
-                        InnerQuote(), // LineQuotes that are inside <poem> @@ Psalm 30
+                        LaxOnly(Sequence("“", createOrAppendTextNode("“")), "Psalm 2", "Psalm 4", "Psalm 30"), // LineQuotes that are inside <poem> @@ Psalm 2, Psalm 4, Psalm 30
+                        LaxOnly(InnerQuote(), "Psalm 30"), // LineQuotes that are inside <poem> @@ Psalm 30
                         Comment()
                 )),
                 '\n',
                 peek(1).appendChild(pop())
             )
         );
+    }
+
+    public Rule LaxOnly(Rule rule, String... chapters) {
+        return Sequence(
+                ACTION(Arrays.asList(chapters).contains(laxChapter)),
+                rule
+            );
     }
 
     public Rule Fat() {
@@ -422,21 +437,21 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     public Rule UnsupportedMarkup() {
         return FirstOf(
             // ((blabla)) @ Mark 14,47, Mark 15,22, Mark 15,42
-            Sequence(
+            LaxOnly(Sequence(
                     "((",createOrAppendTextNode(match()),
                     ScriptureText(),
                     "))",createOrAppendTextNode(match())
-                ),
+                ), "Markus 14", "Markus 15"),
             // superscript slash (@@ Lesefassung Mk. 7,15, Mk 7,25)
-            Sequence("<sup>/</sup>", createOrAppendTextNode("/")),
+            LaxOnly(Sequence("<sup>/</sup>", createOrAppendTextNode("/")), "Markus 7"),
             // non-breaking spaces @@ Gen 10
-            Sequence("&#160;", createOrAppendTextNode(" ")),
+            LaxOnly(Sequence("&#160;", createOrAppendTextNode(" ")), "Genesis 10"),
             // underscores (Psalm 90)
-            Sequence("_", createOrAppendTextNode("_")),
+            LaxOnly(Sequence("_", createOrAppendTextNode("_")), "Psalm 90"),
             // Asterisk (Markus 15)
-            Sequence("*", createOrAppendTextNode("*")),
-            // empty footnotes (Genesis 10, 1Chronik 1, Johannes 15, Jakobus 1)
-            "<ref></ref>"
+            LaxOnly(Sequence("*", createOrAppendTextNode("*")), "Markus 15"),
+            // empty footnotes (Genesis 10, 1Chronik 1, Johannes 15, Jakobus 1, Matthäus 2)
+            LaxOnly(Sequence(new Object[]{"<ref></ref>"}), "Genesis 10", "1 Chronik 1", "Johannes 15", "Jakobus 1", "Matthäus 2")
         );
     }
 
@@ -549,9 +564,9 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             push(new ObAstNode(ObAstNode.NodeType.alternative)),
             OneOrMore(FirstOf(
                 ScriptureText(),
-                Sequence("<s>", createOrAppendTextNode(match()), ScriptureText(), "</s>", createOrAppendTextNode(match())), // @@ Mark 8, 22
+                LaxOnly(Sequence("<s>", createOrAppendTextNode(match()), ScriptureText(), "</s>", createOrAppendTextNode(match())), "Markus 8"), // @@ Mark 8, 22
                 Quote(),
-                InnerQuote(), // @@ John 9, 35
+                LaxOnly(InnerQuote(), "Johannes 9"), // @@ John 9, 35
                 Insertion(),
                 Alternative(),
                 AlternateReading(),
@@ -617,7 +632,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                      ParallelPassage(),
                      Note(),
                      Omission(),
-                     Sequence("“", createOrAppendTextNode("“")), // @@ Mark 16,18 (closed from Mark 16,15)
+                     LaxOnly(Sequence("“", createOrAppendTextNode("“")), "Markus 16"), // @@ Mark 16,18 (closed from Mark 16,15)
                      Comment()
                  )),
                  FirstOf("{{Sekundär ende}}", "{{sekundär ende}}"),

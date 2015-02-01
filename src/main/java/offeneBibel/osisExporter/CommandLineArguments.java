@@ -32,6 +32,9 @@ class CommandLineArguments {
     @Parameter(names = { "-i", "--inlineVersStatus" }, description = "Show verse status as a footnote at the beginning of the verse.")
     boolean m_inlineVerseStatus = false;
 
+    @Parameter(names= { "-l", "--lax"}, description = "Use lax rules for parsing (prefer getting an export file to finding errors)")
+    boolean m_laxParsing = false;
+
     @Parameter(names = {"-h", "--help"})
     boolean m_help;
 }
