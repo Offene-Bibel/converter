@@ -204,17 +204,26 @@ public class ZefaniaConverter {
     private static void parseChapter(String chapterName, Element osisChapter, Element chapter) {
         Element verse = null;
         flattenChildren(osisChapter);
+        boolean beforeVerse = true;
         for (Node node = osisChapter.getFirstChild(); node != null; node = node.getNextSibling()) {
             if (node instanceof Text) {
                 if (verse != null) {
                     verse.appendChild(verse.getOwnerDocument().importNode(node, true));
+                } else if (beforeVerse) {
+                    // TODO create prolog!
+                } else if (((Text) node).getTextContent().trim().length() > 0) {
+                    throw new IllegalStateException("Non-whitespace at chapter level: "+node);
                 }
             } else {
                 Element elem = (Element) node;
                 if (elem.getNodeName().equals("title")) {
                     // these are useless, as they only say "Kapitel ##" anyway.
                 } else if (elem.getNodeName().equals("l")) {
-                    // TODO skip for now
+                    if(verse != null && elem.getAttribute("sID").length() > 0) {
+                        Element br = verse.getOwnerDocument().createElement("BR");
+                        br.setAttribute("art", "x-nl");
+                        verse.appendChild(br);
+                    }
                 } else if (elem.getNodeName().equals("note")) {
                     if (elem.getAttribute("type").equals("crossReference")) {
                         // TODO cross references
@@ -224,8 +233,13 @@ public class ZefaniaConverter {
                         note.setAttribute("type", "x-studynote");
                         flattenChildren(elem);
                         note.appendChild(note.getOwnerDocument().createTextNode(getTextChildren(elem)));
+                    } else if (beforeVerse) {
+                        // TODO add to prolog!
+                    } else {
+                        throw new IllegalStateException("note tag at invalid location");
                     }
                 } else if (elem.getNodeName().equals("verse")) {
+                    beforeVerse = false;
                     String osisID = elem.getAttribute("osisID");
                     if (osisID.isEmpty())
                         osisID = null;
