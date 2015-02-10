@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -389,8 +390,8 @@ public class Exporter
     {
         String result = Misc.readFile(leseFassung ? m_leseFassungTemplate : m_studienFassungTemplate);
 
-        result = result.replace("{{revision}}", "TODO");
-        result = result.replace("{{year}}", "" + Calendar.getInstance().get(Calendar.YEAR));
+        String dateString = new SimpleDateFormat("yyyy.MM.dd'T'kk.mm.ss").format(Calendar.getInstance().getTime());
+        result = result.replaceAll("{{date}}", "" + dateString);
         result = result.replace("{{content}}", osisText);
         return result;
     }

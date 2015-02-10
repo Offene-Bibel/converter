@@ -6,11 +6,11 @@
     xsi:schemaLocation="http://www.bibletechnologies.net/2003/OSIS/namespace http://www.bibletechnologies.net/osisCore.2.1.1.xsd">
     <osisText osisIDWork="OffBiLe" osisRefWork="bible" xml:lang="de" canonical="true">
         <header>
-        	<revisionDesc>{{revision}}</revisionDesc>
+        	<revisionDesc><date>{{date}}</date><p>Export as of {{date}}.</p></revisionDesc>
             <work osisWork="OffBiLe">
                 <title>Offene Bibel - Lesefassung</title>
                 <type type="OSIS">Bible</type>
-                <identifier type="OSIS">Bible.de.ABS.OFFBILE.{{year}}</identifier>
+                <identifier type="OSIS">Bible.de.OFBI.OFFBILE</identifier>
                 <rights type="x-copyright"></rights>
                 <scope></scope>
                 <refSystem>Bible</refSystem>
