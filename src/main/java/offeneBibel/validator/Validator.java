@@ -16,6 +16,8 @@ import org.parboiled.support.ParsingResult;
 import util.Misc;
 
 import com.beust.jcommander.JCommander;
+import com.github.parboiled1.grappa.backport.EventBasedParseRunner;
+import com.github.parboiled1.grappa.backport.TracingParseRunnerListener;
 
 public class Validator {
     CommandLineArguments m_commandLineArguments;
@@ -62,7 +64,13 @@ public class Validator {
         OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
 
         ParseRunner<ObAstNode> parseRunner = null;
-        if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("tracing")) {
+        if(m_commandLineArguments.m_debugFile != null) {
+        	TracingParseRunnerListener<ObAstNode> listener
+        		= new TracingParseRunnerListener<>(m_commandLineArguments.m_debugFile);
+        	parseRunner = new EventBasedParseRunner<ObAstNode>(parser.Page());
+        	((EventBasedParseRunner<ObAstNode>)parseRunner).registerListener(listener);
+        }
+        else if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("tracing")) {
             parseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
         }
         else if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("recovering")) {

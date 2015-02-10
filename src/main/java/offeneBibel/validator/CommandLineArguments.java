@@ -9,6 +9,9 @@ class CommandLineArguments {
                                     "or \"recovering\"", validateWith=ValidateRunner.class)
     String m_parseRunner = "reporting";
 
+    @Parameter(names = { "-d", "--debugFile" }, description = "Where to save the debug file.")
+    String m_debugFile = null;
+
     @Parameter(names = { "-i", "--inputFile" }, description = "File to validate.")
     String m_inputFile = null;
 
