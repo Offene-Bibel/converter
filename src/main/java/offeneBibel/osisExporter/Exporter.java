@@ -390,7 +390,7 @@ public class Exporter
     {
         String result = Misc.readFile(leseFassung ? m_leseFassungTemplate : m_studienFassungTemplate);
 
-        String dateString = new SimpleDateFormat("yyyy.MM.dd'T'kk.mm.ss").format(Calendar.getInstance().getTime());
+        String dateString = new SimpleDateFormat("yyyy.MM.dd'T'HH.mm.ss").format(new Date());
         result = result.replace("{{date}}", "" + dateString);
         result = result.replace("{{content}}", osisText);
         return result;
