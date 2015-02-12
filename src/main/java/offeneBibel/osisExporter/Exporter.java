@@ -391,7 +391,7 @@ public class Exporter
         String result = Misc.readFile(leseFassung ? m_leseFassungTemplate : m_studienFassungTemplate);
 
         String dateString = new SimpleDateFormat("yyyy.MM.dd'T'kk.mm.ss").format(Calendar.getInstance().getTime());
-        result = result.replaceAll("{{date}}", "" + dateString);
+        result = result.replace("{{date}}", "" + dateString);
         result = result.replace("{{content}}", osisText);
         return result;
     }
