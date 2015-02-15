@@ -17,6 +17,9 @@ class CommandLineArguments {
     @Parameter(names = { "-c", "--continueOnError" }, description = "If an error occurs, skip that chapter and continue.")
     boolean m_continueOnError = false;
 
+    @Parameter(names = { "-p", "--tryPreviousVersions" }, description = "If an error occurs, try to load a previous version of that chapter and retry.")
+    boolean m_tryPreviousVersions = false;
+
     @Parameter(names = { "--skipGenerateOSIS" }, description = "Skip generation of OSIS documents.")
     boolean m_skipGenerateOsis = false;
 
