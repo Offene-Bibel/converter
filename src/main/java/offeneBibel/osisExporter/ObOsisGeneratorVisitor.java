@@ -331,7 +331,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         if(m_lTag == null) {
             m_lTag = m_lTagStart + m_lTagCounter;
         }
-        return "<l eID=\"" + m_lTag + "\"/>";
+        return "<lg><l eID=\"" + m_lTag + "\"/></lg>";
     }
 
     private String getLTagStart() {
@@ -339,7 +339,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             ++m_lTagCounter;
         }
         m_lTag = m_lTagStart + m_lTagCounter;
-        return "<l sID=\"" + m_lTag + "\"/>";
+        return "<lg><l sID=\"" + m_lTag + "\"/></lg>";
     }
 
     class QuoteSearcher implements IVisitor<ObAstNode>
