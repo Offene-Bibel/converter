@@ -7,14 +7,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
 import offeneBibel.parser.ObAstFixuper;
 import offeneBibel.parser.ObAstNode;
@@ -30,6 +36,10 @@ import org.parboiled.parserunners.RecoveringParseRunner;
 import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.parserunners.TracingParseRunner;
 import org.parboiled.support.ParsingResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import util.Misc;
 
@@ -42,6 +52,17 @@ public class Exporter
      */
     //static final String m_urlBase = "http://www.offene-bibel.de/wiki/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
     static final String m_urlBase = "http://www.offene-bibel.de/wiki/index.php5?action=raw&title=";
+
+    /**
+     * URL prefix to use for retrieving history of a page.
+     */
+    static final String m_historyURLBase = "http://www.offene-bibel.de/wiki/api.php5?action=query&prop=revisions&rvprop=ids|timestamp&rvlimit=100&format=xml&titles=";
+
+    /**
+     * Oldest date for a history page to be considered to be retrieved. Increase it when parsing succeeded to find errors faster.
+     */
+    static final String m_minHistoryDate = "2015-01-01";
+
     /**
      * A list of all bible books as they are named on the wiki.
      * It was created by combining the wiki page: Vorlage:Kapitelzahl and the OSIS 2.1.1 manual Appendix C.1
@@ -276,6 +297,35 @@ public class Exporter
                     reloadOnError = false;
                     chapter.retrieveWikiPage(true);
                     success = chapter.generateAst(parser, parseRunner);
+                }
+                if (false == success && m_commandLineArguments.m_tryPreviousVersions) {
+                    String wikiPage = chapter.book.urlName + "_" + chapter.number;
+                    List<Integer> ids = new ArrayList<Integer>();
+                    String revisions = Misc.retrieveUrl(m_historyURLBase + URLEncoder.encode(wikiPage, "UTF-8"));
+                    Document revisionsXML = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(revisions)));
+                    NodeList revisionNodes = (NodeList) XPathFactory.newInstance().newXPath().evaluate("/api/query/pages/page/revisions/rev", revisionsXML, XPathConstants.NODESET);
+                    for(int i=0; i < revisionNodes.getLength(); i++) {
+                        Element revision = (Element) revisionNodes.item(i);
+                        if (revision.getAttribute("timestamp").compareTo(m_minHistoryDate) < 0)
+                            break;
+                        ids.add(Integer.parseInt(revision.getAttribute("revid")));
+                    }
+                    ids.add(-1); // make sure there is an (invalid, therefore empty) revision at the end of the list
+                    String fileCacheString = Misc.getPageCacheDir() + wikiPage;
+                    for(int id : ids) {
+                        try {
+                            String result = Misc.retrieveUrl(m_urlBase + URLEncoder.encode(wikiPage, "UTF-8")+"&oldid="+id);
+                            Misc.writeFile(result, fileCacheString);
+                            System.out.println(wikiPage+"@"+id);
+                        } catch (IOException e) {
+                            Misc.writeFile("", fileCacheString);
+                            System.out.println(wikiPage+"@"+id+" failed");
+                        }
+                        chapter.retrieveWikiPage(false);
+                        success = chapter.generateAst(parser, parseRunner);
+                        if (success)
+                            break;
+                    }
                 }
                 if(false == success) {
                     if(stopOnError) {
