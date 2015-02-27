@@ -31,7 +31,6 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
     private String m_verseTag = null;
 
     private String m_lTagStart;
-    private String m_lTag = null;
     private int m_lTagCounter = 1;
 
     private int m_quoteCounter = 0;
@@ -88,7 +87,6 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             m_noteIndexCounter.reset();
             m_currentFassung = new StringBuilder("");
             m_currentFassungContainsVerses = false;
-            m_lTag = null;
             m_lTagCounter = 1;
             m_currentVerseStatus = "";
         }
@@ -328,17 +326,12 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
     }
 
     private String getLTagStop() {
-        if(m_lTag == null) {
-            m_lTag = m_lTagStart + m_lTagCounter;
-        }
-        return "<l eID=\"" + m_lTag + "\"/>";
+        return "<l eID=\"" + m_lTagStart + m_lTagCounter + "\"/>";
     }
 
     private String getLTagStart() {
-        if(m_lTag != null) {
-            ++m_lTagCounter;
-        }
-        m_lTag = m_lTagStart + m_lTagCounter;
+        String m_lTag = m_lTagStart + m_lTagCounter;
+        ++m_lTagCounter;
         return "<l sID=\"" + m_lTag + "\"/>";
     }
 
