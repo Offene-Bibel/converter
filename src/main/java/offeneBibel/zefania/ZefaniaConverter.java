@@ -111,25 +111,26 @@ public class ZefaniaConverter {
         DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         XPath xpath = javax.xml.xpath.XPathFactory.newInstance().newXPath();
         Document osisDoc = docBuilder.parse(new File(Misc.getResultsDir(), osisFile));
+        String date = xpath.evaluate("/osis/osisText/header/revisionDesc/date/text()", osisDoc).substring(0, 10).replace('.', '-');
         Document doc = docBuilder.newDocument();
         doc.setXmlStandalone(true);
         doc.appendChild(doc.createElement("XMLBIBLE"));
         Element root = doc.getDocumentElement();
-        root.setAttribute("version", "3.0.0.9.1");
+        root.setAttribute("version", date.replace('-','.').replace(".0","."));
         root.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "noNamespaceSchemaLocation", "zef2005.xsd");
         root.setAttribute("biblename", config.getProperty("Description"));
         root.setAttribute("type", "x-bible");
         root.setAttribute("status", "v");
-        root.setAttribute("revision", "0");
+        root.setAttribute("revision", date.replace("-",""));
         Element info = doc.createElement("INFORMATION");
         root.appendChild(info);
         appendTextChild(info, "title", config.getProperty("Description"));
         appendTextChild(info, "creator", "offene-bibel-converter");
         info.appendChild(doc.createElement("subject"));
-        appendTextChild(info, "description", config.getProperty("About"));
+        appendTextChild(info, "description", config.getProperty("About") + " [" + date + "]");
         info.appendChild(doc.createElement("publisher"));
         info.appendChild(doc.createElement("contributors"));
-        appendTextChild(info, "date", new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+        appendTextChild(info, "date", date);
         info.appendChild(doc.createElement("type"));
         appendTextChild(info, "format", "Zefania XML Bible Markup Language");
         appendTextChild(info, "identifier", identifier);
@@ -275,9 +276,9 @@ public class ZefaniaConverter {
     }
 
     private static void flattenChildren(Element parent) {
-        // flatten quotes / foreign
+        // flatten quotes / foreign / line groups
         for (Node node = parent.getFirstChild(); node != null; node = node.getNextSibling()) {
-            if (node.getNodeName().equals("q") || node.getNodeName().equals("foreign")) {
+            if (Arrays.asList("q", "foreign", "lg").contains(node.getNodeName())) {
                 while (node.getFirstChild() != null) {
                     Node child = node.getFirstChild();
                     node.removeChild(child);
