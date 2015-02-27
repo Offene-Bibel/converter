@@ -31,7 +31,9 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
     private String m_verseTag = null;
 
     private String m_lTagStart;
+    private String m_lgTagStart;
     private int m_lTagCounter = 1;
+    private int m_lgTagCounter = 1;
 
     private int m_quoteCounter = 0;
     private boolean m_multiParallelPassage = false;
@@ -75,6 +77,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         m_book = book;
         m_verseTagStart = m_book + "." + m_chapter + ".";
         m_lTagStart = m_book + "." + m_chapter + "_l_tag_";
+        m_lTagStart = m_book + "." + m_chapter + "_lg_tag_";
         m_noteIndexCounter = new NoteIndexCounter();
         m_requiredTranslationStatus = requiredTranslationStatus;
         m_inlineVersStatus = inlineVerseStatus;
@@ -233,6 +236,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
         else if(node.getNodeType() == ObAstNode.NodeType.poemStart) {
             m_poemMode = true;
+            m_currentFassung.append(getLgTagStart());
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.poemStop) {
@@ -241,6 +245,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                 m_currentFassung.append(getLTagStop());
                 m_lineStarted = false;
             }
+            m_currentFassung.append(getLgTagStop());
         }
     }
 
@@ -333,6 +338,16 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         String m_lTag = m_lTagStart + m_lTagCounter;
         ++m_lTagCounter;
         return "<l sID=\"" + m_lTag + "\"/>";
+    }
+    
+    private String getLgTagStop() {
+        return "<lg eID=\"" + m_lgTagStart + m_lgTagCounter + "\"/>";
+    }
+
+    private String getLgTagStart() {
+        String m_lgTag = m_lgTagStart + m_lgTagCounter;
+        ++m_lgTagCounter;
+        return "<lg sID=\"" + m_lgTag + "\"/>";
     }
 
     class QuoteSearcher implements IVisitor<ObAstNode>
