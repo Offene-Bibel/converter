@@ -284,9 +284,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                         BibleText(),
                         Verse(),
                         Note(),
-                        Sequence("“", createOrAppendTextNode("“")),
-                        Sequence("‘", createOrAppendTextNode("‘")),
-                        InnerQuote(),
                         Comment()
                 )),
                 '\n',
@@ -546,9 +543,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             push(new ObAstNode(ObAstNode.NodeType.alternative)),
             OneOrMore(FirstOf(
                 ScriptureText(),
-                Sequence("<s>", createOrAppendTextNode(match()), ScriptureText(), "</s>", createOrAppendTextNode(match())),
                 Quote(),
-                InnerQuote(),
                 Insertion(),
                 Alternative(),
                 AlternateReading(),
@@ -614,7 +609,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                      ParallelPassage(),
                      Note(),
                      Omission(),
-                     Sequence("“", createOrAppendTextNode("“")),
                      Comment()
                  )),
                  FirstOf("{{Sekundär ende}}", "{{sekundär ende}}"),
