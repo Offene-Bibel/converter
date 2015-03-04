@@ -244,6 +244,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     public Rule InnerQuote() {
         return Sequence(
+        	ACTION(isRuleAncestor("Quote")),
             '\u201A', // ‚
             push(new ObAstNode(ObAstNode.NodeType.quote)),
             OneOrMore(FirstOf(
@@ -278,6 +279,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
              * This is the actual {@link LineQuote} matching part.
              */
             Sequence(
+        		// Keep the boxing right. LineQuote -> Quote -> InnerQuote -> InnerQuote -> ...
+        		// Line quotes are not allowed in poems.
+        		ACTION(false == isRuleAncestor("Quote")),
+        		ACTION(false == isRuleAncestor("InnerQuote")),
                 "\n:",
                 push(new ObAstNode(ObAstNode.NodeType.quote)),
                 OneOrMore(FirstOf(
