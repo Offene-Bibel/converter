@@ -26,6 +26,7 @@ public class ObAstNode extends ObTreeNode<ObAstNode> { // implements IVisitorHos
         chapterNotes,
         alternateReading,
         secondaryContent,
+        secondVoice,
     }
     private NodeType m_nodeType;
 

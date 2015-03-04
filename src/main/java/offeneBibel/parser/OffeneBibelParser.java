@@ -159,6 +159,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 AlternateReading(),
                 PoemStart(),
                 PoemStop(),
+                SecondVoice(),
                 Break(),
                 ParallelPassage(),
                 Comment(),
@@ -643,6 +644,45 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 );
     }
     
+    /**
+     * SecondVoice is similar to line quotes in how it works. In addition
+     * it can interleave with other elements and is thus represented using
+     * separate start and stop tags. This is similar to how poem tags work.
+     * A Secondary voice starts on the first occurence of "\n_" and stops
+     * on the first ocurrence of "\n" without a following "_".
+     * Secondary voices are only allowed inside poem tags. It's not possible
+     * to determine whether we are in a poem though. Thus this is not checked.
+     */
+    public Rule SecondVoice() {
+        return FirstOf(
+            /**
+             * {@link SecondVoice} elements can freely interleave with other constructs (e.g. Quotes) and can thus not be represented
+             * as a single element with children. This is similar to poem tags.
+             * {@link SecondVoice} can not be matched in a completely hierarchical fashion, because the "\n" can occur inside
+             * other elements. Thus we need a way to eat up "\n:" inside elements nested in {@link LineQuote}s. This is done here.
+             */
+            Sequence(
+                isRuleAncestor("SecondVoice"),
+                "\n_"
+            ),
+            /**
+             * This is the actual {@link SecondVoice} matching part.
+             */
+            Sequence(
+                "\n_",
+                push(new ObAstNode(ObAstNode.NodeType.secondVoice)),
+                OneOrMore(FirstOf(
+                        BibleText(),
+                        Verse(),
+                        Note(),
+                        Comment()
+                )),
+                '\n',
+                peek(1).appendChild(pop())
+            )
+        );
+    }
+    
     public Rule Break() {
         return Sequence(FirstOf("<br/>", "<br />", "<br>"),
                 peek().appendChild(new ObAstNode(ObAstNode.NodeType.textBreak))
@@ -989,18 +1029,20 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     public Rule Whitespace() {
         return FirstOf(
                 ' ',
+                '\t',
+                '\r',
                 /**
-                 * {@link LineQuotes} start with a "\n:" and extend to the first occurence of "\n" without a ":" following.
+                 * {@link LineQuote}s start with a "\n:" and extend to the first occurence of "\n" without a ":" following.
                  * Thus we must not eat the "\n" if we are in a {@link LineQuote}, or if a colon follows. Otherwise
-                 * {@link LineQuotes} could neither start, nor end.  
+                 * {@link LineQuote}s could neither start, nor end. Same for {@link SecondVoice}.
                  */
                 Sequence(
                     ACTION(false == isRuleAncestor("LineQuote")),
                     TestNot("\n:"),
+                    ACTION(false == isRuleAncestor("SecondVoice")),
+                    TestNot("\n_"),
                     '\n'
-                ),
-                '\t',
-                '\r'
+                )
         );
     }
     
