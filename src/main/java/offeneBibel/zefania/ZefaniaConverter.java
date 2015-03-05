@@ -234,6 +234,7 @@ public class ZefaniaConverter {
                         note.setAttribute("type", "x-studynote");
                         flattenChildren(elem);
                         note.appendChild(note.getOwnerDocument().createTextNode(getTextChildren(elem)));
+                        normalizeWhitespace(note);
                     } else if (beforeVerse) {
                         // TODO add to prolog!
                     } else {
@@ -264,6 +265,7 @@ public class ZefaniaConverter {
                         } else if (!eID.equals(chapterName + "." + verse.getAttribute("vnumber"))) {
                             throw new IllegalStateException("Closing verse " + eID + " but open is " + verse.getAttribute("vnumber"));
                         }
+                        normalizeWhitespace(verse);
                         verse = null;
                     } else {
                         throw new IllegalStateException("Invalid combination of verse IDs:" + osisID + "/" + sID + "/" + eID);
@@ -271,6 +273,24 @@ public class ZefaniaConverter {
                 } else {
                     throw new IllegalStateException("invalid book level tag: " + elem.getNodeName());
                 }
+            }
+        }
+    }
+
+    private static void normalizeWhitespace(Element parent) {
+        for (Node node = parent.getFirstChild(); node != null; node = node.getNextSibling()) {
+            if (!(node instanceof Text))
+                continue;
+            String content = ((Text)node).getTextContent();
+            String newContent = content.replaceAll("[ \t\r\n]+", " ");
+            if (newContent.startsWith(" ") && node.getPreviousSibling() == null) {
+                newContent = newContent.substring(1);
+            }
+            if (newContent.endsWith(" ") && node.getNextSibling() == null) {
+                newContent = newContent.substring(0, newContent.length()-1);
+            }
+            if (!content.equals(newContent)) {
+                node.setTextContent(newContent);
             }
         }
     }
