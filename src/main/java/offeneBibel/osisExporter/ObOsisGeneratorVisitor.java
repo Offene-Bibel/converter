@@ -77,7 +77,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         m_book = book;
         m_verseTagStart = m_book + "." + m_chapter + ".";
         m_lTagStart = m_book + "." + m_chapter + "_l_tag_";
-        m_lTagStart = m_book + "." + m_chapter + "_lg_tag_";
+        m_lgTagStart = m_book + "." + m_chapter + "_lg_tag_";
         m_noteIndexCounter = new NoteIndexCounter();
         m_requiredTranslationStatus = requiredTranslationStatus;
         m_inlineVersStatus = inlineVerseStatus;
@@ -99,7 +99,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             if(m_quoteCounter>0)
             {
                 m_quoteCounter++;
-                m_currentFassung.append("»<q level=\" + m_quoteCounter + \" marker=\"\">");
+                m_currentFassung.append("»<q level=\"" + m_quoteCounter + "\" marker=\"\">");
             }
             else
             {
@@ -109,7 +109,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                     m_currentFassung.append("„<q marker=\"\">");
                 else {
                     m_quoteCounter++;
-                    m_currentFassung.append("„<q level=\" + m_quoteCounter + \" marker=\"\">");
+                    m_currentFassung.append("„<q level=\"" + m_quoteCounter + "\" marker=\"\">");
                 }
             }
         }
