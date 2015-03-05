@@ -276,9 +276,9 @@ public class ZefaniaConverter {
     }
 
     private static void flattenChildren(Element parent) {
-        // flatten quotes / foreign
+        // flatten quotes / foreign / line groups
         for (Node node = parent.getFirstChild(); node != null; node = node.getNextSibling()) {
-            if (node.getNodeName().equals("q") || node.getNodeName().equals("foreign")) {
+            if (Arrays.asList("q", "foreign", "lg").contains(node.getNodeName())) {
                 while (node.getFirstChild() != null) {
                     Node child = node.getFirstChild();
                     node.removeChild(child);
