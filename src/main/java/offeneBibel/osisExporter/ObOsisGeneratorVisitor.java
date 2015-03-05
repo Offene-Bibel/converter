@@ -184,6 +184,10 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                 m_skipVerse = false;
                 m_verseTag = m_verseTagStart + verse.getNumber();
                 m_currentFassung.append("<verse osisID=\"" + m_verseTag + "\" sID=\"" + m_verseTag + "\"/>");
+                if(m_poemMode && m_lineStarted == false){
+                    m_currentFassung.append(getLTagStart());
+                    m_lineStarted = true;
+                }
                 if (m_inlineVersStatus) {
                     ObVerseStatus status = verse.getStatus();
                     ObVerseStatus leseStatus = verse.getStatus(FassungType.lesefassung);
@@ -192,18 +196,14 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                     if (leseStatus == studienStatus || status == studienStatus) {
                         // all statuses the same or this is actually the
                         // Studienfassung
-                        verseStatus = studienStatus.toHumanReadableString();
+                        verseStatus = "[Status: "+studienStatus.toHumanReadableString()+"]";
                     } else {
-                        verseStatus = "Studienfassung: " + studienStatus.toHumanReadableString() + "; Lesefassung: " + leseStatus.toHumanReadableString();
+                        verseStatus = "[Studienfassung: " + studienStatus.toHumanReadableString() + "; Lesefassung: " + leseStatus.toHumanReadableString()+"]";
                     }
                     if (!m_currentVerseStatus.equals(verseStatus)) {
                         m_currentVerseStatus = verseStatus;
                         m_currentFassung.append("<note type=\"x-footnote\" n=\"Status\">" + verseStatus + "</note> ");
                     }
-                }
-                if(m_poemMode && m_lineStarted == false){
-                    m_currentFassung.append(getLTagStart());
-                    m_lineStarted = true;
                 }
             }
             else {
