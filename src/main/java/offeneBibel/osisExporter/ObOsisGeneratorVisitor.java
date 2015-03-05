@@ -77,7 +77,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         m_book = book;
         m_verseTagStart = m_book + "." + m_chapter + ".";
         m_lTagStart = m_book + "." + m_chapter + "_l_tag_";
-        m_lTagStart = m_book + "." + m_chapter + "_lg_tag_";
+        m_lgTagStart = m_book + "." + m_chapter + "_lg_tag_";
         m_noteIndexCounter = new NoteIndexCounter();
         m_requiredTranslationStatus = requiredTranslationStatus;
         m_inlineVersStatus = inlineVerseStatus;
