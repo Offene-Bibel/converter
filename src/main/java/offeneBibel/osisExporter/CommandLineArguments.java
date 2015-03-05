@@ -32,6 +32,9 @@ class CommandLineArguments {
     @Parameter(names = { "-i", "--inlineVersStatus" }, description = "Show verse status as a footnote at the beginning of the verse.")
     boolean m_inlineVerseStatus = false;
 
+    @Parameter(names = { "-l", "--lineGroupUnmilestoned" }, description = "Create line group and line tags without milestone; create milestones for quote tags instead to make document well-formed.")
+    boolean m_unmilestonedLineGroup = false;
+
     @Parameter(names = {"-h", "--help"})
     boolean m_help;
 }
