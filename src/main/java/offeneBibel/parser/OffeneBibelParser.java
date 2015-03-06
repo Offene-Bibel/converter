@@ -630,7 +630,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     public Rule PoemStart() {
         return Sequence(
                 "<poem>",
-                peek().appendChild(new ObAstNode(ObAstNode.NodeType.poemStart))
+                peek().appendChild(new ObAstNode(ObAstNode.NodeType.poemStart)),
+                createOrAppendTextNode("\n")
                 );
     }
     

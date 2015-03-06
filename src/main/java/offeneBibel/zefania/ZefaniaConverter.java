@@ -195,7 +195,7 @@ public class ZefaniaConverter {
         StringBuilder result = new StringBuilder();
         for (Node node = elem.getFirstChild(); node != null; node = node.getNextSibling()) {
             if (node instanceof Element) {
-                System.out.println(result);
+                throw new IllegalStateException("Unsupported tag inside footnote");
             }
             result.append(((Text) node).getTextContent());
         }
@@ -219,8 +219,8 @@ public class ZefaniaConverter {
                 Element elem = (Element) node;
                 if (elem.getNodeName().equals("title")) {
                     // these are useless, as they only say "Kapitel ##" anyway.
-                } else if (elem.getNodeName().equals("l")) {
-                    if(verse != null && elem.getAttribute("sID").length() > 0) {
+                } else if (elem.getNodeName().equals("br")) {
+                    if(verse != null) {
                         Element br = verse.getOwnerDocument().createElement("BR");
                         br.setAttribute("art", "x-nl");
                         verse.appendChild(br);
@@ -234,6 +234,7 @@ public class ZefaniaConverter {
                         note.setAttribute("type", "x-studynote");
                         flattenChildren(elem);
                         note.appendChild(note.getOwnerDocument().createTextNode(getTextChildren(elem)));
+                        normalizeWhitespace(note);
                     } else if (beforeVerse) {
                         // TODO add to prolog!
                     } else {
@@ -264,6 +265,7 @@ public class ZefaniaConverter {
                         } else if (!eID.equals(chapterName + "." + verse.getAttribute("vnumber"))) {
                             throw new IllegalStateException("Closing verse " + eID + " but open is " + verse.getAttribute("vnumber"));
                         }
+                        normalizeWhitespace(verse);
                         verse = null;
                     } else {
                         throw new IllegalStateException("Invalid combination of verse IDs:" + osisID + "/" + sID + "/" + eID);
@@ -275,10 +277,37 @@ public class ZefaniaConverter {
         }
     }
 
-    private static void flattenChildren(Element parent) {
-        // flatten quotes / foreign
+    private static void normalizeWhitespace(Element parent) {
         for (Node node = parent.getFirstChild(); node != null; node = node.getNextSibling()) {
-            if (node.getNodeName().equals("q") || node.getNodeName().equals("foreign")) {
+            if (!(node instanceof Text))
+                continue;
+            String content = ((Text)node).getTextContent();
+            String newContent = content.replaceAll("[ \t\r\n]+", " ");
+            if (newContent.startsWith(" ") && node.getPreviousSibling() == null) {
+                newContent = newContent.substring(1);
+            }
+            if (newContent.endsWith(" ") && node.getNextSibling() == null) {
+                newContent = newContent.substring(0, newContent.length()-1);
+            }
+            if (!content.equals(newContent)) {
+                node.setTextContent(newContent);
+            }
+        }
+    }
+
+    private static void flattenChildren(Element parent) {
+        // flatten quotes / foreign / line groups / lines; add <br> tags around lines
+        boolean brTagsInserted = false;
+        for (Node node = parent.getFirstChild(); node != null; node = node.getNextSibling()) {
+            if (node.getNodeName().equals("l")) {
+                brTagsInserted = true;
+                parent.insertBefore(parent.getOwnerDocument().createElement("br"), node);
+                if (node.getNextSibling() == null)
+                    parent.appendChild(parent.getOwnerDocument().createElement("br"));
+                else
+                    parent.insertBefore(parent.getOwnerDocument().createElement("br"), node.getNextSibling());
+            }
+            if (Arrays.asList("q", "foreign", "lg", "l").contains(node.getNodeName())) {
                 while (node.getFirstChild() != null) {
                     Node child = node.getFirstChild();
                     node.removeChild(child);
@@ -286,6 +315,15 @@ public class ZefaniaConverter {
                 }
                 parent.removeChild(node);
                 node = parent.getFirstChild();
+            }
+        }
+        if (brTagsInserted) {
+            for (Node node1 = parent.getFirstChild(); node1 != null; node1=node1.getNextSibling()) {
+                Node node2 = node1.getNextSibling();
+                while (node2 != null && node1.getNodeName().equals("br") && node2.getNodeName().equals("br")) {
+                    parent.removeChild(node2);
+                    node2 = node1.getNextSibling();
+                }
             }
         }
     }

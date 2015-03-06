@@ -386,7 +386,7 @@ public class Exporter
     public String[] generateOsisTexts(Chapter chapter, ObVerseStatus requiredTranslationStatus) throws Throwable {
         String[] texts = new String[] {null, null};
         if(chapter.node != null) {
-            ObOsisGeneratorVisitor visitor = new ObOsisGeneratorVisitor(chapter.number, chapter.book.osisName, requiredTranslationStatus, m_commandLineArguments.m_inlineVerseStatus);
+            ObOsisGeneratorVisitor visitor = new ObOsisGeneratorVisitor(chapter.number, chapter.book.osisName, requiredTranslationStatus, m_commandLineArguments.m_inlineVerseStatus, m_commandLineArguments.m_unmilestonedLineGroup);
             chapter.node.host(visitor);
             texts[0] = visitor.getStudienFassung();
             texts[1] = visitor.getLeseFassung();

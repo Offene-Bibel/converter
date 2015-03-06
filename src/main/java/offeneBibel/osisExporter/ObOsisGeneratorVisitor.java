@@ -32,8 +32,10 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
     private String m_lTagStart;
     private String m_lgTagStart;
+    private String m_qTagStart;
     private int m_lTagCounter = 1;
     private int m_lgTagCounter = 1;
+    private int m_qTagCounter = 1;
 
     private int m_quoteCounter = 0;
     private boolean m_multiParallelPassage = false;
@@ -65,22 +67,27 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
     private boolean m_inlineVersStatus;
 
+    private boolean m_unmilestonedLineGroup;
+
     /**
      * @param chapter The chapter number. Used in verse tags.
      * @param book The OSIS book abbreviation. Used in verse tags.
      * @param requiredTranslationStatus The minimum translation status verses need to meet to be included.
      * @param inlineVerseStatus Whether to include inline verse status in footnotes.
+     * @param unmilestonedLineGroup Do not use milestones for line groups; instead milestone quote tags
      */
-    public ObOsisGeneratorVisitor(int chapter, String book, ObVerseStatus requiredTranslationStatus, boolean inlineVerseStatus)
+    public ObOsisGeneratorVisitor(int chapter, String book, ObVerseStatus requiredTranslationStatus, boolean inlineVerseStatus, boolean unmilestonedLineGroup)
     {
         m_chapter = chapter;
         m_book = book;
         m_verseTagStart = m_book + "." + m_chapter + ".";
         m_lTagStart = m_book + "." + m_chapter + "_l_tag_";
         m_lgTagStart = m_book + "." + m_chapter + "_lg_tag_";
+        m_qTagStart = m_book + "." + m_chapter + "_q_tag_";
         m_noteIndexCounter = new NoteIndexCounter();
         m_requiredTranslationStatus = requiredTranslationStatus;
         m_inlineVersStatus = inlineVerseStatus;
+        m_unmilestonedLineGroup = unmilestonedLineGroup;
     }
 
     @Override
@@ -96,20 +103,25 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
         else if(node.getNodeType() == ObAstNode.NodeType.quote) {
             if(m_skipVerse) return;
+            String end = ">";
+            if (m_unmilestonedLineGroup) {
+                end = " sID=\"" + m_qTagStart + m_qTagCounter + "\"/>";
+                ++m_qTagCounter;
+            }
             if(m_quoteCounter>0)
             {
                 m_quoteCounter++;
-                m_currentFassung.append("»<q level=\"" + m_quoteCounter + "\" marker=\"\">");
+                m_currentFassung.append("»<q level=\"" + m_quoteCounter + "\" marker=\"\"" + end);
             }
             else
             {
                 QuoteSearcher quoteSearcher = new QuoteSearcher();
                 node.host(quoteSearcher, false);
                 if(quoteSearcher.foundQuote == false)
-                    m_currentFassung.append("„<q marker=\"\">");
+                    m_currentFassung.append("„<q marker=\"\"" + end);
                 else {
                     m_quoteCounter++;
-                    m_currentFassung.append("„<q level=\"" + m_quoteCounter + "\" marker=\"\">");
+                    m_currentFassung.append("„<q level=\"" + m_quoteCounter + "\" marker=\"\"" + end);
                 }
             }
         }
@@ -184,6 +196,10 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                 m_skipVerse = false;
                 m_verseTag = m_verseTagStart + verse.getNumber();
                 m_currentFassung.append("<verse osisID=\"" + m_verseTag + "\" sID=\"" + m_verseTag + "\"/>");
+                if(m_poemMode && m_lineStarted == false){
+                    m_currentFassung.append(getLTagStart());
+                    m_lineStarted = true;
+                }
                 if (m_inlineVersStatus) {
                     ObVerseStatus status = verse.getStatus();
                     ObVerseStatus leseStatus = verse.getStatus(FassungType.lesefassung);
@@ -192,18 +208,14 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                     if (leseStatus == studienStatus || status == studienStatus) {
                         // all statuses the same or this is actually the
                         // Studienfassung
-                        verseStatus = studienStatus.toHumanReadableString();
+                        verseStatus = "[Status: "+studienStatus.toHumanReadableString()+"]";
                     } else {
-                        verseStatus = "Studienfassung: " + studienStatus.toHumanReadableString() + "; Lesefassung: " + leseStatus.toHumanReadableString();
+                        verseStatus = "[Studienfassung: " + studienStatus.toHumanReadableString() + "; Lesefassung: " + leseStatus.toHumanReadableString()+"]";
                     }
                     if (!m_currentVerseStatus.equals(verseStatus)) {
                         m_currentVerseStatus = verseStatus;
                         m_currentFassung.append("<note type=\"x-footnote\" n=\"Status\">" + verseStatus + "</note> ");
                     }
-                }
-                if(m_poemMode && m_lineStarted == false){
-                    m_currentFassung.append(getLTagStart());
-                    m_lineStarted = true;
                 }
             }
             else {
@@ -274,10 +286,15 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             if(m_skipVerse) return;
             if(m_quoteCounter>0)
                 m_quoteCounter--;
+            if (m_unmilestonedLineGroup) {
+                m_currentFassung.append("<q eID=\""+m_qTagStart+m_qTagCounter+"\"/>");
+            } else {
+                m_currentFassung.append("</q>");
+            }
             if(m_quoteCounter>0)
-                m_currentFassung.append("</q>«");
+                m_currentFassung.append("«");
             else
-                m_currentFassung.append("</q>“");
+                m_currentFassung.append("“");
 
         }
 
@@ -331,20 +348,28 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
     }
 
     private String getLTagStop() {
+        if (m_unmilestonedLineGroup)
+            return "</l>";
         return "<l eID=\"" + m_lTagStart + m_lTagCounter + "\"/>";
     }
 
     private String getLTagStart() {
+        if (m_unmilestonedLineGroup)
+            return "<l>";
         String m_lTag = m_lTagStart + m_lTagCounter;
         ++m_lTagCounter;
         return "<l sID=\"" + m_lTag + "\"/>";
     }
     
     private String getLgTagStop() {
+        if (m_unmilestonedLineGroup)
+            return "</lg>";
         return "<lg eID=\"" + m_lgTagStart + m_lgTagCounter + "\"/>";
     }
 
     private String getLgTagStart() {
+        if (m_unmilestonedLineGroup)
+            return "<lg>";
         String m_lgTag = m_lgTagStart + m_lgTagCounter;
         ++m_lgTagCounter;
         return "<lg sID=\"" + m_lgTag + "\"/>";
