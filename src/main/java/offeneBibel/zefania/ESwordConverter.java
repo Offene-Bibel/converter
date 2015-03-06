@@ -3,6 +3,8 @@ package offeneBibel.zefania;
 import java.io.*;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.w3c.dom.*;
 
@@ -18,6 +20,8 @@ public class ESwordConverter {
         convert("offeneBibelStudienfassungZefania.xml");
         convert("offeneBibelLesefassungZefania.xml");
     }
+
+    private static final Pattern xrefPattern = Pattern.compile("([A-Za-z0-9]+) ([0-9]+), ([0-9]+)");
 
     private static String[] E_SWORD_BOOKS = new String[] {
             null, // 0
@@ -89,6 +93,17 @@ public class ESwordConverter {
             "Revelation", // 66
     };
 
+    private static String[] ZEF_SHORT_BOOKS = new String[] {
+        null,
+        "Gen", "Exo", "Lev", "Num", "Deu", "Jos", "Jdg", "Rth", "1Sa", "2Sa",
+        "1Ki", "2Ki", "1Ch", "2Ch", "Ezr", "Neh", "Est", "Job", "Psa", "Pro",
+        "Ecc", "Son", "Isa", "Jer", "Lam", "Eze", "Dan", "Hos", "Joe", "Amo",
+        "Oba", "Jon", "Mic", "Nah", "Hab", "Zep", "Hag", "Zec", "Mal", "Mat",
+        "Mar", "Luk", "Joh", "Act", "Rom", "1Co", "2Co", "Gal", "Eph", "Php",
+        "Col", "1Th", "2Th", "1Ti", "2Ti", "Tit", "Phm", "Heb", "Jas", "1Pe",
+        "2Pe", "1Jn", "2Jn", "3Jn", "Jud", "Rev"
+    };
+
     // Some verses used by Offene Bibel are outside of the Canon used by
     // E-Sword. For now, just strip them...
     private static String[] INVALID_VERSES = new String[] {
@@ -131,6 +146,7 @@ public class ESwordConverter {
                     "<style>\n" +
                     "p{margin-top:0pt;margin-bottom:0pt;}\n" +
                     "p.spc{margin-top:10pt;margin-bottom:0pt;}\n" +
+                    "p.prologend{border-width:1px;border-top-style:none;border-right-style:none;border-bottom-style:solid;border-left-style:none;border-color:black}" +
                     "</style></head><body>\n" +
                     "<p>#define description=" + title + " (Kommentar)</p>\n" +
                     "<p>#define abbreviation=" + identifier + "</p>\n" +
@@ -159,10 +175,15 @@ public class ESwordConverter {
                     if (!chapterElement.getNodeName().equals("CHAPTER"))
                         throw new IOException(chapterElement.getNodeName());
                     int cnumber = Integer.parseInt(chapterElement.getAttribute("cnumber"));
+                    Element prolog = null;
                     for (Node verseNode = chapterElement.getFirstChild(); verseNode != null; verseNode = verseNode.getNextSibling()) {
                         if (verseNode instanceof Text)
                             continue;
                         Element verseElement = (Element) verseNode;
+                        if (verseElement.getNodeName().equals("PROLOG")) {
+                            prolog = verseElement;
+                            continue;
+                        }
                         if (!verseElement.getNodeName().equals("VERS"))
                             throw new IOException(verseElement.getNodeName());
                         if (verseElement.getFirstChild() == null)
@@ -171,7 +192,8 @@ public class ESwordConverter {
                         String vref = bname + " " + cnumber + ":" + vnumber;
                         if (invalidVerses.contains(vref))
                             continue;
-                        bblx.write("<p>" + parseVerse(verseElement, vref, cmtx) + "</p>\n");
+                        bblx.write("<p>" + parseVerse(verseElement, vref, cmtx, prolog) + "</p>\n");
+                        prolog = null;
                     }
                 }
             }
@@ -181,12 +203,33 @@ public class ESwordConverter {
         }
     }
 
-    private static String parseVerse(Element verseElement, String vref, BufferedWriter cmtx) throws IOException {
+    private static String parseVerse(Element verseElement, String vref, BufferedWriter cmtx, Element prologElement) throws IOException {
         boolean hasCommentary = false;
         boolean strikeOutOpen = false;
         StringBuilder verse = new StringBuilder(vref + " ");
         StringBuilder comments = new StringBuilder("<p><span style=\"background-color:#FF0000;\">\u00F7</span>" + vref + "</p>\n<p>");
-
+        if (prologElement != null) {
+            for (Node node = prologElement.getFirstChild(); node != null; node = node.getNextSibling()) {
+                if (node instanceof Text) {
+                    String txt = ((Text) node).getTextContent();
+                    txt = txt.replace("&", "&amp").replace("<", "&lt;").replace(">", "&gt;").replace("{", "(").replace("}",")").replaceAll("[ \t\r\n]+", " ");
+                    comments.append(txt);
+                } else {
+                    Element elem = (Element) node;
+                    if (elem.getNodeName().equals("STYLE")) {
+                        String content = elem.getTextContent();
+                        comments.append("</p>\n<p><i>" + content + "</i></p>\n<p class=\"spc\">");
+                        hasCommentary = true;
+                    } else if (elem.getNodeName().equals("BR")) {
+                        comments.append("<br />");
+                    } else {
+                        throw new IllegalStateException("invalid prolog tag: " + elem.getNodeName());
+                    }
+                }
+            }
+            comments.append("</p>\n<p class=\"prologend\">&nbsp;</p>\n<p class=\"spc\">");
+            hasCommentary = true;
+        }
         for (Node node = verseElement.getFirstChild(); node != null; node = node.getNextSibling()) {
             if (node instanceof Text) {
                 String txt = ((Text) node).getTextContent();
@@ -221,6 +264,20 @@ public class ESwordConverter {
                 } else if (elem.getNodeName().equals("BR")) {
                     verse.append("<br />");
                     comments.append("<br />");
+                } else if (elem.getNodeName().equals("XREF")) {
+                    comments.append("</p>\n<p class=\"spc\">(Parallelstellen:");
+                    for(String ref : elem.getAttribute("fscope").split("; ")) {
+                        Matcher m = xrefPattern.matcher(ref);
+                        if (!m.matches())
+                            throw new IllegalStateException("Invalid XREF: "+ref);
+                        String book = m.group(1);
+                        int bookIdx = Arrays.asList(ZEF_SHORT_BOOKS).indexOf(book);
+                        if (bookIdx != -1) book = E_SWORD_BOOKS[bookIdx];
+                        comments.append(" <span style=\"color:#008000;font-weight:bold;text-decoration:underline;\">");
+                        comments.append(book+"_"+m.group(2)+":"+m.group(3)+"</span>");
+                    }
+                    comments.append(")</p>\n<p class=\"spc\">");
+                    hasCommentary = true;
                 } else {
                     throw new IllegalStateException("invalid verse level tag: " + elem.getNodeName());
                 }
