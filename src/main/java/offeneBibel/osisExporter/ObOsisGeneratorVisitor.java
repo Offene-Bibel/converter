@@ -99,7 +99,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             if(m_quoteCounter>0)
             {
                 m_quoteCounter++;
-                m_currentFassung.append("»<q level=\" + m_quoteCounter + \" marker=\"\">");
+                m_currentFassung.append("»<q level=\"" + m_quoteCounter + "\" marker=\"\">");
             }
             else
             {
@@ -109,7 +109,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                     m_currentFassung.append("„<q marker=\"\">");
                 else {
                     m_quoteCounter++;
-                    m_currentFassung.append("„<q level=\" + m_quoteCounter + \" marker=\"\">");
+                    m_currentFassung.append("„<q level=\"" + m_quoteCounter + "\" marker=\"\">");
                 }
             }
         }
