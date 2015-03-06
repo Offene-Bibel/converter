@@ -654,21 +654,21 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * to determine whether we are in a poem though. Thus this is not checked.
      */
     public Rule SecondVoice() {
-        return FirstOf(
+        return toRule("\n_");
             /**
              * {@link SecondVoice} elements can freely interleave with other constructs (e.g. Quotes) and can thus not be represented
              * as a single element with children. This is similar to poem tags.
              * {@link SecondVoice} can not be matched in a completely hierarchical fashion, because the "\n" can occur inside
              * other elements. Thus we need a way to eat up "\n:" inside elements nested in {@link LineQuote}s. This is done here.
              */
-            Sequence(
+            /*Sequence(
                 isRuleAncestor("SecondVoice"),
                 "\n_"
-            ),
+            ),*/
             /**
              * This is the actual {@link SecondVoice} matching part.
              */
-            Sequence(
+            /*Sequence(
                 "\n_",
                 push(new ObAstNode(ObAstNode.NodeType.secondVoice)),
                 OneOrMore(FirstOf(
@@ -680,7 +680,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 '\n',
                 peek(1).appendChild(pop())
             )
-        );
+        );*/
     }
     
     public Rule Break() {
