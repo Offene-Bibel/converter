@@ -13,7 +13,6 @@ import offeneBibel.visitorPattern.IVisitorHost;
  * The generics specification guarantees, that SELF will
  * always be of the objects own type. So "this" can safely be
  * assumed to be of type SELF.
- * @author patrick
  *
  * @param <SELF>
  */

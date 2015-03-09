@@ -43,4 +43,15 @@ public class ObAstNode extends ObTreeNode<ObAstNode> { // implements IVisitorHos
         m_nodeType = nodeType;
         return true;
     }
+
+    public boolean isDescendantOf(NodeType nodeType) {
+        ObAstNode runner =  this;
+        while(runner != null && runner.getNodeType() != nodeType)
+            runner = runner.getParent();
+
+        if (runner == null)
+            return false;
+        else
+            return true;
+    }
 }
