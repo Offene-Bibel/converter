@@ -98,6 +98,21 @@ public class ZefaniaConverter {
         zefBooks.put("3John", new String[] { "64", "3 John", "3Jn" });
         zefBooks.put("Jude", new String[] { "65", "Jude", "Jud" });
         zefBooks.put("Rev", new String[] { "66", "Revelation", "Rev" });
+        zefBooks.put("Jdt", new String[] { "67", "Judit", "Jdt" });
+        zefBooks.put("Wis", new String[] { "68", "Wisdom", "Wis" });
+        zefBooks.put("Tob", new String[] { "69", "Tobit", "Tob" });
+        zefBooks.put("Sir", new String[] { "70", "Sirach", "Sir" });
+        zefBooks.put("Bar", new String[] { "71", "Baruch", "Bar" });
+        zefBooks.put("1Macc", new String[] { "72", "1 Maccabees", "1Ma" });
+        zefBooks.put("2Macc", new String[] { "73", "2 Maccabees", "2Ma" });
+        // 74 = xDan
+        // 75 = xEst
+        // 76 = Man
+        // 77 = 3Macc
+        // 78 = 4Macc
+        // 79 = EpJer
+        zefBooks.put("1Esd", new String[] { "80", "1 Esdras", "1Es" });
+        zefBooks.put("2Esd", new String[] { "81", "2 Esdras", "2Es" });
     }
 
     private static void convert(String osisFile, String confFile, String outFile, String identifier) throws Exception {
