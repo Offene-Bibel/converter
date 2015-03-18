@@ -23,8 +23,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -32,8 +34,10 @@ import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.Vector;
 import java.util.Properties;
 
@@ -46,6 +50,7 @@ import offeneBibel.parser.ObAstFixuper;
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.ObVerseStatus;
 import offeneBibel.parser.OffeneBibelParser;
+import offeneBibel.parser.ObFassungNode.FassungType;
 
 import org.parboiled.Parboiled;
 import org.parboiled.common.Base64;
@@ -275,6 +280,11 @@ public class Exporter
                 generateWebViewerFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel]);
                 System.out.println(" Done.");
             }
+            if (m_commandLineArguments.m_generateStatistics) {
+                System.out.print("Generating statistics...");
+                generateStatistics(books);
+                System.out.println(" Done.");
+            }
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -408,6 +418,66 @@ public class Exporter
             statusFileLine = book.urlName + " " + chapter.number + " " + type + " " + quality + " " + filename + "\n";
         }
         return statusFileLine;
+    }
+
+    public void generateStatistics(List<Book> books) throws Throwable
+    {
+        Properties verseCounts = new Properties();
+        try(InputStream in = new FileInputStream(Misc.getResourceDir()+"verseCount.txt")) {
+            verseCounts.load(in);
+        }
+        Properties props = new Properties();
+        props.setProperty("DATE", new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+        StringBuilder bookList= new StringBuilder();
+        for (Book book : books) {
+            if (book.osisName.equals("Matt"))
+            {
+                props.setProperty("AT", bookList.toString());
+                bookList.setLength(0);
+            }
+            if (bookList.length() >0)
+                bookList.append(",");
+            bookList.append(book.urlName);
+            props.setProperty(book.urlName, ""+book.chapters.size());
+            for (Chapter chapter : book.chapters) {
+                String chapName = book.urlName+","+(chapter.number == 1 && book.chapterCount == 1 ? 0 : chapter.number);
+                String verseInfo = verseCounts.getProperty(chapName);
+                if (verseInfo == null)
+                    throw new IOException(book.wikiName+","+chapter.number);
+                List<String> verseNumbers;
+                if (verseInfo.contains("#")) {
+                    verseInfo = verseInfo.split("#")[2].trim();
+                    verseNumbers = new ArrayList<String>(Arrays.asList(verseInfo.split(",")));
+                } else {
+                    int count = Integer.parseInt(verseInfo);
+                    verseNumbers = new ArrayList<String>(count);
+                    for (int j = 0; j < count; j++) {
+                        verseNumbers.add(String.valueOf(j+1));
+                    }
+                }
+                ObVerseStatisticVisitor visitor = new ObVerseStatisticVisitor(chapName, verseNumbers);
+                if (chapter.node != null) {
+                    chapter.node.host(visitor);
+                }
+                props.setProperty(chapName+",LF", statusToString(visitor.getStatusCounters(FassungType.lesefassung)));
+                props.setProperty(chapName+",SF", statusToString(visitor.getStatusCounters(FassungType.studienfassung)));
+            }
+        }
+        props.setProperty("NT", bookList.toString());
+        try (OutputStream out = new FileOutputStream(Misc.getResultsDir()+"offeneBibelStatus.properties")) {
+            props.store(out, null);
+        }
+        StatisticHTMLBuilder.build(props);
+    }
+
+    private String statusToString(int[] statusCounters) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < statusCounters.length; i++) {
+            if (i > 0)
+                result.append(",");
+            result.append(statusCounters[i]);
+        }
+        return result.toString();
     }
 
     /**
