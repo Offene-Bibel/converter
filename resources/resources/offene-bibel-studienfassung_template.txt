@@ -11,7 +11,7 @@
                 <title>Offene Bibel - Studienfassung</title>
                 <type type="OSIS">Bible</type>
                 <identifier type="OSIS">Bible.de.OFBI.OFFBIST</identifier>
-                <rights type="x-copyright"></rights>
+                <rights type="x-copyright">{{rights}}</rights>
                 <scope></scope>
                 <refSystem>Bible</refSystem>
             </work>
