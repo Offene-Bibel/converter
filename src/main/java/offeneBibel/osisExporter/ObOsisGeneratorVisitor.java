@@ -389,7 +389,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         public void visitAfter(ObAstNode hostNode) throws Throwable {}
     }
 
-    class NoteIndexCounter {
+    public static class NoteIndexCounter {
         private String m_noteIndexCounter;
 
         public NoteIndexCounter()

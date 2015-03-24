@@ -13,6 +13,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 
+import offeneBibel.osisExporter.ObOsisGeneratorVisitor.NoteIndexCounter;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -141,7 +143,8 @@ public class LogosConverter {
 		try (BufferedWriter bblx = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(Misc.getResultsDir(), identifier + ".logos.html"))))) {
 			bblx.write("<html><head>\n" +
 					"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\" />\n" +
-					"</head><body>\n" +
+					"<style>body, h1, h2, h3 { font-family: \"Times New Roman\";}</style>\n"+
+					"</head><body lang=\"de-DE\">\n" +
 					"<h1>" + title + "</h1>\n" +
 					description + "<br />Lizenz: " + rights + "\n");
 
@@ -172,6 +175,7 @@ public class LogosConverter {
 					int cnumber = Integer.parseInt(chapterElement.getAttribute("cnumber"));
 					String chapterRef = "@" + getVerseMap(babbr) + ":" + babbr + " " + cnumber;
 					bblx.write("<h3>[[" + chapterRef + "]]Kapitel " + cnumber + "</h3>\n");
+					footnoteTextCounter.reset();
 					Element prolog = null;
 					for (Node verseNode = chapterElement.getFirstChild(); verseNode != null; verseNode = verseNode.getNextSibling()) {
 						if (verseNode instanceof Text)
@@ -191,7 +195,7 @@ public class LogosConverter {
 								if (node instanceof Text) {
 									String txt = ((Text) node).getTextContent();
 									txt = txt.replace("&", "&amp").replace("<", "&lt;").replace(">", "&gt;").replaceAll("[ \t\r\n]+", " ");
-									bblx.write(txt);
+									bblx.write(tagForeign(txt));
 								} else {
 									Element elem = (Element) node;
 									if (elem.getNodeName().equals("STYLE")) {
@@ -266,10 +270,39 @@ public class LogosConverter {
 	}
 
 	private static int footnoteCounter = 0;
+	private static NoteIndexCounter footnoteTextCounter = new NoteIndexCounter();
 
 	private static String buildFootnote(String content, StringBuilder footnotes) {
 		footnoteCounter++;
-		footnotes.append("<DIV ID=\"sdfootnote" + footnoteCounter + "\">" + content + "</DIV>\n");
-		return "<A CLASS=\"sdfootnoteanc\" HREF=\"#sdfootnote" + footnoteCounter + "sym\">" + footnoteCounter + "</A>";
+		final String footnoteSymbol;
+		if (content.startsWith("[St") && content.endsWith("]")) {
+			footnoteSymbol = "Status";
+		} else {
+			footnoteSymbol = footnoteTextCounter.getNextNoteString();
+		}
+		footnotes.append("<DIV ID=\"sdfootnote" + footnoteCounter + "\">" + tagForeign(content) + "</DIV>\n");
+		return "<A CLASS=\"sdfootnoteanc\" HREF=\"#sdfootnote" + footnoteCounter + "sym\" sdfixed><sup>" + footnoteSymbol + "</sup></A>";
+	}
+
+	private static final Pattern NO_GREEK_OR_HEBREW = Pattern.compile("[\\P{IsGreek}&&\\P{IsHebrew}]*");
+	private static final Pattern FIND_HEBREW = Pattern.compile("[\\p{IsHebrew}]+([\\p{IsCommon}]+[\\p{IsHebrew}]+)*");
+	private static final Pattern FIND_GREEK = Pattern.compile("[\\p{IsGreek}]+([\\p{IsCommon}]+[\\p{IsGreek}]+)*");
+
+	private static String tagForeign(String str) {
+		// fast path for when every character is neither greek nor hebrew
+		if (NO_GREEK_OR_HEBREW.matcher(str).matches())
+			return str;
+		// do the tagging
+		return tagOne(tagOne(str, FIND_HEBREW, "he-IL"), FIND_GREEK, "el-GR");
+	}
+
+	private static String tagOne(String str, Pattern pattern, String languageCode) {
+		Matcher m = pattern.matcher(str);
+		StringBuffer result = new StringBuffer(str.length());
+		while (m.find()) {
+			m.appendReplacement(result, "<span lang=\"" + languageCode + "\">$0</span>");
+		}
+		m.appendTail(result);
+		return result.toString();
 	}
 }
