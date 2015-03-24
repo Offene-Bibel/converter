@@ -23,8 +23,8 @@ class CommandLineArguments {
     @Parameter(names = { "--skipGenerateOSIS" }, description = "Skip generation of OSIS documents.")
     boolean m_skipGenerateOsis = false;
 
-    @Parameter(names = { "--skipGenerateWeb" }, description = "Skip generation of the website backing files.")
-    boolean m_skipGenerateWeb = true;
+    @Parameter(names = { "--generateWeb" }, description = "Generate the webviewer backing files.")
+    boolean m_generateWeb = false;
 
     @Parameter(names = { "-a", "--cacheAST" }, description = "Cache the already parsed ASTs. Delete them manually if you edited the parser code.")
     boolean m_cacheAST = false;
