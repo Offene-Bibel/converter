@@ -145,6 +145,41 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule BibleText() {
+    	return FirstOf(
+    		Sequence(
+    			ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.lesefassung),
+                LfBibleText()
+            ),
+    		Sequence(
+        		ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.studienfassung),
+                SfBibleText()
+            )
+        );
+    }
+
+    public Rule LfBibleText() {
+        return OneOrMore(
+            FirstOf(
+                UnsupportedMarkup(),
+                ScriptureText(),
+                TextParenthesis(),
+                LineQuote(),
+                Quote(),
+                Fat(),
+                Italics(),
+                AlternateReading(),
+                PoemStart(),
+                PoemStop(),
+                SecondVoice(),
+                Break(),
+                ParallelPassage(),
+                Comment(),
+                SecondaryContent()
+            )
+        );
+    }
+    
+    public Rule SfBibleText() {
         return OneOrMore(
             FirstOf(
                 UnsupportedMarkup(),
@@ -175,21 +210,16 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return Sequence(
             ZeroOrMore(Whitespace()),
             "{{",
-            FirstOf('S', 'L'),
-            new Action<ObAstNode>() {
-                public boolean run(Context<ObAstNode> context) {
-                    ObFassungNode.FassungType fassung;
-                    try {
-                        fassung = getCurrentFassung(context.getValueStack());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return false;
-                    }
-                    return ( fassung == ObFassungNode.FassungType.lesefassung && context.getMatch().equals("L") )
-                    ||
-                    ( fassung == ObFassungNode.FassungType.studienfassung && context.getMatch().equals("S") );
-                }
-            },
+            FirstOf(
+	            Sequence(
+            		ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.lesefassung),
+            		'L'
+        		),
+        		Sequence(
+    				ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.studienfassung),
+    				'S'
+				)
+            ),
             '|',
             FirstOf(
                 Sequence(
@@ -209,7 +239,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     public Rule Heading() {
         return Sequence(
-                ACTION( ((ObFassungNode)(peek())).getFassung() == ObFassungNode.FassungType.lesefassung ),
+                ACTION( getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.lesefassung ),
                 "((",
                 push(new ObAstNode(ObAstNode.NodeType.heading)),
                 ScriptureText(),
@@ -542,6 +572,20 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             peek(1).appendChild(pop())
         );
     }
+
+    public Rule TextParenthesis() {
+        return Sequence(
+            '(', peek().appendChild(new ObTextNode(match())),
+            OneOrMore(FirstOf(
+                    BibleText(),
+                    Verse(),
+                    Heading(),
+                    Note(),
+                    Comment()
+            )),
+            ')', peek().appendChild(new ObTextNode(match()))
+        );
+    }
     
     public Rule Alternative() {
         return Sequence(
@@ -605,6 +649,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                  push(new ObAstNode(ObAstNode.NodeType.secondaryContent)),
                  OneOrMore(FirstOf(
                      ScriptureText(),
+                     Verse(),
                      Quote(),
                      Fat(),
                      Italics(),
@@ -1145,13 +1190,13 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return true;
     }
     
-    private static ObFassungNode.FassungType getCurrentFassung(ValueStack<ObAstNode> valueStack) throws Exception
+    protected static ObFassungNode.FassungType getCurrentFassung(ValueStack<ObAstNode> valueStack)
     {
         for(ObAstNode node : valueStack) {
             if(node.getNodeType() == ObAstNode.NodeType.fassung) {
                 return ((ObFassungNode)node).getFassung();
             }
         }
-        throw new Exception("No Fassung found.");
+        return null;
     }
 }
