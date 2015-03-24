@@ -5,6 +5,8 @@ import util.Misc;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,9 +20,9 @@ import javax.xml.xpath.XPathConstants;
 
 import org.w3c.dom.*;
 
-import com.sun.org.apache.xpath.internal.XPathFactory;
-
 public class ZefaniaConverter {
+
+    private static final Pattern xrefPattern = Pattern.compile("([A-Za-z0-9]+)( [0-9]+, [0-9]+)");
 
     public static void main(String[] args) throws Exception {
         convert("offeneBibelLesefassungModule.osis", "offbile.conf", "offeneBibelLesefassungZefania.xml", "OffBiLe");
@@ -195,7 +197,7 @@ public class ZefaniaConverter {
         StringBuilder result = new StringBuilder();
         for (Node node = elem.getFirstChild(); node != null; node = node.getNextSibling()) {
             if (node instanceof Element) {
-                throw new IllegalStateException("Unsupported tag inside footnote");
+                throw new IllegalStateException("Unsupported tag inside " + elem.getNodeName() + ": " + node.getNodeName());
             }
             result.append(((Text) node).getTextContent());
         }
@@ -204,6 +206,7 @@ public class ZefaniaConverter {
 
     private static void parseChapter(String chapterName, Element osisChapter, Element chapter) {
         Element verse = null;
+        Element prolog = null;
         flattenChildren(osisChapter);
         boolean beforeVerse = true;
         for (Node node = osisChapter.getFirstChild(); node != null; node = node.getNextSibling()) {
@@ -211,7 +214,13 @@ public class ZefaniaConverter {
                 if (verse != null) {
                     verse.appendChild(verse.getOwnerDocument().importNode(node, true));
                 } else if (beforeVerse) {
-                    // TODO create prolog!
+                    if (prolog == null && ((Text) node).getTextContent().trim().length() == 0)
+                        continue;
+                    if (prolog == null) {
+                        prolog = chapter.getOwnerDocument().createElement("PROLOG");
+                        chapter.appendChild(prolog);
+                    }
+                    prolog.appendChild(prolog.getOwnerDocument().importNode(node,  true));
                 } else if (((Text) node).getTextContent().trim().length() > 0) {
                     throw new IllegalStateException("Non-whitespace at chapter level: "+node);
                 }
@@ -227,7 +236,25 @@ public class ZefaniaConverter {
                     }
                 } else if (elem.getNodeName().equals("note")) {
                     if (elem.getAttribute("type").equals("crossReference")) {
-                        // TODO cross references
+                        if (verse != null) {
+                            Element note = verse.getOwnerDocument().createElement("XREF");
+                            verse.appendChild(note);
+                            StringBuilder fscope = new StringBuilder();
+                            for(String ref : elem.getTextContent().split("\\|")) {
+                                Matcher m = xrefPattern.matcher(ref);
+                                if (!m.matches())
+                                    throw new IllegalStateException("Malformed cross reference: "+ref);
+                                if (fscope.length() > 0)
+                                    fscope.append("; ");
+                                String book = m.group(1);
+                                if (zefBooks.containsKey(book))
+                                    book = zefBooks.get(book)[2];
+                                fscope.append(book).append(m.group(2));
+                            }
+                            note.setAttribute("fscope", fscope.toString());
+                        } else {
+                            throw new IllegalStateException("note tag of type crossReference at invalid location");
+                        }
                     } else if (verse != null) {
                         Element note = verse.getOwnerDocument().createElement("NOTE");
                         verse.appendChild(note);
@@ -236,7 +263,17 @@ public class ZefaniaConverter {
                         note.appendChild(note.getOwnerDocument().createTextNode(getTextChildren(elem)));
                         normalizeWhitespace(note);
                     } else if (beforeVerse) {
-                        // TODO add to prolog!
+                        if (prolog == null) {
+                            prolog = chapter.getOwnerDocument().createElement("PROLOG");
+                            chapter.appendChild(prolog);
+                        }
+                        // NOTE tag not allowed; abuse STYLE for it :)
+                        Element note = prolog.getOwnerDocument().createElement("STYLE");
+                        prolog.appendChild(note);
+                        note.setAttribute("fs", "italic");
+                        flattenChildren(elem);
+                        note.appendChild(note.getOwnerDocument().createTextNode("["+getTextChildren(elem)+"]"));
+                        normalizeWhitespace(note);
                     } else {
                         throw new IllegalStateException("note tag at invalid location");
                     }
@@ -274,6 +311,10 @@ public class ZefaniaConverter {
                     throw new IllegalStateException("invalid book level tag: " + elem.getNodeName());
                 }
             }
+        }
+        if (prolog != null) {
+            normalizeWhitespace(prolog);
+            prolog.setAttribute("vref", "1");
         }
     }
 

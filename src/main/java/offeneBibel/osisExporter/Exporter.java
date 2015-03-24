@@ -1,3 +1,21 @@
+/* Copyright (C) 2012-2015 Patrick Zimmermann, Michael Schierl,
+ * Stephan Kreutzer
+ *
+ * This file is part of converter.
+ *
+ * converter is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
+ *
+ * converter is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License 3 for more details.
+ *
+ * You should have received a copy of the GNU General Public License 3
+ * along with converter.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package offeneBibel.osisExporter;
 
 import java.io.File;
@@ -17,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
@@ -79,6 +98,9 @@ public class Exporter
      */
     static final String m_studienFassungFilename = Misc.getResultsDir() + "offeneBibelStudienfassungModule.osis";
     static final String m_leseFassungFilename = Misc.getResultsDir() + "offeneBibelLesefassungModule.osis";
+
+    static final String m_studienFassungConfigFilename = "offbist.conf";
+    static final String m_leseFassungConfigFilename = "offbile.conf";
 
     CommandLineArguments m_commandLineArguments;
 
@@ -437,10 +459,31 @@ public class Exporter
 
     private String generateCompleteOsisString(String osisText, boolean leseFassung) throws IOException
     {
+        String confFile = null;
+
+        if (leseFassung == true) {
+            confFile = m_leseFassungConfigFilename;
+        }
+        else {
+            confFile = m_leseFassungConfigFilename;
+        }
+
+        Properties config = new Properties();
+        try (FileInputStream fis = new FileInputStream(new File(Misc.getResourceDir(), confFile))) {
+            config.load(fis);
+        }
+
+        // Properties parses as Latin-1, but the file is UTF-8. Recode
+        // everything.
+        for (Object prop : config.keySet()) {
+            config.put(prop, new String(config.get(prop).toString().getBytes("ISO-8859-1"), "UTF-8"));
+        }
+
         String result = Misc.readFile(leseFassung ? m_leseFassungTemplate : m_studienFassungTemplate);
 
         String dateString = new SimpleDateFormat("yyyy.MM.dd'T'HH.mm.ss").format(new Date());
         result = result.replace("{{date}}", "" + dateString);
+        result = result.replace("{{rights}}", config.getProperty("DistributionLicense"));
         result = result.replace("{{content}}", osisText);
         return result;
     }
