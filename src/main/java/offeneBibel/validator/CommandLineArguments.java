@@ -15,6 +15,9 @@ class CommandLineArguments {
     @Parameter(names = { "-i", "--inputFile" }, description = "File to validate.")
     String m_inputFile = null;
 
+    @Parameter(names = { "--json" }, description = "Output a longer status report in JSON format.")
+    boolean m_json = false;
+
     @Parameter(names = { "-u", "--url" }, description = "URL to download content from to validate.")
     String m_inputUrl = null;
 
