@@ -115,7 +115,7 @@ public class ObWebsiteDbVisitor extends DifferentiatingVisitor<ObAstNode> implem
             m_verseText.append("version: \"" + m_currentFassung + "\"\n");
             m_verseText.append("from: \"" + verse.getFromNumber() + "\"\n");
             m_verseText.append("to: \"" + verse.getToNumber() + "\"\n");
-            m_verseText.append("status: \"" + verse.getStatus().ordinal() + "\"\n");
+            m_verseText.append("status: \"" + verse.getStatus().quality() + "\"\n");
             m_verseText.append("text: \"");
         }
     }
