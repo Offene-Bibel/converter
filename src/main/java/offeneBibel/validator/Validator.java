@@ -2,6 +2,7 @@ package offeneBibel.validator;
 
 import java.io.IOException;
 
+import offeneBibel.osisExporter.EmptyVerseFixupVisitor;
 import offeneBibel.osisExporter.ObWebsiteDbVisitor;
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.OffeneBibelParser;
@@ -90,8 +91,10 @@ public class Validator {
 	            System.exit(1);
 	        } else {
 	        	if(m_commandLineArguments.m_json) {
+		        	ObAstNode node = result.resultValue;
+	                node.host(new EmptyVerseFixupVisitor());
 	        		ObWebsiteDbVisitor visitor = new ObWebsiteDbVisitor();
-					result.resultValue.host(visitor);
+	        		node.host(visitor);
 	                System.out.println(visitor.getResult());
 	        	}
 	        	else {

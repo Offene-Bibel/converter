@@ -207,6 +207,7 @@ public class Exporter
                 else {
                     node = result.resultValue;
                     ObAstFixuper.fixupAstTree(node);
+                    node.host(new EmptyVerseFixupVisitor());
                     if (cacheFile != null) {
                         cacheFile.getParentFile().mkdirs();
                         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
