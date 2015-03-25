@@ -12,15 +12,17 @@ public enum ObVerseStatus {
 
     /**
      * Returns the quality of this tag.
-     * 1 = worst
-     * 4 = best
+     * 1 = non existant or not complete
+     * 2 = raw
+     * 3 = most criteria met
+     * 4 = all criteria met
      */
     public int quality() {
         switch(this) {
         case none:
         case versUnvollstaendigUebersetzt:
-        case inArbeit:
             return 1;
+        case inArbeit:
         case zuPruefen:
         case liegtInRohuebersetzungVor:
         case ueberpruefungAngefordert:
