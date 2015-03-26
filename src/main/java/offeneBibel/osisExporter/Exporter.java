@@ -466,7 +466,7 @@ public class Exporter
             confFile = m_leseFassungConfigFilename;
         }
         else {
-            confFile = m_leseFassungConfigFilename;
+            confFile = m_studienFassungConfigFilename;
         }
 
         Properties config = new Properties();
