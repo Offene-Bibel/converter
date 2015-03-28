@@ -143,7 +143,7 @@ public class LogosConverter {
 		try (BufferedWriter bblx = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(Misc.getResultsDir(), identifier + ".logos.html"))))) {
 			bblx.write("<html><head>\n" +
 					"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\" />\n" +
-					"<style>body, h1, h2, h3 { font-family: \"Times New Roman\";}</style>\n"+
+					"<style>body, h1, h2, h3, h4 { font-family: \"Times New Roman\";}</style>\n"+
 					"</head><body lang=\"de-DE\">\n" +
 					"<h1>" + title + "</h1>\n" +
 					description + "<br />Lizenz: " + rights + "\n");
@@ -176,13 +176,16 @@ public class LogosConverter {
 					String chapterRef = "@" + getVerseMap(babbr) + ":" + babbr + " " + cnumber;
 					bblx.write("<h3>[[" + chapterRef + "]]Kapitel " + cnumber + "</h3>\n");
 					footnoteTextCounter.reset();
-					Element prolog = null;
+					Element prolog = null, caption = null;
 					for (Node verseNode = chapterElement.getFirstChild(); verseNode != null; verseNode = verseNode.getNextSibling()) {
 						if (verseNode instanceof Text)
 							continue;
 						Element verseElement = (Element) verseNode;
 						if (verseElement.getNodeName().equals("PROLOG")) {
 							prolog = verseElement;
+							continue;
+						} else if (verseElement.getNodeName().equals("CAPTION")) {
+							caption = verseElement;
 							continue;
 						}
 						if (!verseElement.getNodeName().equals("VERS"))
@@ -211,10 +214,15 @@ public class LogosConverter {
 							bblx.write("\n<br/>\n");
 						}
 
+						if (caption != null) {
+							bblx.write("<h4>"+caption.getTextContent()+"</h4>\n");
+						}
+
 						int vnumber = Integer.parseInt(verseElement.getAttribute("vnumber"));
 						String vref = chapterRef + ":" + vnumber;
 						bblx.write("<br />[[" + vref + "]]<b>" + vnumber + "</b> {{field-on:bible}}" + parseVerse(verseElement, footnotes) + "{{field-off:bible}}\n");
 						prolog = null;
+						caption = null;
 					}
 				}
 			}

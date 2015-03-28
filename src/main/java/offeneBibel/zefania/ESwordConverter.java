@@ -278,6 +278,9 @@ public class ESwordConverter {
                         if (verseElement.getNodeName().equals("PROLOG")) {
                             prolog = verseElement;
                             continue;
+                        } else if (verseElement.getNodeName().equals("CAPTION")) {
+                            // captions not supported by E-Sword
+                            continue;
                         }
                         if (!verseElement.getNodeName().equals("VERS"))
                             throw new IOException(verseElement.getNodeName());

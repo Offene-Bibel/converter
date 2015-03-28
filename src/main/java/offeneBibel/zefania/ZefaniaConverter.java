@@ -223,12 +223,12 @@ public class ZefaniaConverter {
         Element verse = null;
         Element prolog = null;
         flattenChildren(osisChapter);
-        boolean beforeVerse = true;
+        int nextVerse = 1;
         for (Node node = osisChapter.getFirstChild(); node != null; node = node.getNextSibling()) {
             if (node instanceof Text) {
                 if (verse != null) {
                     verse.appendChild(verse.getOwnerDocument().importNode(node, true));
-                } else if (beforeVerse) {
+                } else if (nextVerse == 1) {
                     if (prolog == null && ((Text) node).getTextContent().trim().length() == 0)
                         continue;
                     if (prolog == null) {
@@ -242,7 +242,17 @@ public class ZefaniaConverter {
             } else {
                 Element elem = (Element) node;
                 if (elem.getNodeName().equals("title")) {
-                    // these are useless, as they only say "Kapitel ##" anyway.
+                    if (elem.getAttribute("type").equals("chapter")) {
+                        // these are useless, as they only say "Kapitel ##" anyway.
+                    } else {
+                        Element caption = chapter.getOwnerDocument().createElement("CAPTION");
+                        caption.setAttribute("vref", String.valueOf(nextVerse));
+                        // footnotes in captions are not supported in Zefania XML
+                        if (elem.getLastChild().getNodeName().equals("note"))
+                            elem.removeChild(elem.getLastChild());
+                        caption.appendChild(chapter.getOwnerDocument().createTextNode(getTextChildren(elem)));
+                        chapter.appendChild(caption);
+                    }
                 } else if (elem.getNodeName().equals("br")) {
                     if(verse != null) {
                         Element br = verse.getOwnerDocument().createElement("BR");
@@ -277,7 +287,7 @@ public class ZefaniaConverter {
                         flattenChildren(elem);
                         note.appendChild(note.getOwnerDocument().createTextNode(getTextChildren(elem)));
                         normalizeWhitespace(note);
-                    } else if (beforeVerse) {
+                    } else if (nextVerse == 1) {
                         if (prolog == null) {
                             prolog = chapter.getOwnerDocument().createElement("PROLOG");
                             chapter.appendChild(prolog);
@@ -293,7 +303,6 @@ public class ZefaniaConverter {
                         throw new IllegalStateException("note tag at invalid location");
                     }
                 } else if (elem.getNodeName().equals("verse")) {
-                    beforeVerse = false;
                     String osisID = elem.getAttribute("osisID");
                     if (osisID.isEmpty())
                         osisID = null;
@@ -311,6 +320,7 @@ public class ZefaniaConverter {
                         verse = chapter.getOwnerDocument().createElement("VERS");
                         chapter.appendChild(verse);
                         verse.setAttribute("vnumber", sID.substring(chapterName.length() + 1));
+                        nextVerse = Integer.parseInt(verse.getAttribute("vnumber")) + 1;
                     } else if (osisID == null && sID == null && eID != null) {
                         if (verse == null) {
                             throw new IllegalStateException("Closing verse that is not open");
