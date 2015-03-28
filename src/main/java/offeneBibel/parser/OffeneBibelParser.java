@@ -575,7 +575,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     public Rule TextParenthesis() {
         return Sequence(
-            '(', peek().appendChild(new ObTextNode(match())),
+            '(', TestNot('/'), peek().appendChild(new ObTextNode(match())),
             OneOrMore(FirstOf(
                     BibleText(),
                     Verse(),
@@ -634,11 +634,13 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 TestNot('/'),
                 TextChar()
             ),
+            Optional(
             '/',
+            TestNot(')'),
             OneOrMore(
                 TestNot('/'),
                 TextChar()
-            ),
+            )),
             "/)"
         );
     }
