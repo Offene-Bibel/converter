@@ -444,14 +444,13 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 ZeroOrMore(AnyOf("αβγδεζηθικλμνξοπρςστυφχψω")),
                 "</i></sup></span>"
             ),
-            // ((blabla))
+            // ((blabla)), only in Studienfassung (breaks headlines in Lesefassung)
             Sequence(
+                    ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.studienfassung),
                     "((",createOrAppendTextNode(match()),
                     ScriptureText(),
                     "))",createOrAppendTextNode(match())
                 ),
-            // superscript slash (Lesefassung Mk. 7,15)
-            Sequence("<sup>/</sup>", createOrAppendTextNode("/")),
             // non-breaking spaces
             Sequence("&#160;", createOrAppendTextNode(" ")),
             // nowiki tags
@@ -461,8 +460,6 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 createOrAppendTextNode(match()),
                 "</nowiki>"
             ),
-            // underscores (Psalm 90)
-            Sequence("_", createOrAppendTextNode("_")),
             // Asterisk (Markus 15)
             Sequence("*", createOrAppendTextNode("*")),
             // empty footnotes (Genesis 10, 1Chronik 1, Johannes 15, Jakobus 1)
@@ -575,7 +572,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     public Rule TextParenthesis() {
         return Sequence(
-            '(', TestNot('/'), peek().appendChild(new ObTextNode(match())),
+            '(', TestNot('/'), TestNot('('), peek().appendChild(new ObTextNode(match())),
             OneOrMore(FirstOf(
                     BibleText(),
                     Verse(),
