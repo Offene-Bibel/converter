@@ -314,7 +314,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             if(m_quoteCounter>0)
                 m_quoteCounter--;
             if (m_unmilestonedLineGroup) {
-                m_currentFassung.append("<q eID=\""+m_qTagStart+m_qTagCounter+"\"/>");
+                m_currentFassung.append("<q marker=\"\" eID=\""+m_qTagStart+m_qTagCounter+"\"/>");
             } else {
                 m_currentFassung.append("</q>");
             }
