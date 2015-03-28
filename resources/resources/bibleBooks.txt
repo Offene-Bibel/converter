@@ -17,7 +17,7 @@ Nehemia,Neh,13,Nehemia
 Ester,Esth,10,Ester
 Ijob,Job,42,Ijob
 Psalm,Ps,150,Psalm
-Sprichwörter,Prov,31,Sprüche,Spr
+Sprichwörter,Prov,31,Sprichwörter,Sprüche,Spr
 Kohelet,Eccl,12,Kohelet
 Hohelied,Song,8,Hohelied
 Jesaja,Isa,66,Jesaja
@@ -68,7 +68,7 @@ Baruch,Bar,6,Baruch
 Judit,Jdt,16,Judit
 1 Makkabäer,1Macc,16,1 Makkabäer,1_Makkabäer,1Makkabäer
 2 Makkabäer,2Macc,15,2 Makkabäer,2_Makkabäer,2Makkabäer
-Jesus Sirach,Sir,51,Jesus Sirach
+Jesus Sirach,Sir,51,Jesus Sirach,Jesus_Sirach
 Tobit,Tob,14,Tobit
 Weisheit,Wis,19,Weisheit
 2 Esdras,2Esd,0,2 Esdras,2_Esdras,2Esdras
