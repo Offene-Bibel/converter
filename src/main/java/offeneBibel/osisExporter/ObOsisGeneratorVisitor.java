@@ -134,17 +134,26 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
         else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
             if(m_skipVerse) return;
-            m_currentFassung.append("(");
+            if (node.isDescendantOf(ObAstNode.NodeType.note))
+                m_currentFassung.append("(");
+            else
+                m_currentFassung.append("<seg type=\"x-alternative\">(");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
             if(m_skipVerse) return;
-            m_currentFassung.append("[");
+            if (node.getParent().isDescendantOf(ObAstNode.NodeType.insertion) || node.isDescendantOf(ObAstNode.NodeType.omission))
+                m_currentFassung.append("[");
+            else
+                m_currentFassung.append("<transChange type=\"added\">[");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.omission) {
             if(m_skipVerse) return;
-            m_currentFassung.append("{");
+            if (node.getParent().isDescendantOf(ObAstNode.NodeType.omission) || node.isDescendantOf(ObAstNode.NodeType.insertion))
+                m_currentFassung.append("{");
+            else
+                m_currentFassung.append("<transChange type=\"deleted\">{");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.heading) {
@@ -327,17 +336,26 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
         else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
             if(m_skipVerse) return;
-            m_currentFassung.append(")");
+            if (node.isDescendantOf(ObAstNode.NodeType.note))
+                m_currentFassung.append(")");
+            else
+                m_currentFassung.append(")</seg>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
             if(m_skipVerse) return;
-            m_currentFassung.append("]");
+            if (node.getParent().isDescendantOf(ObAstNode.NodeType.insertion) || node.isDescendantOf(ObAstNode.NodeType.omission))
+                m_currentFassung.append("]");
+            else
+                m_currentFassung.append("]</transChange>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.omission) {
             if(m_skipVerse) return;
-            m_currentFassung.append("}");
+            if (node.getParent().isDescendantOf(ObAstNode.NodeType.omission) || node.isDescendantOf(ObAstNode.NodeType.insertion))
+                m_currentFassung.append("}");
+            else
+                m_currentFassung.append("}</transChange>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.heading) {

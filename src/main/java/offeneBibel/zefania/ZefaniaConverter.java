@@ -373,7 +373,7 @@ public class ZefaniaConverter {
                 else
                     parent.insertBefore(parent.getOwnerDocument().createElement("br"), node.getNextSibling());
             }
-            if (Arrays.asList("q", "foreign", "lg", "l", "divineName").contains(node.getNodeName())) {
+            if (Arrays.asList("q", "foreign", "lg", "l", "divineName", "seg", "transChange").contains(node.getNodeName())) {
                 while (node.getFirstChild() != null) {
                     Node child = node.getFirstChild();
                     node.removeChild(child);
