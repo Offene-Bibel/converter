@@ -259,6 +259,19 @@ public class ZefaniaConverter {
                         br.setAttribute("art", "x-nl");
                         verse.appendChild(br);
                     }
+                } else if (elem.getNodeName().equals("divineName")) {
+                    Element parent = nextVerse == 1 ? prolog : verse;
+                    if (parent == null)
+                        throw new IllegalStateException("divineName at invalid location");
+                    addStyle(parent, "divineName", "osis-style: divine-name; font-variant: small-caps; color: red;", getTextChildren(elem));
+                } else if (elem.getNodeName().equals("seg")) {
+                    if (verse == null)
+                        throw new IllegalStateException("seg at invalid location");
+                    parseStructuredText(verse, elem);
+                } else if (elem.getNodeName().equals("transChange")) {
+                    if (verse == null)
+                        throw new IllegalStateException("transChange at invalid location");
+                    parseStructuredText(verse, elem);
                 } else if (elem.getNodeName().equals("note")) {
                     if (elem.getAttribute("type").equals("crossReference")) {
                         if (verse != null) {
@@ -293,12 +306,8 @@ public class ZefaniaConverter {
                             chapter.appendChild(prolog);
                         }
                         // NOTE tag not allowed; abuse STYLE for it :)
-                        Element note = prolog.getOwnerDocument().createElement("STYLE");
-                        prolog.appendChild(note);
-                        note.setAttribute("fs", "italic");
                         flattenChildren(elem);
-                        note.appendChild(note.getOwnerDocument().createTextNode("["+getTextChildren(elem)+"]"));
-                        normalizeWhitespace(note);
+                        addStyle(prolog, "italic", null, "["+getTextChildren(elem)+"]");
                     } else {
                         throw new IllegalStateException("note tag at invalid location");
                     }
@@ -343,6 +352,124 @@ public class ZefaniaConverter {
         }
     }
 
+    private static void addStyle(Element parent, String fs, String css, String text) {
+        Element style = parent.getOwnerDocument().createElement("STYLE");
+        if (fs != null)
+            style.setAttribute("fs", fs);
+        if (css != null)
+            style.setAttribute("css", css);
+        style.appendChild(style.getOwnerDocument().createTextNode(text));
+        parent.appendChild(style);
+        normalizeWhitespace(style);
+    }
+
+    private static void parseStructuredText(Element parent, Element textElem) {
+        String fs, css;
+        if (textElem.getNodeName().equals("seg") && textElem.getAttribute("type").equals("x-alternative")) {
+            fs = null;
+            css = "osis-style: alternative; color: gray;";
+        } else if (textElem.getNodeName().equals("transChange") && textElem.getAttribute("type").equals("added")) {
+            fs = "italic";
+            css = "osis-style: added; font-style:italic;";
+        } else if (textElem.getNodeName().equals("transChange") && textElem.getAttribute("type").equals("deleted")) {
+            fs = "line-through";
+            css = "osis-style: deleted; text-decoration: line-through; color: gray;";
+        } else {
+            throw new IllegalStateException("Invalid " + textElem.getNodeName() + " type: " + textElem.getAttribute("type"));
+        }
+        addStyle(parent, fs, css, "");
+        Element style = (Element) parent.getLastChild();
+        flattenChildren(textElem);
+        for (Node node = textElem.getFirstChild(); node != null; node = node.getNextSibling()) {
+            if (node instanceof Text) {
+                style.appendChild(style.getOwnerDocument().importNode(node, true));
+            } else {
+                Element elem = (Element) node;
+                if (elem.getNodeName().equals("br")) {
+                    Element br = style.getOwnerDocument().createElement("BR");
+                    br.setAttribute("art", "x-nl");
+                    style.appendChild(br);
+
+                } else if (elem.getNodeName().equals("divineName")) {
+                    addStyle(style, "divineName", "osis-style: divine-name; font-variant: small-caps; color: red;", getTextChildren(elem));
+                } else if (elem.getNodeName().equals("seg")) {
+                    parseStructuredText(style, elem);
+                } else if (elem.getNodeName().equals("transChange")) {
+                    parseStructuredText(style, elem);
+                } else if (elem.getNodeName().equals("note")) {
+                    if (elem.getAttribute("type").equals("crossReference")) {
+                        Element note = style.getOwnerDocument().createElement("XREF");
+                        style.appendChild(note);
+                        StringBuilder fscope = new StringBuilder();
+                        for (String ref : elem.getTextContent().split("\\|")) {
+                            Matcher m = xrefPattern.matcher(ref);
+                            if (!m.matches())
+                                throw new IllegalStateException("Malformed cross reference: " + ref);
+                            if (fscope.length() > 0)
+                                fscope.append("; ");
+                            String book = m.group(1);
+                            if (zefBooks.containsKey(book))
+                                book = zefBooks.get(book)[2];
+                            fscope.append(book).append(m.group(2));
+                        }
+                        note.setAttribute("fscope", fscope.toString());
+                    } else {
+                        Element note = style.getOwnerDocument().createElement("NOTE");
+                        style.appendChild(note);
+                        note.setAttribute("type", "x-studynote");
+                        flattenChildren(elem);
+                        note.appendChild(note.getOwnerDocument().createTextNode(getTextChildren(elem)));
+                        normalizeWhitespace(note);
+                    }
+                } else {
+                    throw new IllegalStateException("invalid structured element level tag: " + elem.getNodeName());
+                }
+            }
+        }
+        normalizeWhitespace(style);
+
+        // push whitespace into style nodes (to work around bug in MyBible and potentially others)
+        for (Node node = style.getFirstChild(); node != null; node = node.getNextSibling()) {
+            if (node instanceof Text && node.getTextContent().length() > 0 && node.getTextContent().trim().length() == 0) {
+                if (node.getPreviousSibling() != null && node.getPreviousSibling() instanceof Element && node.getPreviousSibling().getNodeName().equals("STYLE")) {
+                    Element styleNode = (Element)node.getPreviousSibling();
+                    styleNode.setAttribute("css", style.getAttribute("css")+" zef-whitespace-after: true;");
+                    styleNode.appendChild(node);
+                    node = styleNode;
+                } else if (node.getNextSibling() != null && node.getNextSibling() instanceof Element && node.getNextSibling().getNodeName().equals("STYLE")) {
+                    Element styleNode = (Element) node.getNextSibling();
+                    styleNode.setAttribute("css", style.getAttribute("css")+" zef-whitespace-before: true;");
+                    styleNode.insertBefore(node, styleNode.getFirstChild());
+                } else {
+                    throw new IllegalStateException("Unable to push whitespace into style");
+                }
+            }
+        }
+
+        // hoist nested notes and xrefs
+        for (Node node = style.getFirstChild(); node != null; node = node.getNextSibling()) {
+            if (node instanceof Text)
+                continue;
+            Element elem = (Element) node;
+            if (!elem.getNodeName().equals("NOTE") && !elem.getNodeName().equals("XREF"))
+                continue;
+            style.setAttribute("css", style.getAttribute("css") + " zef-hoist-after: true;");
+            Node nextNode = node.getNextSibling();
+            style.removeChild(elem);
+            parent.appendChild(elem);
+            addStyle(parent, fs, css + " zef-hoist-before: true;", "");
+            Element newStyle = (Element) parent.getLastChild();
+            while (nextNode != null) {
+                node = nextNode.getNextSibling();
+                style.removeChild(nextNode);
+                newStyle.appendChild(nextNode);
+                nextNode = node;
+            }
+            style = newStyle;
+            node = style.getFirstChild();
+        }
+    }
+
     private static void normalizeWhitespace(Element parent) {
         for (Node node = parent.getFirstChild(); node != null; node = node.getNextSibling()) {
             if (!(node instanceof Text))
@@ -373,7 +500,7 @@ public class ZefaniaConverter {
                 else
                     parent.insertBefore(parent.getOwnerDocument().createElement("br"), node.getNextSibling());
             }
-            if (Arrays.asList("q", "foreign", "lg", "l", "divineName", "seg", "transChange").contains(node.getNodeName())) {
+            if (Arrays.asList("q", "foreign", "lg", "l").contains(node.getNodeName())) {
                 while (node.getFirstChild() != null) {
                     Node child = node.getFirstChild();
                     node.removeChild(child);

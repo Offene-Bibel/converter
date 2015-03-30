@@ -303,7 +303,6 @@ public class ESwordConverter {
 
     private static String parseVerse(Element verseElement, String vref, BufferedWriter cmtx, Element prologElement) throws IOException {
         boolean hasCommentary = false;
-        boolean strikeOutOpen = false;
         StringBuilder verse = new StringBuilder(vref + " ");
         StringBuilder comments = new StringBuilder("<p><span style=\"background-color:#FF0000;\">\u00F7</span>" + vref + "</p>\n<p>");
         if (prologElement != null) {
@@ -332,25 +331,8 @@ public class ESwordConverter {
             if (node instanceof Text) {
                 String txt = ((Text) node).getTextContent();
                 txt = txt.replace("&", "&amp").replace("<", "&lt;").replace(">", "&gt;").replaceAll("[ \t\r\n]+", " ");
-                if (strikeOutOpen) {
-                    strikeOutOpen = false;
-                    txt = "{" + txt;
-                }
-                while (txt.contains("{")) {
-                    int pos1 = txt.indexOf('{'), pos2 = txt.indexOf('}');
-                    if (pos2 == -1 && !strikeOutOpen) {
-                        txt += "}";
-                        strikeOutOpen = true;
-                        pos2 = txt.indexOf('}');
-                    }
-                    if (pos2 < pos1)
-                        throw new IOException(txt);
-                    txt = txt.substring(0, pos1) +
-                            "<span style=\"text-decoration:line-through;\">(" +
-                            txt.substring(pos1 + 1, pos2) +
-                            ")</span>" +
-                            txt.substring(pos2 + 1);
-                }
+                if (txt.contains("{"))
+                    throw new IllegalStateException();
                 verse.append(txt);
                 comments.append("<b>" + txt + "</b>");
             } else {
@@ -376,17 +358,41 @@ public class ESwordConverter {
                     }
                     comments.append(")</p>\n<p class=\"spc\">");
                     hasCommentary = true;
+                } else if (elem.getNodeName().equals("STYLE")) {
+                    StringBuilder styleContent = new StringBuilder();
+                    appendStyle(styleContent, elem);
+                    verse.append(styleContent.toString());
+                    comments.append("<b>"+styleContent.toString()+"</b>");
                 } else {
                     throw new IllegalStateException("invalid verse level tag: " + elem.getNodeName());
                 }
             }
         }
-        if (strikeOutOpen)
-            throw new IOException();
         if (hasCommentary) {
             comments.append("</p>\n");
             cmtx.write(comments.toString());
         }
         return verse.toString();
+    }
+
+    private static void appendStyle(StringBuilder styleContent, Element styleElement) {
+        styleContent.append("<span style=\"" + styleElement.getAttribute("css") + "\">");
+        for (Node node = styleElement.getFirstChild(); node != null; node = node.getNextSibling()) {
+            if (node instanceof Text) {
+                String txt = ((Text) node).getTextContent();
+                txt = txt.replace("&", "&amp").replace("<", "&lt;").replace(">", "&gt;").replaceAll("[ \t\r\n]+", " ").replace('{', '(').replace('}', ')');
+                styleContent.append(txt);
+            } else {
+                Element elem = (Element) node;
+                if (elem.getNodeName().equals("BR")) {
+                    styleContent.append("<br />");
+                } else if (elem.getNodeName().equals("STYLE")) {
+                    appendStyle(styleContent, elem);
+                } else {
+                    throw new IllegalStateException("invalid style level tag: " + elem.getNodeName());
+                }
+            }
+        }
+        styleContent.append("</span>");
     }
 }

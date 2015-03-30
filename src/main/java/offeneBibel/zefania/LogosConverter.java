@@ -257,12 +257,35 @@ public class LogosConverter {
 							book = LOGOS_BOOKS[bookIdx];
 						verse.append("<sup>[[ ℘  &gt;&gt; " + getVerseMap(book) + ":" + book + " " + m.group(2) + ":" + m.group(3) + "]]</sup>");
 					}
+				} else if (elem.getNodeName().equals("STYLE")) {
+					parseStyle(verse, elem);
 				} else {
 					throw new IllegalStateException("invalid verse level tag: " + elem.getNodeName());
 				}
 			}
 		}
 		return verse.toString();
+	}
+
+	private static void parseStyle(StringBuilder content, Element styleElement) {
+		content.append("<span style=\""+styleElement.getAttribute("css")+"\">");
+		for (Node node = styleElement.getFirstChild(); node != null; node = node.getNextSibling()) {
+			if (node instanceof Text) {
+				String txt = ((Text) node).getTextContent();
+				txt = txt.replace("&", "&amp").replace("<", "&lt;").replace(">", "&gt;").replaceAll("[ \t\r\n]+", " ");
+				content.append(txt);
+			} else {
+				Element elem = (Element) node;
+				if (elem.getNodeName().equals("BR")) {
+					content.append("<br />");
+				} else if (elem.getNodeName().equals("STYLE")) {
+					parseStyle(content, elem);
+				} else {
+					throw new IllegalStateException("invalid STYLE level tag: " + elem.getNodeName());
+				}
+			}
+		}
+		content.append("</span>");
 	}
 
 	private static String getVerseMap(String book) {
