@@ -143,7 +143,7 @@ public class LogosConverter {
 		try (BufferedWriter bblx = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(Misc.getResultsDir(), identifier + ".logos.html"))))) {
 			bblx.write("<html><head>\n" +
 					"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\" />\n" +
-					"<style>body, h1, h2, h3 { font-family: \"Times New Roman\";}</style>\n"+
+					"<style>body, h1, h2, h3, h4 { font-family: \"Times New Roman\";}</style>\n"+
 					"</head><body lang=\"de-DE\">\n" +
 					"<h1>" + title + "</h1>\n" +
 					description + "<br />Lizenz: " + rights + "\n");
@@ -176,13 +176,16 @@ public class LogosConverter {
 					String chapterRef = "@" + getVerseMap(babbr) + ":" + babbr + " " + cnumber;
 					bblx.write("<h3>[[" + chapterRef + "]]Kapitel " + cnumber + "</h3>\n");
 					footnoteTextCounter.reset();
-					Element prolog = null;
+					Element prolog = null, caption = null;
 					for (Node verseNode = chapterElement.getFirstChild(); verseNode != null; verseNode = verseNode.getNextSibling()) {
 						if (verseNode instanceof Text)
 							continue;
 						Element verseElement = (Element) verseNode;
 						if (verseElement.getNodeName().equals("PROLOG")) {
 							prolog = verseElement;
+							continue;
+						} else if (verseElement.getNodeName().equals("CAPTION")) {
+							caption = verseElement;
 							continue;
 						}
 						if (!verseElement.getNodeName().equals("VERS"))
@@ -211,10 +214,15 @@ public class LogosConverter {
 							bblx.write("\n<br/>\n");
 						}
 
+						if (caption != null) {
+							bblx.write("<h4>"+caption.getTextContent()+"</h4>\n");
+						}
+
 						int vnumber = Integer.parseInt(verseElement.getAttribute("vnumber"));
 						String vref = chapterRef + ":" + vnumber;
 						bblx.write("<br />[[" + vref + "]]<b>" + vnumber + "</b> {{field-on:bible}}" + parseVerse(verseElement, footnotes) + "{{field-off:bible}}\n");
 						prolog = null;
+						caption = null;
 					}
 				}
 			}
@@ -249,12 +257,35 @@ public class LogosConverter {
 							book = LOGOS_BOOKS[bookIdx];
 						verse.append("<sup>[[ ℘  &gt;&gt; " + getVerseMap(book) + ":" + book + " " + m.group(2) + ":" + m.group(3) + "]]</sup>");
 					}
+				} else if (elem.getNodeName().equals("STYLE")) {
+					parseStyle(verse, elem);
 				} else {
 					throw new IllegalStateException("invalid verse level tag: " + elem.getNodeName());
 				}
 			}
 		}
 		return verse.toString();
+	}
+
+	private static void parseStyle(StringBuilder content, Element styleElement) {
+		content.append("<span style=\""+styleElement.getAttribute("css")+"\">");
+		for (Node node = styleElement.getFirstChild(); node != null; node = node.getNextSibling()) {
+			if (node instanceof Text) {
+				String txt = ((Text) node).getTextContent();
+				txt = txt.replace("&", "&amp").replace("<", "&lt;").replace(">", "&gt;").replaceAll("[ \t\r\n]+", " ");
+				content.append(txt);
+			} else {
+				Element elem = (Element) node;
+				if (elem.getNodeName().equals("BR")) {
+					content.append("<br />");
+				} else if (elem.getNodeName().equals("STYLE")) {
+					parseStyle(content, elem);
+				} else {
+					throw new IllegalStateException("invalid STYLE level tag: " + elem.getNodeName());
+				}
+			}
+		}
+		content.append("</span>");
 	}
 
 	private static String getVerseMap(String book) {

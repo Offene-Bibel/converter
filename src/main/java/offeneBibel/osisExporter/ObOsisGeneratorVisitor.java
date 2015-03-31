@@ -17,6 +17,9 @@
 
 package offeneBibel.osisExporter;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.ObFassungNode;
 import offeneBibel.parser.ObFassungNode.FassungType;
@@ -38,6 +41,9 @@ import java.util.regex.Pattern;
  */
 public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> implements IVisitor<ObAstNode>
 {
+
+    private static final Pattern DIVINE_NAME_PATTERN = Pattern.compile("JHWH|(JAHWE|HERR|GOTT)[A-Z]*");
+
     private final int m_chapter;
     private final String m_book;
 
@@ -148,17 +154,26 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
         else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
             if(m_skipVerse) return;
-            m_currentFassung.append("(");
+            if (node.isDescendantOf(ObAstNode.NodeType.note))
+                m_currentFassung.append("(");
+            else
+                m_currentFassung.append("<seg type=\"x-alternative\">(");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
             if(m_skipVerse) return;
-            m_currentFassung.append("[");
+            if (node.getParent().isDescendantOf(ObAstNode.NodeType.insertion) || node.isDescendantOf(ObAstNode.NodeType.omission))
+                m_currentFassung.append("[");
+            else
+                m_currentFassung.append("<transChange type=\"added\">[");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.omission) {
             if(m_skipVerse) return;
-            m_currentFassung.append("{");
+            if (node.getParent().isDescendantOf(ObAstNode.NodeType.omission) || node.isDescendantOf(ObAstNode.NodeType.insertion))
+                m_currentFassung.append("{");
+            else
+                m_currentFassung.append("<transChange type=\"deleted\">{");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.heading) {
@@ -193,6 +208,27 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             textString = textString.replaceAll("&", "&amp;");
             textString = textString.replaceAll(">", "&gt;");
             textString = textString.replaceAll("<", "&lt;");
+
+            // pretty print divine names
+            if (!node.isDescendantOf(ObNoteNode.class)) {
+                if (textString.contains("|")) {
+                    textString = textString.replaceAll("\\|([^ |]+)\\|", "<divineName>$1</divineName>").replace("|", "");
+                }
+                Matcher m = DIVINE_NAME_PATTERN.matcher(textString);
+                StringBuffer sb = null;
+                if (m.find()) {
+                    if (sb == null)
+                        sb = new StringBuffer(textString.length());
+                    String name = m.group();
+                    if (!name.equals("JHWH"))
+                        name = name.substring(0,1)+name.substring(1).toLowerCase();
+                    m.appendReplacement(sb, "<divineName>"+name+"</divineName>");
+                }
+                if (sb != null) {
+                    m.appendTail(sb);
+                    textString = sb.toString();
+                }
+            }
 
             if(m_poemMode && ! node.isDescendantOf(ObNoteNode.class)) {
                 if(textString.contains("\n")) {
@@ -310,7 +346,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             if(m_quoteCounter>0)
                 m_quoteCounter--;
             if (m_unmilestonedLineGroup) {
-                m_currentFassung.append("<q eID=\""+m_qTagStart+m_qTagCounter+"\"/>");
+                m_currentFassung.append("<q marker=\"\" eID=\""+m_qTagStart+m_qTagCounter+"\"/>");
             } else {
                 m_currentFassung.append("</q>");
             }
@@ -323,17 +359,26 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
         else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
             if(m_skipVerse) return;
-            m_currentFassung.append(")");
+            if (node.isDescendantOf(ObAstNode.NodeType.note))
+                m_currentFassung.append(")");
+            else
+                m_currentFassung.append(")</seg>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
             if(m_skipVerse) return;
-            m_currentFassung.append("]");
+            if (node.getParent().isDescendantOf(ObAstNode.NodeType.insertion) || node.isDescendantOf(ObAstNode.NodeType.omission))
+                m_currentFassung.append("]");
+            else
+                m_currentFassung.append("]</transChange>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.omission) {
             if(m_skipVerse) return;
-            m_currentFassung.append("}");
+            if (node.getParent().isDescendantOf(ObAstNode.NodeType.omission) || node.isDescendantOf(ObAstNode.NodeType.insertion))
+                m_currentFassung.append("}");
+            else
+                m_currentFassung.append("}</transChange>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.heading) {
