@@ -95,6 +95,7 @@ public class Validator {
 	                node.host(new EmptyVerseFixupVisitor());
 	        		ObWebsiteDbVisitor visitor = new ObWebsiteDbVisitor();
 	        		node.host(visitor);
+	        		System.out.println("valid");
 	                System.out.println(visitor.getResult());
 	        	}
 	        	else {
