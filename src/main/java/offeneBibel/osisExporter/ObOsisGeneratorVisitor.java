@@ -69,8 +69,6 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
      */
     private boolean m_poemMode = false;
 
-    private boolean m_inNote = false;
-
     /**
      * If in poem mode and a textual line has started, this is true.
      * It is used to securely add the final </l> tag after the last line
@@ -174,8 +172,6 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
         else if(node.getNodeType() == ObAstNode.NodeType.note) {
             if(m_skipVerse) return;
-            // I do hope notes don't cross verse boundaries...
-            m_inNote = true;
             m_currentFassung.append("<note type=\"x-footnote\" n=\"" + m_noteIndexCounter.getNextNoteString() + "\">");
         }
     }
@@ -189,7 +185,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             String textString = text.getText();
 
             // Tag greek.
-            if(m_inNote)
+            if (node.isDescendantOf(ObAstNode.NodeType.note))
                 textString = tagGreek(textString);
 
             // Escaping &<> has to happen *before* inserting <l> tags.
@@ -351,7 +347,6 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
         else if(node.getNodeType() == ObAstNode.NodeType.note) {
             if(m_skipVerse) return;
-            m_inNote = false;
             m_currentFassung.append("</note>");
         }
     }
