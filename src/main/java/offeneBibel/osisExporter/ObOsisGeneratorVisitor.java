@@ -1,3 +1,20 @@
+/* Copyright (C) 2013-2015 Patrick Zimmermann, Michael Schierl
+ *
+ * This file is part of converter.
+ *
+ * converter is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
+ *
+ * converter is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License 3 for more details.
+ *
+ * You should have received a copy of the GNU General Public License 3
+ * along with converter.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package offeneBibel.osisExporter;
 
 import offeneBibel.parser.ObAstNode;
@@ -10,6 +27,9 @@ import offeneBibel.parser.ObVerseNode;
 import offeneBibel.parser.ObVerseStatus;
 import offeneBibel.visitorPattern.DifferentiatingVisitor;
 import offeneBibel.visitorPattern.IVisitor;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This visitor constructs a Studienfassung and Lesefassung from an AST tree.
@@ -184,7 +204,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                 }
             }
 
-            m_currentFassung.append(textString);
+            m_currentFassung.append(tagForeign(textString));
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.verse) {
@@ -374,6 +394,28 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         ++m_lgTagCounter;
         return "<lg sID=\"" + m_lgTag + "\"/>";
     }
+
+	private static final Pattern NO_GREEK_OR_HEBREW = Pattern.compile("[\\P{IsGreek}&&\\P{IsHebrew}]*");
+	private static final Pattern FIND_HEBREW = Pattern.compile("[\\p{IsHebrew}]+([\\p{IsCommon}]+[\\p{IsHebrew}]+)*");
+	private static final Pattern FIND_GREEK = Pattern.compile("[\\p{IsGreek}]+([\\p{IsCommon}]+[\\p{IsGreek}]+)*");
+
+	private static String tagForeign(String str) {
+		// fast path for when every character is neither greek nor hebrew
+		if (NO_GREEK_OR_HEBREW.matcher(str).matches())
+			return str;
+		// do the tagging
+		return tagOne(tagOne(str, FIND_HEBREW, "he-IL"), FIND_GREEK, "el-GR");
+	}
+
+	private static String tagOne(String str, Pattern pattern, String languageCode) {
+		Matcher m = pattern.matcher(str);
+		StringBuffer result = new StringBuffer(str.length());
+		while (m.find()) {
+			m.appendReplacement(result, "<foreign xml:lang=\"" + languageCode + "\">$0</foreign>");
+		}
+		m.appendTail(result);
+		return result.toString();
+	}
 
     class QuoteSearcher implements IVisitor<ObAstNode>
     {
