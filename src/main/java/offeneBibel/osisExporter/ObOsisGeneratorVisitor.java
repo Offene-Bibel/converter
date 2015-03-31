@@ -67,7 +67,9 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
      * there actually was some text. A </l> is added after the last text
      * block too.
      */
-    private boolean m_poemMode;
+    private boolean m_poemMode = false;
+
+    private boolean m_inNote = false;
 
     /**
      * If in poem mode and a textual line has started, this is true.
@@ -172,6 +174,8 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
         else if(node.getNodeType() == ObAstNode.NodeType.note) {
             if(m_skipVerse) return;
+            // I do hope notes don't cross verse boundaries...
+            m_inNote = true;
             m_currentFassung.append("<note type=\"x-footnote\" n=\"" + m_noteIndexCounter.getNextNoteString() + "\">");
         }
     }
@@ -183,7 +187,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             if(m_skipVerse) return;
             ObTextNode text = (ObTextNode)node;
             String textString = text.getText();
-            
+
+            // Tag greek.
+            if(m_inNote)
+                textString = tagGreek(textString);
+
             // Escaping &<> has to happen *before* inserting <l> tags.
             // Otherwise they would be replaced too.
             textString = textString.replaceAll("&", "&amp;");
@@ -203,8 +211,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                     }
                 }
             }
-
-            m_currentFassung.append(tagForeign(textString));
+            m_currentFassung.append(textString);
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.verse) {
@@ -344,6 +351,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
         else if(node.getNodeType() == ObAstNode.NodeType.note) {
             if(m_skipVerse) return;
+            m_inNote = false;
             m_currentFassung.append("</note>");
         }
     }
@@ -395,23 +403,13 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         return "<lg sID=\"" + m_lgTag + "\"/>";
     }
 
-	private static final Pattern NO_GREEK_OR_HEBREW = Pattern.compile("[\\P{IsGreek}&&\\P{IsHebrew}]*");
-	private static final Pattern FIND_HEBREW = Pattern.compile("[\\p{IsHebrew}]+([\\p{IsCommon}]+[\\p{IsHebrew}]+)*");
 	private static final Pattern FIND_GREEK = Pattern.compile("[\\p{IsGreek}]+([\\p{IsCommon}]+[\\p{IsGreek}]+)*");
 
-	private static String tagForeign(String str) {
-		// fast path for when every character is neither greek nor hebrew
-		if (NO_GREEK_OR_HEBREW.matcher(str).matches())
-			return str;
-		// do the tagging
-		return tagOne(tagOne(str, FIND_HEBREW, "he-IL"), FIND_GREEK, "el-GR");
-	}
-
-	private static String tagOne(String str, Pattern pattern, String languageCode) {
-		Matcher m = pattern.matcher(str);
+	private static String tagGreek(String str) {
+		Matcher m = FIND_GREEK.matcher(str);
 		StringBuffer result = new StringBuffer(str.length());
 		while (m.find()) {
-			m.appendReplacement(result, "<foreign xml:lang=\"" + languageCode + "\">$0</foreign>");
+			m.appendReplacement(result, "<foreign xml:lang=\"grc\">$0</foreign>");
 		}
 		m.appendTail(result);
 		return result.toString();
