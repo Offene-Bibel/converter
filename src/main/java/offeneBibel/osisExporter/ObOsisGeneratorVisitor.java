@@ -189,6 +189,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             if(m_skipVerse) return;
             m_currentFassung.append("<note type=\"x-footnote\" n=\"" + m_noteIndexCounter.getNextNoteString() + "\">");
         }
+
+        else if(node.getNodeType() == ObAstNode.NodeType.italics) {
+            if (m_skipVerse) return;
+            m_currentFassung.append("<hi type=\"italic\">");
+        }
     }
 
     @Override
@@ -199,15 +204,15 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             ObTextNode text = (ObTextNode)node;
             String textString = text.getText();
 
-            // Tag greek.
-            if (node.isDescendantOf(ObAstNode.NodeType.note))
-                textString = tagGreek(textString);
-
             // Escaping &<> has to happen *before* inserting <l> tags.
             // Otherwise they would be replaced too.
             textString = textString.replaceAll("&", "&amp;");
             textString = textString.replaceAll(">", "&gt;");
             textString = textString.replaceAll("<", "&lt;");
+
+            // Tag greek.
+            if (node.isDescendantOf(ObAstNode.NodeType.note))
+                textString = tagGreek(textString);
 
             // pretty print divine names
             if (!node.isDescendantOf(ObNoteNode.class)) {
@@ -393,6 +398,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         else if(node.getNodeType() == ObAstNode.NodeType.note) {
             if(m_skipVerse) return;
             m_currentFassung.append("</note>");
+        }
+
+        else if(node.getNodeType() == ObAstNode.NodeType.italics) {
+            if (m_skipVerse) return;
+            m_currentFassung.append("</hi>");
         }
     }
 
