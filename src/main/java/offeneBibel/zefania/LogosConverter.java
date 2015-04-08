@@ -242,7 +242,7 @@ public class LogosConverter {
 			} else {
 				Element elem = (Element) node;
 				if (elem.getNodeName().equals("NOTE")) {
-					String content = elem.getTextContent();
+					String content = elem.getTextContent().replace("&", "&amp").replace("<", "&lt;").replace(">", "&gt;");
 					verse.append(buildFootnote(content, footnotes));
 				} else if (elem.getNodeName().equals("BR")) {
 					verse.append("<br />");
@@ -268,7 +268,32 @@ public class LogosConverter {
 	}
 
 	private static void parseStyle(StringBuilder content, Element styleElement) {
-		content.append("<span style=\""+styleElement.getAttribute("css")+"\">");
+		String css = styleElement.getAttribute("css");
+		String suffix = "</span>";
+		if (css.contains("osis-style: added;")) {
+			if (!css.contains("zef-hoist-before")) {
+				Text text = (Text) styleElement.getFirstChild();
+				String prefixBracket = "[";
+				if (!text.getNodeValue().startsWith(prefixBracket))
+					prefixBracket = " [";
+				if (!text.getNodeValue().startsWith(prefixBracket))
+					throw new IllegalStateException("Missing bracket at start of addition.");
+				text.setNodeValue(text.getNodeValue().substring(prefixBracket.length()));
+				content.append("<span style=\"font-weight: bold; color:gray;\">" + prefixBracket + "</span>");
+			}
+			if (!css.contains("zef-hoist-after")) {
+				Text text = (Text) styleElement.getLastChild();
+				String suffixBracket = "]";
+				if (!text.getNodeValue().endsWith(suffixBracket))
+					suffixBracket = "] ";
+				if (!text.getNodeValue().endsWith(suffixBracket))
+					throw new IllegalStateException("Missing bracket at end of addition.");
+				text.setNodeValue(text.getNodeValue().substring(0, text.getNodeValue().length() - suffixBracket.length()));
+				suffix += "<span style=\"font-weight: bold; color:gray;\">" + suffixBracket + "</span>";
+			}
+			css = "osis-style:added;";
+		}
+		content.append("<span style=\""+css+"\">");
 		for (Node node = styleElement.getFirstChild(); node != null; node = node.getNextSibling()) {
 			if (node instanceof Text) {
 				String txt = ((Text) node).getTextContent();
@@ -285,7 +310,7 @@ public class LogosConverter {
 				}
 			}
 		}
-		content.append("</span>");
+		content.append(suffix);
 	}
 
 	private static String getVerseMap(String book) {
