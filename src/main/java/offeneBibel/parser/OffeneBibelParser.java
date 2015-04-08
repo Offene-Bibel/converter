@@ -591,6 +591,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             OneOrMore(FirstOf(
                 ScriptureText(),
                 Quote(),
+                Sequence(ACTION(isRuleAncestor("Quote")), InnerQuote()),
                 Insertion(),
                 Alternative(),
                 AlternateReading(),
