@@ -41,6 +41,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import offeneBibel.parser.BookNameHelper;
 import offeneBibel.parser.ObAstFixuper;
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.ObVerseStatus;
@@ -287,6 +288,12 @@ public class Exporter
      */
     private List<Book> retrieveBooks() throws IOException
     {
+        List<String> bookFilter = new ArrayList<String>();
+        if (m_commandLineArguments.m_books.length() > 0) {
+            for(String bookName : m_commandLineArguments.m_books.split(",")) {
+                bookFilter.add(BookNameHelper.getInstance().getUnifiedBookNameForString(bookName));
+            }
+        }
         List<List<String>> bookDataList = Misc.readCsv(m_bibleBooks);
         List<Book>  bookDataCollection = new Vector<Book>();
         for(List<String> bookData : bookDataList) {
@@ -296,6 +303,10 @@ public class Exporter
             book.urlName = book.wikiName.replaceAll(" ", "_");
             book.osisName = bookData.get(1);
             book.chapterCount = Integer.parseInt(bookData.get(2));
+
+            if (bookFilter.size() > 0 && !bookFilter.contains(book.osisName)) {
+                continue;
+            }
 
             for(int i = 1; i <= book.chapterCount; ++i) {
                 Chapter chapter = new Chapter(book, i);
