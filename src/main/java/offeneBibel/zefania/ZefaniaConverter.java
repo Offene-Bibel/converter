@@ -500,7 +500,7 @@ public class ZefaniaConverter {
                 else
                     parent.insertBefore(parent.getOwnerDocument().createElement("br"), node.getNextSibling());
             }
-            if (Arrays.asList("q", "foreign", "lg", "l").contains(node.getNodeName())) {
+            if (Arrays.asList("q", "foreign", "lg", "l", "hi").contains(node.getNodeName())) {
                 while (node.getFirstChild() != null) {
                     Node child = node.getFirstChild();
                     node.removeChild(child);

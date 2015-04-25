@@ -28,6 +28,8 @@ public class LogosConverter {
 	public static void main(String[] args) throws Exception {
 		convert("offeneBibelStudienfassungZefania.xml");
 		convert("offeneBibelLesefassungZefania.xml");
+		convert("offeneBibelStudienfassungZefaniaMitHtmlFußnoten.xml");
+		convert("offeneBibelLesefassungZefaniaMitHtmlFußnoten.xml");
 	}
 
 	private static final Pattern xrefPattern = Pattern.compile("([A-Za-z0-9]+) ([0-9]+), ([0-9]+)");
@@ -197,7 +199,10 @@ public class LogosConverter {
 							for (Node node = prolog.getFirstChild(); node != null; node = node.getNextSibling()) {
 								if (node instanceof Text) {
 									String txt = ((Text) node).getTextContent();
-									txt = txt.replace("&", "&amp").replace("<", "&lt;").replace(">", "&gt;").replaceAll("[ \t\r\n]+", " ");
+									if (txt.startsWith("<html>"))
+										txt = txt.substring(6).replaceAll("[ \t\r\n]+", " ");
+									else
+										txt = txt.replace("&", "&amp").replace("<", "&lt;").replace(">", "&gt;").replaceAll("[ \t\r\n]+", " ");
 									bblx.write(tagForeign(txt));
 								} else {
 									Element elem = (Element) node;
@@ -242,7 +247,11 @@ public class LogosConverter {
 			} else {
 				Element elem = (Element) node;
 				if (elem.getNodeName().equals("NOTE")) {
-					String content = elem.getTextContent().replace("&", "&amp").replace("<", "&lt;").replace(">", "&gt;");
+					String txt = elem.getTextContent(), content;
+					if (txt.startsWith("<html>"))
+						content = txt.substring(6);
+					else
+						content = txt.replace("&", "&amp").replace("<", "&lt;").replace(">", "&gt;");
 					verse.append(buildFootnote(content, footnotes));
 				} else if (elem.getNodeName().equals("BR")) {
 					verse.append("<br />");
