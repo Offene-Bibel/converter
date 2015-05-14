@@ -132,7 +132,6 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             String end = ">";
             if (m_unmilestonedLineGroup) {
                 end = " sID=\"" + m_qTagStart + m_qTagCounter + "\"/>";
-                ++m_qTagCounter;
             }
             if(m_quoteCounter>0)
             {
@@ -393,6 +392,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
             if (m_unmilestonedLineGroup) {
                 m_currentFassung.append("<q marker=\"\" eID=\""+m_qTagStart+m_qTagCounter+"\"/>");
+                ++m_qTagCounter;
             } else {
                 m_currentFassung.append("</q>");
             }
