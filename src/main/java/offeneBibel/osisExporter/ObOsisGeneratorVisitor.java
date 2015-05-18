@@ -228,6 +228,14 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             if (m_skipVerse) return;
             m_currentFassung.append("<hi type=\"super\">");
         }
+        else if (node.getNodeType() == ObAstNode.NodeType.strikeThrough) {
+            if (m_skipVerse) return;
+            m_currentFassung.append("<hi type=\"line-through\">");
+        }
+        else if (node.getNodeType() == ObAstNode.NodeType.underline) {
+            if (m_skipVerse) return;
+            m_currentFassung.append("<hi type=\"underline\">");
+        }
     }
 
     @Override
@@ -454,6 +462,14 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             m_currentFassung.append("</hi>");
         }
         else if(node.getNodeType() == ObAstNode.NodeType.superScript) {
+            if (m_skipVerse) return;
+            m_currentFassung.append("</hi>");
+        }
+        else if(node.getNodeType() == ObAstNode.NodeType.strikeThrough) {
+            if (m_skipVerse) return;
+            m_currentFassung.append("</hi>");
+        }
+        else if(node.getNodeType() == ObAstNode.NodeType.underline) {
             if (m_skipVerse) return;
             m_currentFassung.append("</hi>");
         }

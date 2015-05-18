@@ -65,6 +65,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 Hebrew(),
                 WikiLink(),
                 NoteSuperScript(),
+                NoteStrikeThrough(),
+                NoteUnderline(),
                 Break(),
                 Note(),
                 Comment()
@@ -811,6 +813,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             Hebrew(),
             WikiLink(),
             NoteSuperScript(),
+            NoteStrikeThrough(),
+            NoteUnderline(),
             Break(),
             Comment()
         );
@@ -917,6 +921,28 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             push(new ObSuperScriptTextNode()),
             NoteText(new StringVar("</sup>")),
             "</sup>",
+            peek(1).appendChild(pop())
+        );
+    }
+    
+    public Rule NoteStrikeThrough() {
+        return Sequence(
+            breakRecursion(),
+            "<s>",
+            push(new ObAstNode(NodeType.strikeThrough)),
+            NoteText(new StringVar("</s>")),
+            "</s>",
+            peek(1).appendChild(pop())
+        );
+    }
+    
+    public Rule NoteUnderline() {
+        return Sequence(
+            breakRecursion(),
+            "<u>",
+            push(new ObAstNode(NodeType.underline)),
+            NoteText(new StringVar("</u>")),
+            "</u>",
             peek(1).appendChild(pop())
         );
     }
