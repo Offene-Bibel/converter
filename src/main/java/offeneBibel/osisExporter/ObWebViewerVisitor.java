@@ -134,9 +134,9 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
         else if(node.getNodeType() == ObAstNode.NodeType.parallelPassage) {
             if(m_skipVerse) return;
             ObParallelPassageNode passage = (ObParallelPassageNode)node;
-            m_currentFassung.append("<a href=\"" + passage.getBook() + "_" + passage.getChapter() + "?verse=" + passage.getStartVerse() +
+            m_currentFassung.append("<a href=\"" + passage.getOsisBookId() + "_" + passage.getChapter() + "?verse=" + passage.getStartVerse() +
                                             "\" data-toggle=\"tooltip\" data-placement=\"auto bottom\" title=\"" +
-                                            passage.getBook() + " " + passage.getChapter() + ", " + passage.getStartVerse() + "\">℘</a>");
+                                            passage.getOsisBookId() + " " + passage.getChapter() + ", " + passage.getStartVerse() + "\">℘</a>");
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.poemStart) {

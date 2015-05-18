@@ -22,7 +22,7 @@ public class ObParallelPassageNode extends ObAstNode {
         m_stopVerse = stopVerse;
     }
 
-    public String getBook() {
+    public String getOsisBookId() {
         return m_book;
     }
 

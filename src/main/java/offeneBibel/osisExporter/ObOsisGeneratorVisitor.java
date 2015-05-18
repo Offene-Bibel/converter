@@ -20,6 +20,7 @@ package offeneBibel.osisExporter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import offeneBibel.parser.BookNameHelper;
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.ObFassungNode;
 import offeneBibel.parser.ObFassungNode.FassungType;
@@ -297,12 +298,12 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             }
 
             m_currentFassung.append("<reference osisRef=\"" +
-                                            passage.getBook() + "." + passage.getChapter() + "." + passage.getStartVerse() + "\">" +
-                                            passage.getBook() + " " + passage.getChapter() + ", " + passage.getStartVerse() + "</reference>");
+                                            passage.getOsisBookId() + "." + passage.getChapter() + "." + passage.getStartVerse() + "\">" +
+                                            BookNameHelper.getInstance().getGermanBookNameForOsisId(passage.getOsisBookId()) + " " + passage.getChapter() + ", " + passage.getStartVerse() + "</reference>");
 
             if(passage.getNextSibling() != null && passage.getNextSibling().getNodeType() == ObAstNode.NodeType.parallelPassage) {
                 m_multiParallelPassage = true;
-                m_currentFassung.append("|");
+                m_currentFassung.append("; ");
             }
             else {
                 m_multiParallelPassage = false;

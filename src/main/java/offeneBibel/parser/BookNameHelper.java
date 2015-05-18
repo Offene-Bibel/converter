@@ -7,9 +7,13 @@ import util.Misc;
 
 public class BookNameHelper {
     static final String m_bibleBooks = Misc.getResourceDir() + "bibleBooks.txt";
+    /*
+     * OSIS tag
+     * german book name
+     * zero or more
+     */
     private List<List<String>> m_bookList;
     private static BookNameHelper m_instance = null;
-
 
 
     private BookNameHelper()
@@ -48,6 +52,15 @@ public class BookNameHelper {
                 if(book.get(i).equals(bookName))
                     return book.get(0);
             }
+        }
+        return null;
+    }
+
+    public String getGermanBookNameForOsisId(String osisId)
+    {
+        for (List<String> book : m_bookList) {
+            if(book.get(0).equals(osisId))
+                return book.get(1);
         }
         return null;
     }
