@@ -133,22 +133,51 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             String end = ">";
             if (m_unmilestonedLineGroup) {
                 end = " sID=\"" + m_qTagStart + m_qTagCounter + "\"/>";
-                ++m_qTagCounter;
             }
             if(m_quoteCounter>0)
             {
                 m_quoteCounter++;
-                m_currentFassung.append("»<q level=\"" + m_quoteCounter + "\" marker=\"\"" + end);
+                
+                m_currentFassung.append("»");
+                
+                if (node.getParent().isDescendantOf(ObAstNode.NodeType.italics))
+                {
+                    // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
+                    m_currentFassung.append("</hi>");          
+                }
+
+                m_currentFassung.append("<q level=\"" + m_quoteCounter + "\" marker=\"\"" + end);
+                
+                if (node.getParent().isDescendantOf(ObAstNode.NodeType.italics))
+                {
+                    // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
+                    m_currentFassung.append("<hi type=\"italic\">");          
+                }
             }
             else
             {
                 QuoteSearcher quoteSearcher = new QuoteSearcher();
                 node.host(quoteSearcher, false);
+
+                m_currentFassung.append("„");
+
+                if (node.getParent().isDescendantOf(ObAstNode.NodeType.italics))
+                {
+                    // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
+                    m_currentFassung.append("</hi>");          
+                }
+
                 if(quoteSearcher.foundQuote == false)
-                    m_currentFassung.append("„<q marker=\"\"" + end);
+                    m_currentFassung.append("<q marker=\"\"" + end);
                 else {
                     m_quoteCounter++;
-                    m_currentFassung.append("„<q level=\"" + m_quoteCounter + "\" marker=\"\"" + end);
+                    m_currentFassung.append("<q level=\"" + m_quoteCounter + "\" marker=\"\"" + end);
+                }
+
+                if (node.getParent().isDescendantOf(ObAstNode.NodeType.italics))
+                {
+                    // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
+                    m_currentFassung.append("<hi type=\"italic\">");          
                 }
             }
         }
@@ -194,6 +223,10 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         else if(node.getNodeType() == ObAstNode.NodeType.italics) {
             if (m_skipVerse) return;
             m_currentFassung.append("<hi type=\"italic\">");
+        }
+        else if (node.getNodeType() == ObAstNode.NodeType.superScript) {
+            if (m_skipVerse) return;
+            m_currentFassung.append("<hi type=\"super\">");
         }
     }
 
@@ -351,11 +384,26 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             if(m_skipVerse) return;
             if(m_quoteCounter>0)
                 m_quoteCounter--;
+
+            if (node.getParent().isDescendantOf(ObAstNode.NodeType.italics))
+            {
+                // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
+                m_currentFassung.append("</hi>");          
+            }
+
             if (m_unmilestonedLineGroup) {
                 m_currentFassung.append("<q marker=\"\" eID=\""+m_qTagStart+m_qTagCounter+"\"/>");
+                ++m_qTagCounter;
             } else {
                 m_currentFassung.append("</q>");
             }
+
+            if (node.getParent().isDescendantOf(ObAstNode.NodeType.italics))
+            {
+                // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
+                m_currentFassung.append("<hi type=\"italic\">");          
+            }
+
             if(m_quoteCounter>0)
                 m_currentFassung.append("«");
             else
@@ -402,6 +450,10 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.italics) {
+            if (m_skipVerse) return;
+            m_currentFassung.append("</hi>");
+        }
+        else if(node.getNodeType() == ObAstNode.NodeType.superScript) {
             if (m_skipVerse) return;
             m_currentFassung.append("</hi>");
         }
