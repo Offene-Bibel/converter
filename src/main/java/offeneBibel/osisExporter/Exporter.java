@@ -249,7 +249,7 @@ public class Exporter
                 return;
             }
 
-            System.out.print("Retrieving wiki pages...");
+            System.out.println("Retrieving wiki pages...");
             List<Book> books = retrieveBooks();
             System.out.println(" Done.");
 
