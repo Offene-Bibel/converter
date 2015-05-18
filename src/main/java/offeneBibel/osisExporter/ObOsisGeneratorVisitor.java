@@ -332,7 +332,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
             m_currentFassung.append("<reference osisRef=\"" +
                                             passage.getOsisBookId() + "." + passage.getChapter() + "." + passage.getStartVerse() + "\">" +
-                                            BookNameHelper.getInstance().getGermanBookNameForOsisId(passage.getOsisBookId()) + " " + passage.getChapter() + ", " + passage.getStartVerse() + "</reference>");
+                                            BookNameHelper.getInstance().getGermanBookNameForOsisId(passage.getOsisBookId()) + " " + passage.getChapter() + "," + passage.getStartVerse() + "</reference>");
 
             if(passage.getNextSibling() != null && passage.getNextSibling().getNodeType() == ObAstNode.NodeType.parallelPassage) {
                 m_multiParallelPassage = true;
