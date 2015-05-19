@@ -1,4 +1,4 @@
-/* Copyright (C) 2013-2015 Patrick Zimmermann, Michael Schierl
+/* Copyright (C) 2013-2015 Patrick Zimmermann, Michael Schierl, Stephan Kreutzer
  *
  * This file is part of converter.
  *
@@ -29,6 +29,7 @@ import offeneBibel.parser.ObParallelPassageNode;
 import offeneBibel.parser.ObTextNode;
 import offeneBibel.parser.ObVerseNode;
 import offeneBibel.parser.ObVerseStatus;
+import offeneBibel.parser.ObWikiLinkNode;
 import offeneBibel.visitorPattern.DifferentiatingVisitor;
 import offeneBibel.visitorPattern.IVisitor;
 
@@ -235,6 +236,16 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         else if (node.getNodeType() == ObAstNode.NodeType.underline) {
             if (m_skipVerse) return;
             m_currentFassung.append("<hi type=\"underline\">");
+        }
+        else if (node.getNodeType() == ObAstNode.NodeType.wikiLink) {
+            if (m_skipVerse) return;
+
+            ObWikiLinkNode obWikiLinkNode = (ObWikiLinkNode)node;
+
+            if (obWikiLinkNode != null)
+            {
+                m_currentFassung.append(obWikiLinkNode.getLinkText());
+            }
         }
     }
 
