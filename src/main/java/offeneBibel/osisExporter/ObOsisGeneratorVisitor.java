@@ -242,12 +242,12 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             ObWikiLinkNode obWikiLinkNode = (ObWikiLinkNode)node;
             m_currentFassung.append("<a href=\"");
             if(obWikiLinkNode.isWikiLink())
-            	m_currentFassung.append("http://offene-bibel.de/wiki/");
+                m_currentFassung.append("http://offene-bibel.de/wiki/");
             m_currentFassung.append(obWikiLinkNode.getLink());
             m_currentFassung.append("\">");
             
             if(obWikiLinkNode.childCount() == 0)
-            	m_currentFassung.append(obWikiLinkNode.getLink());
+                m_currentFassung.append(obWikiLinkNode.getLink());
         }
     }
 
@@ -539,17 +539,17 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         return "<lg sID=\"" + m_lgTag + "\"/>";
     }
 
-	private static final Pattern FIND_GREEK = Pattern.compile("[\\p{IsGreek}]+([\\p{IsCommon}]+[\\p{IsGreek}]+)*");
+    private static final Pattern FIND_GREEK = Pattern.compile("[\\p{IsGreek}]+([\\p{IsCommon}]+[\\p{IsGreek}]+)*");
 
-	private static String tagGreek(String str) {
-		Matcher m = FIND_GREEK.matcher(str);
-		StringBuffer result = new StringBuffer(str.length());
-		while (m.find()) {
-			m.appendReplacement(result, "<foreign xml:lang=\"grc\">$0</foreign>");
-		}
-		m.appendTail(result);
-		return result.toString();
-	}
+    private static String tagGreek(String str) {
+        Matcher m = FIND_GREEK.matcher(str);
+        StringBuffer result = new StringBuffer(str.length());
+        while (m.find()) {
+            m.appendReplacement(result, "<foreign xml:lang=\"grc\">$0</foreign>");
+        }
+        m.appendTail(result);
+        return result.toString();
+    }
 
     class QuoteSearcher implements IVisitor<ObAstNode>
     {

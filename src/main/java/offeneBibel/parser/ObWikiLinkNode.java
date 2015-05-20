@@ -15,6 +15,6 @@ public class ObWikiLinkNode extends ObAstNode {
     }
     
     public boolean isWikiLink() {
-    	return m_wikiLink;
+        return m_wikiLink;
     }
 }

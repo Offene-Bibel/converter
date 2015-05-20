@@ -147,13 +147,13 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule BibleText() {
-    	return FirstOf(
-    		Sequence(
-    			ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.lesefassung),
+        return FirstOf(
+            Sequence(
+                ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.lesefassung),
                 LfBibleText()
             ),
-    		Sequence(
-        		ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.studienfassung),
+            Sequence(
+                ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.studienfassung),
                 SfBibleText()
             )
         );
@@ -213,14 +213,14 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             ZeroOrMore(Whitespace()),
             "{{",
             FirstOf(
-	            Sequence(
-            		ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.lesefassung),
-            		'L'
-        		),
-        		Sequence(
-    				ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.studienfassung),
-    				'S'
-				)
+                Sequence(
+                    ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.lesefassung),
+                    'L'
+                ),
+                Sequence(
+                    ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.studienfassung),
+                    'S'
+                )
             ),
             '|',
             FirstOf(
@@ -277,7 +277,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     public Rule InnerQuote() {
         return Sequence(
-        	ACTION(isRuleAncestor("Quote")),
+            ACTION(isRuleAncestor("Quote")),
             '\u201A', // ‚
             push(new ObAstNode(ObAstNode.NodeType.quote)),
             OneOrMore(FirstOf(
@@ -312,10 +312,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
              * This is the actual {@link LineQuote} matching part.
              */
             Sequence(
-        		// Keep the boxing right. LineQuote -> Quote -> InnerQuote -> InnerQuote -> ...
-        		// Line quotes are not allowed in poems.
-        		ACTION(false == isRuleAncestor("Quote")),
-        		ACTION(false == isRuleAncestor("InnerQuote")),
+                // Keep the boxing right. LineQuote -> Quote -> InnerQuote -> InnerQuote -> ...
+                // Line quotes are not allowed in poems.
+                ACTION(false == isRuleAncestor("Quote")),
+                ACTION(false == isRuleAncestor("InnerQuote")),
                 "\n:",
                 push(new ObAstNode(ObAstNode.NodeType.quote)),
                 OneOrMore(FirstOf(
@@ -849,7 +849,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return Sequence(
             FirstOf("{{Hebr}}", "{{hebr}}"),
             FirstOf(Sequence(
-            		"[",
+                    "[",
                     Test(FirstOf("http://", "https://")), 
                     OneOrMore(NoneOf(" ]")),
                     push(new ObWikiLinkNode(match(), false)),
