@@ -849,9 +849,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         return Sequence(
             FirstOf("{{Hebr}}", "{{hebr}}"),
             FirstOf(Sequence(
-                    "[http://",
+            		"[",
+                    Test(FirstOf("http://", "https://")), 
                     OneOrMore(NoneOf(" ]")),
-                    push(new ObWikiLinkNode(match())),
+                    push(new ObWikiLinkNode(match(), false)),
                     ' ',
                     push(new ObAstNode(NodeType.hebrew)),
                     FirstOf(
@@ -877,7 +878,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 breakRecursion(),
                 "[[",
                 OneOrMore(NoneOf("|]")),
-                push(new ObWikiLinkNode(match())),
+                push(new ObWikiLinkNode(match(), true)),
                 Optional(
                     '|',
                     NoteText(new StringVar("]]"))
@@ -887,9 +888,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             ),
             Sequence(
                 breakRecursion(),
-                "[http://",
+                "[",
+                Test(FirstOf("http://","https://")),
                 OneOrMore(NoneOf(" ]")),
-                push(new ObWikiLinkNode(match())),
+                push(new ObWikiLinkNode(match(), false)),
                 Optional(
                     ' ',
                     NoteWikiLinkText()

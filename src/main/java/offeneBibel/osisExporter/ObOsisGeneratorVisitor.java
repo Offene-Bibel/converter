@@ -239,13 +239,15 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         }
         else if (node.getNodeType() == ObAstNode.NodeType.wikiLink) {
             if (m_skipVerse) return;
-
             ObWikiLinkNode obWikiLinkNode = (ObWikiLinkNode)node;
-
-            if (obWikiLinkNode != null)
-            {
-                m_currentFassung.append(obWikiLinkNode.getLinkText());
-            }
+            m_currentFassung.append("<a href=\"");
+            if(obWikiLinkNode.isWikiLink())
+            	m_currentFassung.append("http://offene-bibel.de/wiki/");
+            m_currentFassung.append(obWikiLinkNode.getLink());
+            m_currentFassung.append("\">");
+            
+            if(obWikiLinkNode.childCount() == 0)
+            	m_currentFassung.append(obWikiLinkNode.getLink());
         }
     }
 
@@ -483,6 +485,10 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         else if(node.getNodeType() == ObAstNode.NodeType.underline) {
             if (m_skipVerse) return;
             m_currentFassung.append("</hi>");
+        }
+        else if (node.getNodeType() == ObAstNode.NodeType.wikiLink) {
+            if (m_skipVerse) return;
+            m_currentFassung.append("</a>");
         }
     }
 
