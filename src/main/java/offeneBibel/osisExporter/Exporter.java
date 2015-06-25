@@ -71,12 +71,12 @@ public class Exporter
      * URL prefix to use for retrieving the translation pages.
      */
     //static final String m_urlBase = "http://www.offene-bibel.de/wiki/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
-    static final String m_urlBase = "http://www.offene-bibel.de/wiki/index.php5?action=raw&title=";
+    static final String m_urlBase = "http://www.offene-bibel.de/mediawiki/index.php?action=raw&title=";
 
     /**
      * URL prefix to use for retrieving history of a page.
      */
-    static final String m_historyURLBase = "http://www.offene-bibel.de/wiki/api.php5?action=query&prop=revisions&rvprop=ids|timestamp&rvlimit=100&format=xml&titles=";
+    static final String m_historyURLBase = "http://www.offene-bibel.de/mediawiki/api.php?action=query&prop=revisions&rvprop=ids|timestamp&rvlimit=100&format=xml&titles=";
 
     /**
      * Oldest date for a history page to be considered to be retrieved. Increase it when parsing succeeded to find errors faster.
