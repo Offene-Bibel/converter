@@ -13,6 +13,9 @@ class CommandLineArguments {
     @Parameter(names= { "-b", "--book"}, description="Comma separated list of books to export (empty to export all)", validateWith=ValidateBook.class)
     String m_books = "";
 
+    @Parameter(names= { "-d", "--divineName"}, description="Desired divine name style (0-13)")
+    int m_divineNameStyle = 0;
+
     @Parameter(names = { "-r", "--runner" }, description = "Runner to use for error reporting. One of: \"reporting\", \"tracing\" or \"recovering\"", validateWith=ValidateRunner.class)
     String m_parseRunner = "reporting";
     @Parameter(names = { "-R", "--reloadOnError" }, description = "If parsing fails for a page, redownload it and retry.")

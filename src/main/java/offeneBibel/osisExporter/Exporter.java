@@ -321,6 +321,7 @@ public class Exporter
     private boolean generateAsts(List<Book> books, ObVerseStatus requiredTranslationStatus, boolean stopOnError) throws Throwable
     {
         OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
+        parser.setDivineNameStyle(m_commandLineArguments.m_divineNameStyle);
         BasicParseRunner<ObAstNode> parseRunner = new BasicParseRunner<ObAstNode>(parser.Page());
         boolean reloadOnError = m_commandLineArguments.m_reloadOnError;
         StringBuilder errorList = new StringBuilder();

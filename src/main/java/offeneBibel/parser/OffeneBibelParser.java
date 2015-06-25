@@ -2,6 +2,10 @@ package offeneBibel.parser;
 
 import offeneBibel.parser.ObAstNode.NodeType;
 
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.parboiled.Action;
 import org.parboiled.BaseParser;
 import org.parboiled.Context;
@@ -20,6 +24,12 @@ import org.parboiled.support.Var;
  */
 @BuildParseTree
 public class OffeneBibelParser extends BaseParser<ObAstNode> {
+
+    private int divineNameStyle = 0;
+
+    public void setDivineNameStyle(int divineNameStyle) {
+        this.divineNameStyle = divineNameStyle;
+    }
 
     //page    :    ws* (chaptertag ws*)* lesefassung ws* studienfassung ws* '{{Kapitelseite Fuß}}' ws* EOF;
     public Rule Page() {
@@ -615,36 +625,74 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * @return
      */
     public Rule AlternateReading() {
+        StringVar part1 = new StringVar(), part2=new StringVar(), part3 = new StringVar();
         return Sequence(
             "(/",
-            Optional(
-                OneOrMore(
-                    FirstOf(
-                        '|',
-                        Sequence(
-                            TestNot('/'),
-                            TextChar()
-                        )
+            OneOrMore(
+                FirstOf(
+                    '|',
+                    Sequence(
+                        TestNot('/'),
+                        TextChar()
                     )
-                ),
-                peek().appendChild(new ObTextNode(match())),
-                '/'
+                )
             ),
+            part1.set(match()),
+            '/',
             OneOrMore(
                 TestNot('/'),
                 TextChar()
             ),
+            part2.set(match()),
             Optional(
             '/',
             TestNot(')'),
             OneOrMore(
                 TestNot('/'),
                 TextChar()
-            )),
+            ),
+            part3.set(match())),
+            peek().appendChild(new ObTextNode(makeDivineName(part1.get(),part2.get(),part3.get()))),
             "/)"
         );
     }
     
+    public String makeDivineName(String part1, String part2, String part3) {
+        if (divineNameStyle == 0)
+            return part1;
+
+        // code based on https://github.com/Offene-Bibel/website/blob/a7e8a917a786a998b4856cca5df418493b140df1/website/mediawiki/extensions/OffeneBibel/OffeneBibel_body.php#L129-L175
+        String p1 = part3, p2 = part2;
+        if (part3 == null || part3.isEmpty()) { p1 = part2; p2 = part1; }
+        Matcher m1 = Pattern.compile("\\b(ICH|DU|ER|MIR|DIR|IHM|MICH|DICH|IHN|[MDS]EIN(E[MNRS]?)?)\\b").matcher(p1);
+        Matcher m2 = Pattern.compile("\\b(([Uu]ns|[Ee]u)er\\s(GOTT|HERR)|([Uu]nse|[Ee]u)re[mn]\\s(GOTT|HERRN)|([Uu]nse|[Ee]u)res\\s(GOTTES|HERRN))\\b").matcher(p2);
+        if (!m1.find() || !m2.find()) { return part1; }
+        String pfx1 = p1.substring(0, m1.start()), ptn1 = p1.substring(m1.start(), m1.end()), sfx1 = p1.substring(m1.end());
+        String pfx2 = p2.substring(0, m2.start()), ptn2 = p2.substring(m2.start(), m2.end()), sfx2 = p2.substring(m2.end());
+        ptn2 = ptn2.replace("HERRN", "Herrn").replace("HERR", "Herr").replace("GOTTES", "Herrn").replace("rem GOTT", "rem Herrn").replace("ren GOTT", "ren Herrn").replace("GOTT", "Herr");
+
+        // code based on https://github.com/Offene-Bibel/website/blob/44ec1a587c62e7e991a330cfbecfc3aa9d0cc81a/website/static/js/replacement.js#L36-L181
+        boolean isGenitiv = ptn2.matches("(?:[Uu]nseres|[Ee]ures) Herrn");
+        String der = ptn2.replaceFirst("^(?:unser|euer) ", "der ").replaceFirst("^(?:Unser|Euer) ", "Der ").replaceFirst("^(?:unsere|eure)([nms]) ", "de$1 ").replaceFirst("^(?:Unsere|Eure)([nms]) ", "De$1 ").replace(" Herrn", " @n").replace(" Herr", " @");
+        if (ptn1.equals("DU")) { der = "@@"; }
+        String[] variations = { part1,
+                pfx2 + (isGenitiv ? "von יהוה" : "יהוה") + sfx2,
+                pfx1 + (isGenitiv ? "JHWHs" : "JHWH") + sfx1,
+                pfx1 + (isGenitiv ? "Jahwes" : "Jahwe") + sfx1,
+                pfx1 + (isGenitiv ? "Jahos" : "Jaho") + sfx1,
+                pfx1 + (isGenitiv ? "Gottes" : "Gott") + sfx1,
+                pfx2 + der.replace("@@", "Herr").replace("@", "Herr") + sfx2,
+                pfx2 + der.replace("@@", "Ewiger").replace("@", "Ewige") + sfx2,
+                pfx1 + ptn1 + sfx1,
+                pfx1 + (isGenitiv ? "Ich-Bin-Das" : "Ich-Bin-Da") + sfx1,
+                pfx2 + (isGenitiv ? ptn2.replace(" Herrn", " Gottes") : ptn2.replace(" Herrn", " Gott").replace(" Herr", " Gott")) + sfx2,
+                pfx2 + ptn2 + sfx2,
+                pfx2 + (isGenitiv ? "von Adonai" : "Adonai") + sfx2,
+                pfx2 + (isGenitiv ? "von Ha-Schem" : "Ha-Schem") + sfx2,
+        };
+        return variations[divineNameStyle];
+     }
+
     public Rule SecondaryContent() {
         return Sequence(
                  FirstOf("{{Sekundär}}", "{{sekundär}}"),
