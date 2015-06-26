@@ -28,7 +28,7 @@ import util.Misc;
 
 public class FootnoteHTMLGrabber {
 
-    private static final String BASE_URL = "http://www.offene-bibel.de/wiki/index.php5?title=";
+    private static final String BASE_URL = "http://www.offene-bibel.de/mediawiki/index.php?title=";
 
     private static final Pattern PROLOG_REGEX = Pattern.compile(
             "\n<div class=\"bemerkungen\">(.*?)\n</div>\n<p></p>\n<table class=\"references\">",
