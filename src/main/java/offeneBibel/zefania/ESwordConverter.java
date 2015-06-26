@@ -374,6 +374,8 @@ public class ESwordConverter {
             comments.append(marker + "</p>\n");
             cmtx.write(comments.toString());
         }
+        if (verse.toString().trim().equals(vref))
+            verse.append("-");
         return verse.toString();
     }
 
