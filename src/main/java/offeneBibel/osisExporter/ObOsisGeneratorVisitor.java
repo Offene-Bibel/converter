@@ -233,7 +233,12 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
         else if(node.getNodeType() == ObAstNode.NodeType.hebrew) {
             if(m_skipVerse) return;
-            m_currentFassung.append("<foreign xml:lang=\"he\">");
+
+            if (!node.getParent().isDescendantOf(ObAstNode.NodeType.wikiLink))
+            {
+                // foreign are not allowed inside of <a>, so skip them
+                m_currentFassung.append("<foreign xml:lang=\"he\">");
+            }
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.note) {
@@ -496,7 +501,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
         else if(node.getNodeType() == ObAstNode.NodeType.hebrew) {
             if(m_skipVerse) return;
-            m_currentFassung.append("</foreign>");
+            if (!node.getParent().isDescendantOf(ObAstNode.NodeType.wikiLink))
+            {
+                // foreign are not allowed inside of <a>, so skip them
+                m_currentFassung.append("</foreign>");
+            }
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.note) {
