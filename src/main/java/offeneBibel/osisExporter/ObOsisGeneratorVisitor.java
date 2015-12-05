@@ -243,11 +243,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             m_currentFassung.append("<a href=\"");
             if(obWikiLinkNode.isWikiLink())
                 m_currentFassung.append("http://offene-bibel.de/wiki/");
-            m_currentFassung.append(obWikiLinkNode.getLink());
+            m_currentFassung.append(obWikiLinkNode.getLink().replace("&", "&amp;"));
             m_currentFassung.append("\">");
             
             if(obWikiLinkNode.childCount() == 0)
-                m_currentFassung.append(obWikiLinkNode.getLink());
+                m_currentFassung.append(obWikiLinkNode.getLink().replace("&", "&amp;"));
         }
     }
 
