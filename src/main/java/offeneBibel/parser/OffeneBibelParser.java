@@ -338,7 +338,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 OneOrMore(FirstOf(
                         ScriptureText(),
                         Quote(),
-                        Italics(),
+                        //Italics(),
                         Insertion(),
                         Alternative(),
                         AlternateReading(),
@@ -475,7 +475,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 breakRecursion(),
                 "'''",
                 push(new ObAstNode(ObAstNode.NodeType.fat)),
-                NoteText(new StringVar("'''")),
+                OneOrMore(Sequence(TestNot("</b>"), NoteChar(), createOrAppendTextNode(match()))),
                 "'''",
                 peek(1).appendChild(pop())
             ),
