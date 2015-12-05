@@ -655,6 +655,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                      ScriptureText(),
                      Verse(),
                      Quote(),
+                     InnerQuote(),
                      Fat(),
                      Italics(),
                      Insertion(),
