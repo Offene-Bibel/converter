@@ -462,6 +462,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 createOrAppendTextNode(match()),
                 "</nowiki>"
             ),
+            // [Jesus] in Lesefassung (Matthäus 17)
+            Sequence("[Jesus]", createOrAppendTextNode("[Jesus]")),
             // Asterisk (Markus 15)
             Sequence("*", createOrAppendTextNode("*")),
             // empty footnotes (Genesis 10, 1Chronik 1, Johannes 15, Jakobus 1)
