@@ -146,6 +146,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                     m_currentFassung.append("</hi>");          
                 }
+                if (node.getParent().isDescendantOf(ObAstNode.NodeType.fat))
+                {
+                    // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
+                    m_currentFassung.append("</hi>");
+                }
 
                 m_currentFassung.append("<q level=\"" + m_quoteCounter + "\" marker=\"\"" + end);
                 
@@ -153,6 +158,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                     m_currentFassung.append("<hi type=\"italic\">");          
+                }
+                if (node.getParent().isDescendantOf(ObAstNode.NodeType.fat))
+                {
+                    // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
+                    m_currentFassung.append("<hi type=\"bold\">");
                 }
             }
             else
@@ -167,6 +177,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                     m_currentFassung.append("</hi>");          
                 }
+                if (node.getParent().isDescendantOf(ObAstNode.NodeType.fat))
+                {
+                    // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
+                    m_currentFassung.append("</hi>");
+                }
 
                 if(quoteSearcher.foundQuote == false)
                     m_currentFassung.append("<q marker=\"\"" + end);
@@ -179,6 +194,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                     m_currentFassung.append("<hi type=\"italic\">");          
+                }
+                if (node.getParent().isDescendantOf(ObAstNode.NodeType.fat))
+                {
+                    // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
+                    m_currentFassung.append("<hi type=\"bold\">");
                 }
             }
         }
@@ -224,6 +244,10 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         else if(node.getNodeType() == ObAstNode.NodeType.italics) {
             if (m_skipVerse) return;
             m_currentFassung.append("<hi type=\"italic\">");
+        }
+        else if(node.getNodeType() == ObAstNode.NodeType.fat) {
+            if (m_skipVerse) return;
+            m_currentFassung.append("<hi type=\"bold\">");
         }
         else if (node.getNodeType() == ObAstNode.NodeType.superScript) {
             if (m_skipVerse) return;
@@ -411,6 +435,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                 // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                 m_currentFassung.append("</hi>");          
             }
+            if (node.getParent().isDescendantOf(ObAstNode.NodeType.fat))
+            {
+                // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
+                m_currentFassung.append("</hi>");
+            }
 
             if (m_unmilestonedLineGroup) {
                 m_currentFassung.append("<q marker=\"\" eID=\""+m_qTagStart+m_qTagCounter+"\"/>");
@@ -423,6 +452,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             {
                 // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                 m_currentFassung.append("<hi type=\"italic\">");          
+            }
+            if (node.getParent().isDescendantOf(ObAstNode.NodeType.fat))
+            {
+                // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
+                m_currentFassung.append("<hi type=\"bold\">");
             }
 
             if(m_quoteCounter>0)
@@ -471,6 +505,10 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.italics) {
+            if (m_skipVerse) return;
+            m_currentFassung.append("</hi>");
+        }
+        else if(node.getNodeType() == ObAstNode.NodeType.fat) {
             if (m_skipVerse) return;
             m_currentFassung.append("</hi>");
         }
