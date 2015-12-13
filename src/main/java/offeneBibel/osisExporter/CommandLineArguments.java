@@ -33,6 +33,10 @@ class CommandLineArguments {
     @Parameter(names = { "--generateWeb" }, description = "Generate the webviewer backing files.")
     boolean m_generateWeb = false;
 
+    @Parameter(names = { "-s", "--generateStatistics" }, description = "Generate statistics of verse status")
+    boolean m_generateStatistics = false;
+
+
     @Parameter(names = { "-a", "--cacheAST" }, description = "Cache the already parsed ASTs. Delete them manually if you edited the parser code.")
     boolean m_cacheAST = false;
 
