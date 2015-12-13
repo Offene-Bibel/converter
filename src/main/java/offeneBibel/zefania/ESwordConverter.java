@@ -16,7 +16,9 @@ import util.Misc;
 
 public class ESwordConverter {
 
+    private static String marker;
     public static void main(String[] args) throws Exception {
+        marker = args.length > 0 ? args[0] : "";
         convert("offeneBibelStudienfassungZefania.xml");
         convert("offeneBibelLesefassungZefania.xml");
     }
@@ -224,17 +226,17 @@ public class ESwordConverter {
                     "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\" />\n" +
                     "<style>p{margin-top:0pt;margin-bottom:0pt;}</style>\n" +
                     "</head><body>\n" +
-                    "<p>#define description=" + title + "</p>\n" +
-                    "<p>#define abbreviation=" + identifier + "</p>\n" +
-                    "<p>#define comments=" + description + "</p>\n" +
-                    "<p>#define version=1</p>\n" +
-                    "<p>#define strong=0</p>\n" +
-                    "<p>#define right2left=0</p>\n" +
-                    "<p>#define ot=1</p>\n" +
-                    "<p>#define nt=1</p>\n" +
-                    "<p>#define font=DEFAULT</p>\n" +
-                    "<p>#define apocrypha=1</p>\n" +
-                    "<p><span style=\"background-color:#C80000;\">\u00F7</span></p>\n");
+                    "<p>#define description=" + title + marker + "</p>\n" +
+                    "<p>#define abbreviation=" + identifier + marker + "</p>\n" +
+                    "<p>#define comments=" + description + marker + "</p>\n" +
+                    "<p>#define version=1" + marker + "</p>\n" +
+                    "<p>#define strong=0" + marker + "</p>\n" +
+                    "<p>#define right2left=0" + marker + "</p>\n" +
+                    "<p>#define ot=1" + marker + "</p>\n" +
+                    "<p>#define nt=1" + marker + "</p>\n" +
+                    "<p>#define font=DEFAULT" + marker + "</p>\n" +
+                    "<p>#define apocrypha=1" + marker + "</p>\n" +
+                    "<p><span style=\"background-color:#C80000;\">\u00F7</span>" + marker + "</p>\n");
 
             cmtx.write("<html><head>\n" +
                     "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\" />\n" +
@@ -243,10 +245,10 @@ public class ESwordConverter {
                     "p.spc{margin-top:10pt;margin-bottom:0pt;}\n" +
                     "p.prologend{border-width:1px;border-top-style:none;border-right-style:none;border-bottom-style:solid;border-left-style:none;border-color:black}" +
                     "</style></head><body>\n" +
-                    "<p>#define description=" + title + " (Kommentar)</p>\n" +
-                    "<p>#define abbreviation=" + identifier + "</p>\n" +
-                    "<p>#define comments=" + description + "</p>\n" +
-                    "<p>#define version=1</p>\r\n");
+                    "<p>#define description=" + title + " (Kommentar)" + marker + "</p>\n" +
+                    "<p>#define abbreviation=" + identifier + marker + "</p>\n" +
+                    "<p>#define comments=" + description + marker + "</p>\n" +
+                    "<p>#define version=1" + marker + "</p>\r\n");
 
             for (Node bookNode = zefDoc.getDocumentElement().getFirstChild().getNextSibling(); bookNode != null; bookNode = bookNode.getNextSibling()) {
                 if (bookNode instanceof Text) {
@@ -290,7 +292,7 @@ public class ESwordConverter {
                         String vref = bname + " " + cnumber + ":" + vnumber;
                         if (invalidVerses.contains(vref))
                             continue;
-                        bblx.write("<p>" + parseVerse(verseElement, vref, cmtx, prolog) + "</p>\n");
+                        bblx.write("<p>" + parseVerse(verseElement, vref, cmtx, prolog) + marker + "</p>\n");
                         prolog = null;
                     }
                 }
@@ -304,7 +306,7 @@ public class ESwordConverter {
     private static String parseVerse(Element verseElement, String vref, BufferedWriter cmtx, Element prologElement) throws IOException {
         boolean hasCommentary = false;
         StringBuilder verse = new StringBuilder(vref + " ");
-        StringBuilder comments = new StringBuilder("<p><span style=\"background-color:#FF0000;\">\u00F7</span>" + vref + "</p>\n<p>");
+        StringBuilder comments = new StringBuilder("<p><span style=\"background-color:#FF0000;\">\u00F7</span>" + vref + marker + "</p>\n<p>");
         if (prologElement != null) {
             for (Node node = prologElement.getFirstChild(); node != null; node = node.getNextSibling()) {
                 if (node instanceof Text) {
@@ -315,7 +317,7 @@ public class ESwordConverter {
                     Element elem = (Element) node;
                     if (elem.getNodeName().equals("STYLE")) {
                         String content = elem.getTextContent();
-                        comments.append("</p>\n<p><i>" + content + "</i></p>\n<p class=\"spc\">");
+                        comments.append(marker + "</p>\n<p><i>" + content + "</i>" + marker + "</p>\n<p class=\"spc\">");
                         hasCommentary = true;
                     } else if (elem.getNodeName().equals("BR")) {
                         comments.append("<br />");
@@ -324,7 +326,7 @@ public class ESwordConverter {
                     }
                 }
             }
-            comments.append("</p>\n<p class=\"prologend\">&nbsp;</p>\n<p class=\"spc\">");
+            comments.append(marker + "</p>\n<p class=\"prologend\">&nbsp;" + marker + "</p>\n<p class=\"spc\">");
             hasCommentary = true;
         }
         for (Node node = verseElement.getFirstChild(); node != null; node = node.getNextSibling()) {
@@ -339,13 +341,13 @@ public class ESwordConverter {
                 Element elem = (Element) node;
                 if (elem.getNodeName().equals("NOTE")) {
                     String content = elem.getTextContent();
-                    comments.append("</p>\n<p>" + content + "</p>\n<p class=\"spc\">");
+                    comments.append(marker + "</p>\n<p>" + content + marker + "</p>\n<p class=\"spc\">");
                     hasCommentary = true;
                 } else if (elem.getNodeName().equals("BR")) {
                     verse.append("<br />");
                     comments.append("<br />");
                 } else if (elem.getNodeName().equals("XREF")) {
-                    comments.append("</p>\n<p class=\"spc\">(Parallelstellen:");
+                    comments.append(marker + "</p>\n<p class=\"spc\">(Parallelstellen:");
                     for(String ref : elem.getAttribute("fscope").split("; ")) {
                         Matcher m = xrefPattern.matcher(ref);
                         if (!m.matches())
@@ -356,7 +358,7 @@ public class ESwordConverter {
                         comments.append(" <span style=\"color:#008000;font-weight:bold;text-decoration:underline;\">");
                         comments.append(book+"_"+m.group(2)+":"+m.group(3)+"</span>");
                     }
-                    comments.append(")</p>\n<p class=\"spc\">");
+                    comments.append(")" + marker + "</p>\n<p class=\"spc\">");
                     hasCommentary = true;
                 } else if (elem.getNodeName().equals("STYLE")) {
                     StringBuilder styleContent = new StringBuilder();
@@ -369,9 +371,11 @@ public class ESwordConverter {
             }
         }
         if (hasCommentary) {
-            comments.append("</p>\n");
+            comments.append(marker + "</p>\n");
             cmtx.write(comments.toString());
         }
+        if (verse.toString().trim().equals(vref))
+            verse.append("-");
         return verse.toString();
     }
 

@@ -145,7 +145,10 @@ public class LogosConverter {
 		try (BufferedWriter bblx = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(Misc.getResultsDir(), identifier + ".logos.html"))))) {
 			bblx.write("<html><head>\n" +
 					"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\" />\n" +
-					"<style>body, h1, h2, h3, h4 { font-family: \"Times New Roman\";}</style>\n"+
+					"<style>\n" +
+					"body, h1, h2, h3, h4 { font-family: \"Times New Roman\";}\n" +
+					"a.sdfootnotesym, a.sdendnotesym { font-style: italic;}\n" +
+					"</style>\n"+
 					"</head><body lang=\"de-DE\">\n" +
 					"<h1>" + title + "</h1>\n" +
 					description + "<br />Lizenz: " + rights + "\n");

@@ -22,8 +22,6 @@ import org.w3c.dom.*;
 
 public class ZefaniaConverter {
 
-    private static final Pattern xrefPattern = Pattern.compile("([A-Za-z0-9]+)( [0-9]+, [0-9]+)");
-
     public static void main(String[] args) throws Exception {
         convert("offeneBibelLesefassungModule.osis", "offbile.conf", "offeneBibelLesefassungZefania.xml", "OffBiLe");
         convert("offeneBibelStudienfassungModule.osis", "offbist.conf", "offeneBibelStudienfassungZefania.xml", "OffBiSt");
@@ -210,6 +208,7 @@ public class ZefaniaConverter {
 
     private static String getTextChildren(Element elem) {
         StringBuilder result = new StringBuilder();
+        flattenChildren(elem);
         for (Node node = elem.getFirstChild(); node != null; node = node.getNextSibling()) {
             if (node instanceof Element) {
                 throw new IllegalStateException("Unsupported tag inside " + elem.getNodeName() + ": " + node.getNodeName());
@@ -278,16 +277,16 @@ public class ZefaniaConverter {
                             Element note = verse.getOwnerDocument().createElement("XREF");
                             verse.appendChild(note);
                             StringBuilder fscope = new StringBuilder();
-                            for(String ref : elem.getTextContent().split("\\|")) {
-                                Matcher m = xrefPattern.matcher(ref);
-                                if (!m.matches())
-                                    throw new IllegalStateException("Malformed cross reference: "+ref);
+                            for (Node ref = elem.getFirstChild(); ref != null; ref = ref.getNextSibling()) {
+                                if (ref instanceof Text)
+                                    continue;
+                                String[] fields = ((Element) ref).getAttribute("osisRef").split("\\.");
                                 if (fscope.length() > 0)
                                     fscope.append("; ");
-                                String book = m.group(1);
+                                String book = fields[0];
                                 if (zefBooks.containsKey(book))
                                     book = zefBooks.get(book)[2];
-                                fscope.append(book).append(m.group(2));
+                                fscope.append(book).append(" ").append(fields[1]).append(", ").append(fields[2]);
                             }
                             note.setAttribute("fscope", fscope.toString());
                         } else {
@@ -401,16 +400,16 @@ public class ZefaniaConverter {
                         Element note = style.getOwnerDocument().createElement("XREF");
                         style.appendChild(note);
                         StringBuilder fscope = new StringBuilder();
-                        for (String ref : elem.getTextContent().split("\\|")) {
-                            Matcher m = xrefPattern.matcher(ref);
-                            if (!m.matches())
-                                throw new IllegalStateException("Malformed cross reference: " + ref);
+                        for (Node ref = elem.getFirstChild(); ref != null; ref = ref.getNextSibling()) {
+                            if (ref instanceof Text)
+                                continue;
+                            String[] fields = ((Element) ref).getAttribute("osisRef").split("\\.");
                             if (fscope.length() > 0)
                                 fscope.append("; ");
-                            String book = m.group(1);
+                            String book = fields[0];
                             if (zefBooks.containsKey(book))
                                 book = zefBooks.get(book)[2];
-                            fscope.append(book).append(m.group(2));
+                            fscope.append(book).append(" ").append(fields[1]).append(", ").append(fields[2]);
                         }
                         note.setAttribute("fscope", fscope.toString());
                     } else {
@@ -500,7 +499,7 @@ public class ZefaniaConverter {
                 else
                     parent.insertBefore(parent.getOwnerDocument().createElement("br"), node.getNextSibling());
             }
-            if (Arrays.asList("q", "foreign", "lg", "l", "hi").contains(node.getNodeName())) {
+            if (Arrays.asList("q", "foreign", "lg", "l", "hi", "a").contains(node.getNodeName())) {
                 while (node.getFirstChild() != null) {
                     Node child = node.getFirstChild();
                     node.removeChild(child);
