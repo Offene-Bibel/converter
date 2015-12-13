@@ -120,6 +120,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     public Rule ChapterTagType(Var<ObChapterTag> chapterTag) {
         return FirstOf(
             Sequence("Lesefassung in Arbeit", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassunginArbeit)),
+            Sequence("Lesefassung folgt später", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassunginArbeit), todo()),
+            Sequence("Ungeprüfte Lesefassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassunginArbeit), todo()),
+            Sequence("Lesefassung kann erstellt werden", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassunginArbeit), todo()),
+            Sequence("Zuverlässige Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien), todo()),
+            Sequence("zuverlässige Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien), todo()),
+            Sequence("Sehr gute Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien), todo()),
             Sequence("Studienfassung in Arbeit", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassunginArbeit)),
             Sequence("Lesefassung zu prüfen", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassungZuPruefen)),
             Sequence("Studienfassung zu prüfen", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungZuPruefen)),
@@ -132,6 +138,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         );
     }
     
+    public boolean todo() {
+        return true;
+    }
+
     //(poemstart ws*)? (vers ws*)* '{{Bemerkungen}}';
     public Rule Fassung(ObFassungNode.FassungType fassung, StringVar breaker) {
         return Sequence(
