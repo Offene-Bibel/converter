@@ -159,9 +159,14 @@ public class ObWebsiteDbVisitor extends DifferentiatingVisitor<ObAstNode> implem
     
     private void appendToVerse(String text) throws Exception {
     	if(m_verseText.length() == 0) {
-    		throw new Exception("Text outside verse found: \"" + text + "\".");
+            if(text.trim().length() != 0) {
+                // Ignore for now.
+                // throw new Exception("Text outside verse found: \"" + text + "\".");
+            }
     	}
-    	m_verseText.append(text);
+        else {
+    	    m_verseText.append(text);
+        }
     }
 
 	private void finishVerse() {
