@@ -165,6 +165,8 @@ public class ZefaniaConverter {
             bibleBook.setAttribute("bname", bookZefName[1]);
             bibleBook.setAttribute("bsname", bookZefName[2]);
             parseBook(bookOsisID, osisBook, bibleBook);
+            if (bibleBook.getFirstChild() == null)
+                root.removeChild(bibleBook);
         }
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -199,6 +201,9 @@ public class ZefaniaConverter {
                     bibleBook.appendChild(chapter);
                     chapter.setAttribute("cnumber", chapterName.substring(bookName.length() + 1));
                     parseChapter(chapterName, elem, chapter);
+                    if (chapter.getFirstChild() == null) {
+                        bibleBook.removeChild(chapter);
+                    }
                 } else {
                     throw new IllegalStateException("invalid book level tag: " + elem.getNodeName());
                 }
@@ -336,6 +341,9 @@ public class ZefaniaConverter {
                             throw new IllegalStateException("Closing verse " + eID + " but open is " + verse.getAttribute("vnumber"));
                         }
                         normalizeWhitespace(verse);
+                        if (verse.getFirstChild() == null) {
+                            chapter.removeChild(verse);
+                        }
                         verse = null;
                     } else {
                         throw new IllegalStateException("Invalid combination of verse IDs:" + osisID + "/" + sID + "/" + eID);
