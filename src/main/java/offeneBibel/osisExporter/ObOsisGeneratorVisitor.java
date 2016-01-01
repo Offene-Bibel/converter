@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 
 import offeneBibel.parser.BookNameHelper;
 import offeneBibel.parser.ObAstNode;
+import offeneBibel.parser.ObAstNode.NodeType;
 import offeneBibel.parser.ObFassungNode;
 import offeneBibel.parser.ObFassungNode.FassungType;
 import offeneBibel.parser.ObNoteNode;
@@ -349,7 +350,18 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                     m_lineStarted = true;
                 }
                 if (m_inlineVersStatus) {
-                    if (verse.getNextSibling() instanceof ObVerseNode) {
+                    ObAstNode nextNode = verse.getNextSibling();
+                    while(nextNode != null) {
+                        if(nextNode instanceof ObTextNode) {
+                            if (!((ObTextNode) nextNode).getText().trim().isEmpty())
+                                break;
+                        }
+                        else if (nextNode.getNodeType() != NodeType.poemStart && nextNode.getNodeType() != NodeType.poemStop) {
+                            break;
+                        }
+                        nextNode = nextNode.getNextSibling();
+                    }
+                    if (nextNode == null || nextNode instanceof ObVerseNode || nextNode.getNodeType() == NodeType.heading) {
                         // empty verses do not need any status
                         m_currentVerseStatus = "";
                     } else {
