@@ -349,20 +349,18 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                     m_lineStarted = true;
                 }
                 if (m_inlineVersStatus) {
-                    ObVerseStatus status = verse.getStatus();
-                    ObVerseStatus leseStatus = verse.getStatus(FassungType.lesefassung);
-                    ObVerseStatus studienStatus = verse.getStatus(FassungType.studienfassung);
-                    String verseStatus;
-                    if (leseStatus == studienStatus || status == studienStatus) {
-                        // all statuses the same or this is actually the
-                        // Studienfassung
-                        verseStatus = "[Status: "+studienStatus.toHumanReadableString()+"]";
+                    if (verse.getNextSibling() instanceof ObVerseNode) {
+                        // empty verses do not need any status
+                        m_currentVerseStatus = "";
                     } else {
-                        verseStatus = "[Studienfassung: " + studienStatus.toHumanReadableString() + "; Lesefassung: " + leseStatus.toHumanReadableString()+"]";
-                    }
-                    if (!m_currentVerseStatus.equals(verseStatus)) {
-                        m_currentVerseStatus = verseStatus;
-                        m_currentFassung.append("<note type=\"x-footnote\" n=\"Status\">" + verseStatus + "</note> ");
+                        // non empty verses are "Ungeprüft", "Zuverlässig" oder "Sehr gut".
+                        // (quick and dirty solution for now)
+                        ObVerseStatus status = verse.getStatus();
+                        String verseStatus = "[Status: "+status.getExportStatusString()+"]";
+                        if (!m_currentVerseStatus.equals(verseStatus)) {
+                            m_currentVerseStatus = verseStatus;
+                            m_currentFassung.append("<note type=\"x-footnote\" n=\"Status\">" + verseStatus + "</note> ");
+                        }
                     }
                 }
             }
