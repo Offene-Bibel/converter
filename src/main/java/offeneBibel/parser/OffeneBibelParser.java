@@ -119,22 +119,19 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     public Rule ChapterTagType(Var<ObChapterTag> chapterTag) {
         return FirstOf(
-            Sequence("Lesefassung in Arbeit", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassunginArbeit)),
-            Sequence("Lesefassung folgt später", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassunginArbeit), todo()),
-            Sequence("Ungeprüfte Lesefassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassunginArbeit), todo()),
-            Sequence("Lesefassung kann erstellt werden", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassunginArbeit), todo()),
-            Sequence("Zuverlässige Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien), todo()),
-            Sequence("zuverlässige Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien), todo()),
-            Sequence("Sehr gute Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien), todo()),
             Sequence("Studienfassung in Arbeit", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassunginArbeit)),
-            Sequence("Lesefassung zu prüfen", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassungZuPruefen)),
-            Sequence("Studienfassung zu prüfen", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungZuPruefen)),
+            Sequence("Ungeprüfte Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungLiegtInRohuebersetzungVor)),
+            Sequence("Sehr gute Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassunginArbeit), todo()),
+            Sequence("Zuverlässige Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien), todo()),
+
+            Sequence("Lesefassung folgt später", todo()),
+            Sequence("Lesefassung kann erstellt werden", todo()),
+            Sequence("Ungeprüfte Lesefassung", todo()),
+            Sequence("Lesefassung zu prüfen", todo()),
+            
+            // old chapter tags (-> redirects)
             Sequence("Studienfassung liegt in Rohübersetzung vor", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungLiegtInRohuebersetzungVor)),
-            Sequence("Lesefassung erfüllt die meisten Kriterien", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassungErfuelltDieMeistenKriterien)),
-            Sequence("Studienfassung erfüllt die meisten Kriterien", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien)),
-            Sequence("Studienfassung und Lesefassung erfüllen die Kriterien", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungUndLesefassungErfuellenDieKriterien)),
-            Sequence("Überprüfung angefordert", chapterTag.get().setTag(ObChapterTag.ChapterTagName.ueberpruefungAngefordert)),
-            Sequence("Vers unvollständig übersetzt", chapterTag.get().setTag(ObChapterTag.ChapterTagName.versUnvollstaendigUebersetzt))
+            Sequence("Studienfassung erfüllt die meisten Kriterien", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien))
         );
     }
     
@@ -486,6 +483,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
             Sequence("[Jesus]", createOrAppendTextNode("[Jesus]")),
             // Asterisk (Markus 15)
             Sequence("*", createOrAppendTextNode("*")),
+            // Urtext unklar (Klagelieder 1)
+            Sequence("†", createOrAppendTextNode("†")),
             // empty footnotes (Genesis 10, 1Chronik 1, Johannes 15, Jakobus 1)
             "<ref></ref>"
         );
@@ -830,7 +829,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         StringVar tagText = new StringVar();
         return FirstOf(
             Sequence(
-                "<ref>", push(new ObNoteNode()),
+                FirstOf("<ref>", "<ref group=\"Text\">"), push(new ObNoteNode()),
                 NoteText(new StringVar("</ref>")),
                 "</ref>",
                 peek(1).appendChild(pop())
@@ -844,7 +843,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 peek().appendChild(new ObNoteLinkNode(tagText.get()))
             ),
             Sequence(
-                "<ref name=\"",
+                FirstOf("<ref name=\"", "<ref group=\"Text\" name=\""),
                 TagText(), tagText.set(match()),
                 "\"",
                 ZeroOrMore(Whitespace()),
@@ -1027,6 +1026,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 OneOrMore(FirstOf(
                     CharRange('\u0590', '\u05ff'), // hebrew alphabet
                     CharRange('\ufb1d', '\ufb4f'),  // hebrew presentation forms
+                    '(', ')', // (Klagelieder 1)
                     PunctuationChar()
                 )),
                 peek().appendChild(new ObTextNode(match()))
@@ -1085,6 +1085,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     //'\u00b4', // ´
                     '\u2019', // ’ preferred character to be used for apostrophe
                     //CharRange('\u2010', '\u2015'), // all sorts of dashes
+                    '`', // Psalm 6, Psalm 11
+                    '―', // Klagelieder 1
                 // Latin Extended Additional, http://www.unicode.org/charts/PDF/U1E00.pdf
                     CharRange('\u1e00', '\u1eff'), 
                 Whitespace()

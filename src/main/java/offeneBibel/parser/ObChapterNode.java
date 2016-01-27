@@ -12,6 +12,7 @@ public class ObChapterNode extends ObAstNode {
     }
 
     public boolean addChapterTag(ObChapterTag tag) {
+        if (tag.getTag() == null) return true;
         m_chapterTags.add(tag);
         return true;
     }

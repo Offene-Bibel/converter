@@ -57,4 +57,18 @@ public enum ObVerseStatus {
         default: throw new IllegalStateException("No translation for "+this);
         }
     }
+
+    public String getExportStatusString() {
+        switch(this) {
+        case none:
+        case inArbeit:
+        case liegtInRohuebersetzungVor:
+            return "Ungeprüft";
+        case erfuelltDieMeistenKriterien:
+            return "Zuverlässig";
+        case erfuelltDieKriterien:
+            return "Sehr gut";
+        default: throw new IllegalStateException("Unhandled status "+this);
+        }
+    }
 }

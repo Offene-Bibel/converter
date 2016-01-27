@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 
 import offeneBibel.parser.BookNameHelper;
 import offeneBibel.parser.ObAstNode;
+import offeneBibel.parser.ObAstNode.NodeType;
 import offeneBibel.parser.ObFassungNode;
 import offeneBibel.parser.ObFassungNode.FassungType;
 import offeneBibel.parser.ObNoteNode;
@@ -349,20 +350,29 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                     m_lineStarted = true;
                 }
                 if (m_inlineVersStatus) {
-                    ObVerseStatus status = verse.getStatus();
-                    ObVerseStatus leseStatus = verse.getStatus(FassungType.lesefassung);
-                    ObVerseStatus studienStatus = verse.getStatus(FassungType.studienfassung);
-                    String verseStatus;
-                    if (leseStatus == studienStatus || status == studienStatus) {
-                        // all statuses the same or this is actually the
-                        // Studienfassung
-                        verseStatus = "[Status: "+studienStatus.toHumanReadableString()+"]";
-                    } else {
-                        verseStatus = "[Studienfassung: " + studienStatus.toHumanReadableString() + "; Lesefassung: " + leseStatus.toHumanReadableString()+"]";
+                    ObAstNode nextNode = verse.getNextSibling();
+                    while(nextNode != null) {
+                        if(nextNode instanceof ObTextNode) {
+                            if (!((ObTextNode) nextNode).getText().trim().isEmpty())
+                                break;
+                        }
+                        else if (nextNode.getNodeType() != NodeType.poemStart && nextNode.getNodeType() != NodeType.poemStop) {
+                            break;
+                        }
+                        nextNode = nextNode.getNextSibling();
                     }
-                    if (!m_currentVerseStatus.equals(verseStatus)) {
-                        m_currentVerseStatus = verseStatus;
-                        m_currentFassung.append("<note type=\"x-footnote\" n=\"Status\">" + verseStatus + "</note> ");
+                    if (nextNode == null || nextNode instanceof ObVerseNode || nextNode.getNodeType() == NodeType.heading) {
+                        // empty verses do not need any status
+                        m_currentVerseStatus = "";
+                    } else {
+                        // non empty verses are "Ungeprüft", "Zuverlässig" oder "Sehr gut".
+                        // (quick and dirty solution for now)
+                        ObVerseStatus status = verse.getStatus();
+                        String verseStatus = "[Status: "+status.getExportStatusString()+"]";
+                        if (!m_currentVerseStatus.equals(verseStatus)) {
+                            m_currentVerseStatus = verseStatus;
+                            m_currentFassung.append("<note type=\"x-footnote\" n=\"Status\">" + verseStatus + "</note> ");
+                        }
                     }
                 }
             }
