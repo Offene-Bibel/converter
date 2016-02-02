@@ -112,10 +112,10 @@ public class ObWebsiteDbVisitor extends DifferentiatingVisitor<ObAstNode> implem
         	
             ObVerseNode verse = (ObVerseNode)node;
             m_verseText.append("{\n");
-            m_verseText.append("version: \"" + m_currentFassung + "\"\n");
-            m_verseText.append("from: \"" + verse.getFromNumber() + "\"\n");
-            m_verseText.append("to: \"" + verse.getToNumber() + "\"\n");
-            m_verseText.append("status: \"" + verse.getStatus().quality() + "\"\n");
+            m_verseText.append("version: \"" + m_currentFassung + "\",\n");
+            m_verseText.append("from: \"" + verse.getFromNumber() + "\",\n");
+            m_verseText.append("to: \"" + verse.getToNumber() + "\",\n");
+            m_verseText.append("status: \"" + verse.getStatus().quality() + "\",\n");
             m_verseText.append("text: \"");
         }
     }
@@ -159,14 +159,20 @@ public class ObWebsiteDbVisitor extends DifferentiatingVisitor<ObAstNode> implem
     
     private void appendToVerse(String text) throws Exception {
     	if(m_verseText.length() == 0) {
-    		throw new Exception("Text outside verse found: \"" + text + "\".");
+            if(text.trim().length() != 0) {
+                // Ignore for now.
+                // throw new Exception("Text outside verse found: \"" + text + "\".");
+            }
     	}
-    	m_verseText.append(text);
+        else {
+    	    m_verseText.append(text);
+        }
     }
 
 	private void finishVerse() {
 		if(m_verseText.length() != 0) {
-			m_result.append(m_verseText.toString());
+            // Trim the verse text to suppress verses with trailing newlines.
+			m_result.append(m_verseText.toString().trim());
 			m_result.append("\"\n},\n");
 			m_verseText = new StringBuilder();
 		}

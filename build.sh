@@ -8,11 +8,10 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-pushd $DIR
+cd $DIR
 mvn package
 mkdir install 2>/dev/null
 cp -r resources/* install
 cp -r target/lib install
 cp target/Parser-0.0.1-SNAPSHOT.jar install/lib
-popd
 
