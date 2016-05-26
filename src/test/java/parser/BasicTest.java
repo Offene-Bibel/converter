@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-public class Basic {
+public class BasicTest {
 
     public void parseOk(String text) {
         OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
