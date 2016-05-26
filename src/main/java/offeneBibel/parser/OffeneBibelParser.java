@@ -2,13 +2,10 @@ package offeneBibel.parser;
 
 import offeneBibel.parser.ObAstNode.NodeType;
 
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.parboiled.Action;
 import org.parboiled.BaseParser;
-import org.parboiled.Context;
 import org.parboiled.Rule;
 import org.parboiled.annotations.BuildParseTree;
 import org.parboiled.annotations.SuppressNode;
@@ -119,19 +116,17 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     public Rule ChapterTagType(Var<ObChapterTag> chapterTag) {
         return FirstOf(
+            Sequence("Studienfassung kann erstellt werden", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungKannErstelltWerden)),
             Sequence("Studienfassung in Arbeit", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassunginArbeit)),
-            Sequence("Ungeprüfte Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungLiegtInRohuebersetzungVor)),
-            Sequence("Sehr gute Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassunginArbeit), todo()),
-            Sequence("Zuverlässige Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien), todo()),
-
-            Sequence("Lesefassung folgt später", todo()),
-            Sequence("Lesefassung kann erstellt werden", todo()),
-            Sequence("Ungeprüfte Lesefassung", todo()),
-            Sequence("Lesefassung zu prüfen", todo()),
-            
-            // old chapter tags (-> redirects)
-            Sequence("Studienfassung liegt in Rohübersetzung vor", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungLiegtInRohuebersetzungVor)),
-            Sequence("Studienfassung erfüllt die meisten Kriterien", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien))
+            Sequence("Ungeprüfte Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.ungepruefteStudienfassung)),
+            Sequence("Zuverlässige Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.zuverlaessigeStudienfassung)),
+            Sequence("Sehr gute Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.sehrGuteStudienfassung)),
+            Sequence("Lesefassung folgt später", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassungFolgtSpaeter)),
+            Sequence("Lesefassung kann erstellt werden", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassungKannErstelltWerden)),
+            Sequence("Ungeprüfte Lesefassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.ungepruefteLesefassung)),
+            Sequence("Zuverlässige Lesefassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.zuverlaessigeLesefassung)),
+            Sequence("Sehr gute Lesefassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.sehrGuteLesefassung)),
+            Sequence("Überprüfung angefordert", chapterTag.get().setTag(ObChapterTag.ChapterTagName.ueberpruefungAngefordert))
         );
     }
     

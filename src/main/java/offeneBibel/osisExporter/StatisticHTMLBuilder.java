@@ -75,11 +75,12 @@ public class StatisticHTMLBuilder {
                     "<table>");
             for (int i = 0; i < COLORS.length; i++) {
                 bw.write("<tr><th style=\"background-color: " + COLORS[i] + "\">#" + (9 - i) + "</th><td>");
-                if (i < 8) {
-                    bw.write(ObVerseStatus.values()[7 - i].toHumanReadableString());
-                } else if (i == 8) {
+                int statusCount = ObVerseStatus.values().length;
+                if (i < statusCount) {
+                    bw.write(ObVerseStatus.values()[statusCount - 1 - i].getHumanReadableString());
+                } else if (i == statusCount) {
                     bw.write("Leer");
-                } else if (i == 9) {
+                } else if (i == statusCount + 1) {
                     bw.write("Fehlt");
                 }
                 bw.write("</td></tr>");

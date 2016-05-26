@@ -39,8 +39,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
-import java.util.Properties;
-
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
@@ -399,8 +397,8 @@ public class Exporter
                 if (chapter.node != null) {
                     ObWebViewerVisitor visitor = new ObWebViewerVisitor(requiredTranslationStatus);
                     chapter.node.host(visitor);
-                    statusFileString.append(writeWebScriptureToFile(visitor.getStudienFassung(), book, chapter, visitor.getStudienFassungQuality(), "sf"));
-                    statusFileString.append(writeWebScriptureToFile(visitor.getLeseFassung(), book, chapter, visitor.getLeseFassungQuality(), "lf"));
+                    statusFileString.append(writeWebScriptureToFile(visitor.getStudienFassung(), book, chapter, visitor.getStudienFassungStatus(), "sf"));
+                    statusFileString.append(writeWebScriptureToFile(visitor.getLeseFassung(), book, chapter, visitor.getLeseFassungStatus(), "lf"));
                 }
             }
         }
@@ -409,14 +407,14 @@ public class Exporter
         statusFileWriter.close();
     }
 
-    private String writeWebScriptureToFile(String scriptureText, Book book, Chapter chapter, int quality, String type) throws IOException {
+    private String writeWebScriptureToFile(String scriptureText, Book book, Chapter chapter, ObVerseStatus status, String type) throws IOException {
         String statusFileLine = "";
         if(scriptureText != null) {
             String filename = book.urlName + "_" + chapter.number + "_" + type;
             FileWriter writer = new FileWriter(Misc.getWebResultsDir() + filename);
             writer.write(scriptureText);
             writer.close();
-            statusFileLine = book.urlName + " " + chapter.number + " " + type + " " + quality + " " + filename + "\n";
+            statusFileLine = book.urlName + " " + chapter.number + " " + type + " " + status.quality() + " " + filename + "\n";
         }
         return statusFileLine;
     }

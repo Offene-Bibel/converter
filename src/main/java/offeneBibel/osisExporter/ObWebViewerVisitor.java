@@ -16,8 +16,8 @@ import offeneBibel.visitorPattern.IVisitor;
 
 public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implements IVisitor<ObAstNode>
 {
-    private int m_studienFassungStatus = 1;
-    private int m_leseFassungStatus = 1;
+    private ObVerseStatus m_studienFassungStatus = ObVerseStatus.none;
+    private ObVerseStatus m_leseFassungStatus = ObVerseStatus.none;
     private String m_studienFassung = null;
     private String m_leseFassung = null;
     private StringBuilder m_currentFassung = new StringBuilder();
@@ -158,8 +158,8 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
                 }
             }
             if(tagName != null) {
-                m_leseFassungStatus = tagName.getVerseStatus(FassungType.lesefassung).quality();
-                m_studienFassungStatus = tagName.getVerseStatus(FassungType.studienfassung).quality();
+                m_leseFassungStatus = tagName.getVerseStatus(FassungType.lesefassung);
+                m_studienFassungStatus = tagName.getVerseStatus(FassungType.studienfassung);
             }
         }
     }
@@ -234,17 +234,11 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
         return m_leseFassung;
     }
 
-    /**
-     * @return Status of the Studienfassung according to ObVerseStatus.quality().
-     */
-    public int getStudienFassungQuality() {
+    public ObVerseStatus getStudienFassungStatus() {
         return m_studienFassungStatus;
     }
 
-    /**
-     * @return Status of the Lesefassung according to ObVerseStatus.quality().
-     */
-    public int getLeseFassungQuality() {
+    public ObVerseStatus getLeseFassungStatus() {
         return m_leseFassungStatus;
     }
 

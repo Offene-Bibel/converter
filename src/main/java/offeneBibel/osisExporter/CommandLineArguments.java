@@ -7,7 +7,7 @@ import util.ValidateRunner;
 import com.beust.jcommander.Parameter;
 
 class CommandLineArguments {
-    @Parameter(names = { "-e", "--exportLevel" }, description = "Required translation status for export, 0=no restrictions on criteria, 7=all criteria met", validateWith=ValidateLevel.class)
+    @Parameter(names = { "-e", "--exportLevel" }, description = "Required translation status for export, 0=unchecked, 3=very good", validateWith=ValidateLevel.class)
     int m_exportLevel = 0;
 
     @Parameter(names= { "-b", "--book"}, description="Comma separated list of books to export (empty to export all)", validateWith=ValidateBook.class)

@@ -7,108 +7,108 @@ import offeneBibel.parser.ObFassungNode.FassungType;
 
 public class ObChapterTag implements Serializable {
     public enum ChapterTagName {
-        lesefassunginArbeit,
+        studienfassungKannErstelltWerden,
         studienfassunginArbeit,
-        lesefassungZuPruefen,
-        studienfassungZuPruefen,
-        studienfassungLiegtInRohuebersetzungVor,
-        lesefassungErfuelltDieMeistenKriterien,
-        studienfassungErfuelltDieMeistenKriterien,
-        studienfassungUndLesefassungErfuellenDieKriterien,
-        ueberpruefungAngefordert,
-        versUnvollstaendigUebersetzt;
-
+        ungepruefteStudienfassung,
+        zuverlaessigeStudienfassung,
+        sehrGuteStudienfassung,
+        lesefassungFolgtSpaeter,
+        lesefassungKannErstelltWerden,
+        ungepruefteLesefassung,
+        zuverlaessigeLesefassung,
+        sehrGuteLesefassung,
+        ueberpruefungAngefordert;
+        
         /**
-         * Returns a priority of the different stati.
-         * The higher the priority the more dominant that status is.
-         * So if you are unsure which status applies, pick the one
-         * with the higher status.
+         * Returns a priority of the different statuses.
          * 
-         * The worse the status is, the higher the status.
+         * Usually no competing statuses should be specified. But in case there are
+         * they take precedence according to the following priority.
+         * The general rule of thumb is: Play safe. Thus the worse the status is,
+         * the higher the priority.
          */
         public int getPriority() {
             switch (this) {
-            case lesefassunginArbeit:
-                return 4;
-            case studienfassunginArbeit:
-                return 8;
-            case lesefassungZuPruefen:
-                return 2;
-            case studienfassungZuPruefen:
-                return 5;
-            case studienfassungLiegtInRohuebersetzungVor:
-                return 7;
-            case lesefassungErfuelltDieMeistenKriterien:
-                return 3;
-            case studienfassungErfuelltDieMeistenKriterien:
-                return 6;
-            case studienfassungUndLesefassungErfuellenDieKriterien:
-                return 1;
             case ueberpruefungAngefordert:
-                return 10;
-            case versUnvollstaendigUebersetzt:
-                return 9;
+                return 6;
+            
+            case studienfassungKannErstelltWerden:
+                return 5;
+            case studienfassunginArbeit:
+                return 4;
+            case ungepruefteStudienfassung:
+                return 3;
+            case zuverlaessigeStudienfassung:
+                return 2;
+            case sehrGuteStudienfassung:
+                return 1;
+            
+            case lesefassungFolgtSpaeter:
+                return 5;
+            case lesefassungKannErstelltWerden:
+                return 4;
+            case ungepruefteLesefassung:
+                return 3;
+            case zuverlaessigeLesefassung:
+                return 2;
+            case sehrGuteLesefassung:
+                return 1;
             default:
                 return 0; // never reached
             }
         }
 
         public ObVerseStatus getVerseStatus(FassungType fassung) {
-            switch (this) {
-            case lesefassunginArbeit:
-                if(fassung == FassungType.lesefassung) return ObVerseStatus.inArbeit;
-                else return ObVerseStatus.erfuelltDieKriterien;
-            case studienfassunginArbeit:
-                if(fassung == FassungType.lesefassung) return ObVerseStatus.none;
-                else return ObVerseStatus.inArbeit;
-            case lesefassungZuPruefen:
-                if(fassung == FassungType.lesefassung) return ObVerseStatus.zuPruefen;
-                else return ObVerseStatus.erfuelltDieKriterien;
-            case studienfassungZuPruefen:
-                if(fassung == FassungType.lesefassung) return ObVerseStatus.none;
-                else return ObVerseStatus.zuPruefen;
-            case studienfassungLiegtInRohuebersetzungVor:
-                if(fassung == FassungType.lesefassung) return ObVerseStatus.none;
-                else return ObVerseStatus.liegtInRohuebersetzungVor;
-            case lesefassungErfuelltDieMeistenKriterien:
-                if(fassung == FassungType.lesefassung) return ObVerseStatus.erfuelltDieMeistenKriterien;
-                else return ObVerseStatus.erfuelltDieKriterien;
-            case studienfassungErfuelltDieMeistenKriterien:
-                if(fassung == FassungType.lesefassung) return ObVerseStatus.none;
-                else return ObVerseStatus.erfuelltDieMeistenKriterien;
-            case studienfassungUndLesefassungErfuellenDieKriterien:
-                if(fassung == FassungType.lesefassung) return ObVerseStatus.erfuelltDieKriterien;
-                else return ObVerseStatus.erfuelltDieKriterien;
-            case ueberpruefungAngefordert:
-                if(fassung == FassungType.lesefassung) return ObVerseStatus.ueberpruefungAngefordert;
-                else return ObVerseStatus.ueberpruefungAngefordert;
-            case versUnvollstaendigUebersetzt:
-                if(fassung == FassungType.lesefassung) return ObVerseStatus.versUnvollstaendigUebersetzt;
-                else return ObVerseStatus.versUnvollstaendigUebersetzt;
-            default:
-                return ObVerseStatus.none; // never hits
+            if(fassung == FassungType.studienfassung) {
+                switch (this) {
+                case ueberpruefungAngefordert:
+                    return ObVerseStatus.zuPruefen;
+                case ungepruefteStudienfassung:
+                case studienfassunginArbeit:
+                    return ObVerseStatus.ungeprueft;
+                case zuverlaessigeStudienfassung:
+                    return ObVerseStatus.zuverlaessig;
+                case sehrGuteStudienfassung:
+                    return ObVerseStatus.sehrGut;
+                case studienfassungKannErstelltWerden:
+                default:
+                    return ObVerseStatus.none;
+                }
+            }
+            else {
+                switch (this) {
+                case ueberpruefungAngefordert:
+                    return ObVerseStatus.zuPruefen;
+                case ungepruefteLesefassung:
+                    return ObVerseStatus.ungeprueft;
+                case zuverlaessigeLesefassung:
+                    return ObVerseStatus.zuverlaessig;
+                case sehrGuteLesefassung:
+                    return ObVerseStatus.sehrGut;
+                case lesefassungKannErstelltWerden:
+                case lesefassungFolgtSpaeter:
+                default:
+                    return ObVerseStatus.none;
+                }
             }
         }
 
         public boolean doesMatchFassung(FassungType fassung) {
             if(fassung == FassungType.lesefassung &&
-                                            (this == ObChapterTag.ChapterTagName.lesefassunginArbeit ||
-                                            this == ObChapterTag.ChapterTagName.lesefassungZuPruefen ||
-                                            this == ObChapterTag.ChapterTagName.lesefassungErfuelltDieMeistenKriterien ||
-                                            this == ObChapterTag.ChapterTagName.studienfassungUndLesefassungErfuellenDieKriterien ||
+                                           (this == ObChapterTag.ChapterTagName.lesefassungFolgtSpaeter ||
+                                            this == ObChapterTag.ChapterTagName.lesefassungKannErstelltWerden ||
+                                            this == ObChapterTag.ChapterTagName.ungepruefteLesefassung ||
+                                            this == ObChapterTag.ChapterTagName.zuverlaessigeLesefassung ||
+                                            this == ObChapterTag.ChapterTagName.sehrGuteLesefassung ||
                                             this == ObChapterTag.ChapterTagName.ueberpruefungAngefordert))
                 return true;
-
             if(fassung == FassungType.studienfassung &&
-                                            (this == ObChapterTag.ChapterTagName.lesefassunginArbeit ||
-                                            this == ObChapterTag.ChapterTagName.lesefassungErfuelltDieMeistenKriterien ||
+                                           (this == ObChapterTag.ChapterTagName.studienfassungKannErstelltWerden ||
                                             this == ObChapterTag.ChapterTagName.studienfassunginArbeit ||
-                                            this == ObChapterTag.ChapterTagName.studienfassungZuPruefen ||
-                                            this == ObChapterTag.ChapterTagName.studienfassungLiegtInRohuebersetzungVor ||
-                                            this == ObChapterTag.ChapterTagName.studienfassungErfuelltDieMeistenKriterien ||
-                                            this == ObChapterTag.ChapterTagName.studienfassungUndLesefassungErfuellenDieKriterien ||
-                                            this == ObChapterTag.ChapterTagName.ueberpruefungAngefordert ||
-                                            this == ObChapterTag.ChapterTagName.versUnvollstaendigUebersetzt))
+                                            this == ObChapterTag.ChapterTagName.ungepruefteStudienfassung ||
+                                            this == ObChapterTag.ChapterTagName.zuverlaessigeStudienfassung ||
+                                            this == ObChapterTag.ChapterTagName.sehrGuteStudienfassung ||
+                                            this == ObChapterTag.ChapterTagName.ueberpruefungAngefordert))
                 return true;
 
             return false;

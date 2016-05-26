@@ -54,7 +54,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
     private String m_leseFassung = null;
     private StringBuilder m_currentFassung = new StringBuilder();
     private boolean m_currentFassungContainsVerses = false;
-    private String m_currentVerseStatus = "";
+    private ObVerseStatus m_currentVerseStatus = ObVerseStatus.none;
 
     private final String m_verseTagStart;
     private String m_verseTag = null;
@@ -127,7 +127,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             m_currentFassung = new StringBuilder("");
             m_currentFassungContainsVerses = false;
             m_lTagCounter = 1;
-            m_currentVerseStatus = "";
+            m_currentVerseStatus = ObVerseStatus.none;
         }
 
         else if(node.getNodeType() == ObAstNode.NodeType.quote) {
@@ -363,15 +363,12 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                     }
                     if (nextNode == null || nextNode instanceof ObVerseNode || nextNode.getNodeType() == NodeType.heading) {
                         // empty verses do not need any status
-                        m_currentVerseStatus = "";
+                        m_currentVerseStatus = ObVerseStatus.none;
                     } else {
-                        // non empty verses are "Ungeprüft", "Zuverlässig" oder "Sehr gut".
-                        // (quick and dirty solution for now)
                         ObVerseStatus status = verse.getStatus();
-                        String verseStatus = "[Status: "+status.getExportStatusString()+"]";
-                        if (!m_currentVerseStatus.equals(verseStatus)) {
-                            m_currentVerseStatus = verseStatus;
-                            m_currentFassung.append("<note type=\"x-footnote\" n=\"Status\">" + verseStatus + "</note> ");
+                        if (m_currentVerseStatus != status) {
+                            m_currentVerseStatus = status;
+                            m_currentFassung.append("<note type=\"x-footnote\" n=\"Status\">[Status: " + status.getExportStatusString() + "]</note> ");
                         }
                     }
                 }
