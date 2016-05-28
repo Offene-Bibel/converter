@@ -2,7 +2,6 @@ package offeneBibel.parser;
 
 public enum ObVerseStatus {
     none(0, "Unbekannt"),
-    zuPruefen(0, "Zu prüfen"),
     ungeprueft(1, "Ungeprüft"),
     zuverlaessig(2, "Zuverlässig"),
     sehrGut(3, "Sehr gut");

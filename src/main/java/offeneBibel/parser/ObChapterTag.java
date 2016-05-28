@@ -29,9 +29,6 @@ public class ObChapterTag implements Serializable {
          */
         public int getPriority() {
             switch (this) {
-            case ueberpruefungAngefordert:
-                return 6;
-            
             case studienfassungKannErstelltWerden:
                 return 5;
             case studienfassunginArbeit:
@@ -53,6 +50,8 @@ public class ObChapterTag implements Serializable {
                 return 2;
             case sehrGuteLesefassung:
                 return 1;
+            
+            case ueberpruefungAngefordert:
             default:
                 return 0; // never reached
             }
@@ -61,8 +60,6 @@ public class ObChapterTag implements Serializable {
         public ObVerseStatus getVerseStatus(FassungType fassung) {
             if(fassung == FassungType.studienfassung) {
                 switch (this) {
-                case ueberpruefungAngefordert:
-                    return ObVerseStatus.zuPruefen;
                 case ungepruefteStudienfassung:
                 case studienfassunginArbeit:
                     return ObVerseStatus.ungeprueft;
@@ -77,8 +74,6 @@ public class ObChapterTag implements Serializable {
             }
             else {
                 switch (this) {
-                case ueberpruefungAngefordert:
-                    return ObVerseStatus.zuPruefen;
                 case ungepruefteLesefassung:
                     return ObVerseStatus.ungeprueft;
                 case zuverlaessigeLesefassung:
