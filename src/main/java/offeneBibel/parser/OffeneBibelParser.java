@@ -30,41 +30,41 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     //page    :    ws* (chaptertag ws*)* lesefassung ws* studienfassung ws* '{{Kapitelseite Fuß}}' ws* EOF;
     public Rule Page() {
-        return Sequence(
+        return sequence(
             push(new ObChapterNode()),
-            ZeroOrMore(Whitespace()),
-            Optional(Sequence(ChapterNotes(), ZeroOrMore(Whitespace()))),
-            ZeroOrMore(Sequence(ChapterTag(), ZeroOrMore(Whitespace()))),
-            Optional(Sequence("<small>", OneOrMore(FirstOf(FreeWikiMarkup(), Sequence(TestNot("</small>"), NoteChar(), createOrAppendTextNode(match())))), "</small>"), ZeroOrMore(Whitespace())), // just ignore alternate readings for now
+            zeroOrMore(Whitespace()),
+            optional(sequence(ChapterNotes(), zeroOrMore(Whitespace()))),
+            zeroOrMore(sequence(ChapterTag(), zeroOrMore(Whitespace()))),
+            optional(sequence("<small>", oneOrMore(firstOf(FreeWikiMarkup(), sequence(testNot("</small>"), NoteChar(), createOrAppendTextNode(match())))), "</small>"), zeroOrMore(Whitespace())), // just ignore alternate readings for now
             "{{Lesefassung}}",
-            ZeroOrMore(Whitespace()),
-            FirstOf(
+            zeroOrMore(Whitespace()),
+            firstOf(
                 "''(kommt später)''",
                 Fassung(ObFassungNode.FassungType.lesefassung, new StringVar("{{Studienfassung}}"))
             ),
-            ZeroOrMore(Whitespace()),
+            zeroOrMore(Whitespace()),
             "{{Studienfassung}}",
-            ZeroOrMore(Whitespace()),
+            zeroOrMore(Whitespace()),
             Fassung(ObFassungNode.FassungType.studienfassung, new StringVar("{{Kapitelseite Fuß}}")),
-            ZeroOrMore(Whitespace()),
+            zeroOrMore(Whitespace()),
             "{{Kapitelseite Fuß}}",
-            ZeroOrMore(Whitespace()),
+            zeroOrMore(Whitespace()),
             EOI
         );
     }
     
     public Rule ChapterNotes() {
-        return Sequence(
+        return sequence(
                 "==Einführende Bemerkungen==",
                 push(new ObAstNode(NodeType.chapterNotes)),
-                ZeroOrMore(Whitespace()),
-                OneOrMore(FirstOf(FreeWikiMarkup(), Sequence(TestNot(ChapterTag()), NoteChar(), createOrAppendTextNode(match())))),
+                zeroOrMore(Whitespace()),
+                oneOrMore(firstOf(FreeWikiMarkup(), sequence(testNot(ChapterTag()), NoteChar(), createOrAppendTextNode(match())))),
                 peek(1).appendChild(pop())
         );
     }
     
     public Rule FreeWikiMarkup() {
-        return OneOrMore(FirstOf(
+        return oneOrMore(firstOf(
                 BibleTextQuote(),
                 NoteQuote(),
                 NoteFat(),
@@ -87,11 +87,11 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      */
     public Rule ChapterTag() {
         Var<ObChapterTag> chapterTag = new Var<ObChapterTag>(new ObChapterTag());
-        return FirstOf(
-            Sequence("{{", ChapterTagType(chapterTag), "}}", ((ObChapterNode)peek()).addChapterTag(chapterTag.get())),
-            Sequence("{{",
+        return firstOf(
+            sequence("{{", ChapterTagType(chapterTag), "}}", ((ObChapterNode)peek()).addChapterTag(chapterTag.get())),
+            sequence("{{",
                     ChapterTagType(chapterTag), "|Vers ",
-                    VerseRange(chapterTag), ZeroOrMore(" und ", VerseRange(chapterTag)),
+                    VerseRange(chapterTag), zeroOrMore(" und ", VerseRange(chapterTag)),
                     "}}",
                     ((ObChapterNode)peek()).addChapterTag(chapterTag.get())
                     )
@@ -101,32 +101,32 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     public Rule VerseRange(Var<ObChapterTag> chapterTag) {
         Var<Integer> startVerse = new Var<Integer>();
         Var<Integer> stopVerse = new Var<Integer>();
-        return FirstOf(
-            Sequence(
+        return firstOf(
+            sequence(
                 Number(), safeParseIntSet(startVerse),
                 '-',
                 Number(), safeParseIntSet(stopVerse),
                 chapterTag.get().addVerseRange(startVerse.get(), stopVerse.get())
             ),
-            Sequence(
+            sequence(
                 Number(), safeParseIntSet(startVerse), chapterTag.get().addVerse(startVerse.get())
             )
         );
     }
     
     public Rule ChapterTagType(Var<ObChapterTag> chapterTag) {
-        return FirstOf(
-            Sequence("Studienfassung kann erstellt werden", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungKannErstelltWerden)),
-            Sequence("Studienfassung in Arbeit", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassunginArbeit)),
-            Sequence("Ungeprüfte Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.ungepruefteStudienfassung)),
-            Sequence("Zuverlässige Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.zuverlaessigeStudienfassung)),
-            Sequence("Sehr gute Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.sehrGuteStudienfassung)),
-            Sequence("Lesefassung folgt später", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassungFolgtSpaeter)),
-            Sequence("Lesefassung kann erstellt werden", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassungKannErstelltWerden)),
-            Sequence("Ungeprüfte Lesefassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.ungepruefteLesefassung)),
-            Sequence("Zuverlässige Lesefassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.zuverlaessigeLesefassung)),
-            Sequence("Sehr gute Lesefassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.sehrGuteLesefassung)),
-            Sequence("Überprüfung angefordert", chapterTag.get().setTag(ObChapterTag.ChapterTagName.ueberpruefungAngefordert))
+        return firstOf(
+            sequence("Studienfassung kann erstellt werden", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassungKannErstelltWerden)),
+            sequence("Studienfassung in Arbeit", chapterTag.get().setTag(ObChapterTag.ChapterTagName.studienfassunginArbeit)),
+            sequence("Ungeprüfte Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.ungepruefteStudienfassung)),
+            sequence("Zuverlässige Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.zuverlaessigeStudienfassung)),
+            sequence("Sehr gute Studienfassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.sehrGuteStudienfassung)),
+            sequence("Lesefassung folgt später", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassungFolgtSpaeter)),
+            sequence("Lesefassung kann erstellt werden", chapterTag.get().setTag(ObChapterTag.ChapterTagName.lesefassungKannErstelltWerden)),
+            sequence("Ungeprüfte Lesefassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.ungepruefteLesefassung)),
+            sequence("Zuverlässige Lesefassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.zuverlaessigeLesefassung)),
+            sequence("Sehr gute Lesefassung", chapterTag.get().setTag(ObChapterTag.ChapterTagName.sehrGuteLesefassung)),
+            sequence("Überprüfung angefordert", chapterTag.get().setTag(ObChapterTag.ChapterTagName.ueberpruefungAngefordert))
         );
     }
     
@@ -136,10 +136,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     //(poemstart ws*)? (vers ws*)* '{{Bemerkungen}}';
     public Rule Fassung(ObFassungNode.FassungType fassung, StringVar breaker) {
-        return Sequence(
-                ZeroOrMore(Whitespace()),
+        return sequence(
+                zeroOrMore(Whitespace()),
                 push(new ObFassungNode(fassung)),
-                OneOrMore(FirstOf(
+                oneOrMore(firstOf(
                     BibleText(),
                     Verse(),
                     Heading(),
@@ -147,9 +147,9 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     Comment()
                 )),
                 "{{Bemerkungen}}",
-                Optional(Sequence(
+                optional(sequence(
                         push(new ObAstNode(NodeType.fassungNotes)),
-                        ZeroOrMore(Whitespace()),
+                        zeroOrMore(Whitespace()),
                         NoteText(breaker),
                         peek(1).insertChild(0, pop()) // put the notes of the Fassung at the beginning
                     )
@@ -159,12 +159,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule BibleText() {
-        return FirstOf(
-            Sequence(
+        return firstOf(
+            sequence(
                 ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.lesefassung),
                 LfBibleText()
             ),
-            Sequence(
+            sequence(
                 ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.studienfassung),
                 SfBibleText()
             )
@@ -172,8 +172,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     public Rule LfBibleText() {
-        return OneOrMore(
-            FirstOf(
+        return oneOrMore(
+            firstOf(
                 UnsupportedMarkup(),
                 ScriptureText(),
                 TextParenthesis(),
@@ -194,8 +194,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule SfBibleText() {
-        return OneOrMore(
-            FirstOf(
+        return oneOrMore(
+            firstOf(
                 UnsupportedMarkup(),
                 ScriptureText(),
                 LineQuote(),
@@ -221,43 +221,43 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     public Rule Verse() {
         Var<Integer> verseFromNumber = new Var<Integer>();
         Var<Integer> verseToNumber = new Var<Integer>();
-        return Sequence(
-            ZeroOrMore(Whitespace()),
+        return sequence(
+            zeroOrMore(Whitespace()),
             "{{",
-            FirstOf(
-                Sequence(
+            firstOf(
+                sequence(
                     ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.lesefassung),
                     'L'
                 ),
-                Sequence(
+                sequence(
                     ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.studienfassung),
                     'S'
                 )
             ),
             '|',
-            FirstOf(
-                Sequence(
+            firstOf(
+                sequence(
                     Number(), safeParseIntSet(verseFromNumber),
-                    FirstOf("/", "-"),
+                    firstOf("/", "-"),
                     Number(), safeParseIntSet(verseToNumber)
                 ),
-                Sequence(
+                sequence(
                     Number(), safeParseIntSet(verseFromNumber), verseToNumber.set(verseFromNumber.get())
                 )
             ),
             "}}",
             peek().appendChild(new ObVerseNode(verseFromNumber.get(), verseToNumber.get())),
-            ZeroOrMore(Whitespace())
+            zeroOrMore(Whitespace())
         );
     }
 
     public Rule Heading() {
-        return Sequence(
+        return sequence(
                 ACTION( getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.lesefassung ),
                 "((",
                 push(new ObAstNode(ObAstNode.NodeType.heading)),
                 ScriptureText(),
-                Optional(Note()),
+                optional(Note()),
                 "))",
                 peek(1).appendChild(pop())
         );
@@ -269,12 +269,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * @return
      */
     public Rule Quote() {
-        return Sequence(
+        return sequence(
             /** {@link InnerQuotes} could contain {@link Quotes} via the {@link BibleText}, to prevent this we check here. */
             ACTION(false == isRuleAncestor("InnerQuote")),
             '\u201e', // „
             push(new ObAstNode(ObAstNode.NodeType.quote)),
-            OneOrMore(FirstOf(
+            oneOrMore(firstOf(
                     BibleText(),
                     InnerQuote(),
                     Verse(),
@@ -282,17 +282,17 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     Comment()
             )),
             // TODO: Once chapters are not parsed separately anymore quotes should forcefully match the closing tag again.
-            Optional('\u201c'), // “
+            optional('\u201c'), // “
             peek(1).appendChild(pop())
         );
     }
 
     public Rule InnerQuote() {
-        return Sequence(
+        return sequence(
             ACTION(isRuleAncestor("Quote")),
             '\u201A', // ‚
             push(new ObAstNode(ObAstNode.NodeType.quote)),
-            OneOrMore(FirstOf(
+            oneOrMore(firstOf(
                 BibleText(),
                 InnerQuote(),
                 Verse(),
@@ -311,26 +311,26 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * added there.
      */
     public Rule LineQuote() {
-        return FirstOf(
+        return firstOf(
             /**
              * {@link LineQuotes} can not be matched in a completely hierarchical fashion, because the "\n:" can occur inside
              * other elements. Thus we need a way to eat up "\n:" inside elements nested in {@link LineQuote}s. This is done here.
              */
-            Sequence(
+            sequence(
                 isRuleAncestor("LineQuote"),
                 "\n:"
             ),
             /**
              * This is the actual {@link LineQuote} matching part.
              */
-            Sequence(
+            sequence(
                 // Keep the boxing right. LineQuote -> Quote -> InnerQuote -> InnerQuote -> ...
                 // Line quotes are not allowed in poems.
                 ACTION(false == isRuleAncestor("Quote")),
                 ACTION(false == isRuleAncestor("InnerQuote")),
                 "\n:",
                 push(new ObAstNode(ObAstNode.NodeType.quote)),
-                OneOrMore(FirstOf(
+                oneOrMore(firstOf(
                         BibleText(),
                         Verse(),
                         Note(),
@@ -343,11 +343,11 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     public Rule Fat() {
-        return FirstOf(
-            Sequence(
+        return firstOf(
+            sequence(
                 "'''",
                 push(new ObAstNode(ObAstNode.NodeType.fat)),
-                OneOrMore(FirstOf(
+                oneOrMore(firstOf(
                         ScriptureText(),
                         Quote(),
                         //Italics(),
@@ -363,10 +363,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 "'''",
                 peek(1).appendChild(pop())
             ),
-            Sequence(
+            sequence(
                 "<b>",
                 push(new ObAstNode(ObAstNode.NodeType.fat)),
-                OneOrMore(FirstOf(
+                oneOrMore(firstOf(
                         ScriptureText(),
                         Quote(),
                         Italics(),
@@ -386,11 +386,11 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule Italics() {
-        return FirstOf(
-            Sequence(
+        return firstOf(
+            sequence(
                 "''",
                 push(new ObAstNode(ObAstNode.NodeType.italics)),
-                OneOrMore(FirstOf(
+                oneOrMore(firstOf(
                         ScriptureText(),
                         Quote(),
                         Fat(),
@@ -406,10 +406,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 "''",
                 peek(1).appendChild(pop())
             ),
-            Sequence(
+            sequence(
                 "<em>",
                 push(new ObAstNode(ObAstNode.NodeType.italics)),
-                OneOrMore(FirstOf(
+                oneOrMore(firstOf(
                         ScriptureText(),
                         Quote(),
                         Fat(),
@@ -425,10 +425,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 "</em>",
                 peek(1).appendChild(pop())
             ),
-            Sequence(
+            sequence(
                 "<i>",
                 push(new ObAstNode(ObAstNode.NodeType.italics)),
-                OneOrMore(FirstOf(
+                oneOrMore(firstOf(
                         ScriptureText(),
                         Quote(),
                         Fat(),
@@ -449,57 +449,57 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     
     // Parses/skips stuff that exists in the wiki but is not supported by the parser
     public Rule UnsupportedMarkup() {
-        return FirstOf(
+        return firstOf(
             // verse subsplitting with roman and greek letters
-            Sequence(
+            sequence(
                 "<span style=\"color:gray\"><sup><i>",
-                ZeroOrMore(AnyOf("0123456789")),
-                OneOrMore(AnyOf("abcdefghijklmnopqrstuvwxyz")),
-                ZeroOrMore(AnyOf("αβγδεζηθικλμνξοπρςστυφχψω")),
+                zeroOrMore(anyOf("0123456789")),
+                oneOrMore(anyOf("abcdefghijklmnopqrstuvwxyz")),
+                zeroOrMore(anyOf("αβγδεζηθικλμνξοπρςστυφχψω")),
                 "</i></sup></span>"
             ),
             // ((blabla)), only in Studienfassung (breaks headlines in Lesefassung)
-            Sequence(
+            sequence(
                     ACTION(getCurrentFassung(getContext().getValueStack()) == ObFassungNode.FassungType.studienfassung),
                     "((",createOrAppendTextNode(match()),
                     ScriptureText(),
                     "))",createOrAppendTextNode(match())
                 ),
             // non-breaking spaces
-            Sequence("&#160;", createOrAppendTextNode(" ")),
+            sequence("&#160;", createOrAppendTextNode(" ")),
             // nowiki tags
-            Sequence(
+            sequence(
                 "<nowiki>",
-                ZeroOrMore(FirstOf(CharRange(' ', ';'),CharRange('?','~'))),
+                zeroOrMore(firstOf(charRange(' ', ';'),charRange('?','~'))),
                 createOrAppendTextNode(match()),
                 "</nowiki>"
             ),
             // [Jesus] in Lesefassung (Matthäus 17)
-            Sequence("[Jesus]", createOrAppendTextNode("[Jesus]")),
+            sequence("[Jesus]", createOrAppendTextNode("[Jesus]")),
             // Asterisk (Markus 15)
-            Sequence("*", createOrAppendTextNode("*")),
+            sequence("*", createOrAppendTextNode("*")),
             // Urtext unklar (Klagelieder 1)
-            Sequence("†", createOrAppendTextNode("†")),
+            sequence("†", createOrAppendTextNode("†")),
             // empty footnotes (Genesis 10, 1Chronik 1, Johannes 15, Jakobus 1)
             "<ref></ref>"
         );
     }
 
     public Rule NoteFat() {
-        return FirstOf(
-            Sequence(
+        return firstOf(
+            sequence(
                 breakRecursion(),
                 "'''",
                 push(new ObAstNode(ObAstNode.NodeType.fat)),
-                OneOrMore(Sequence(TestNot("</b>"), NoteChar(), createOrAppendTextNode(match()))),
+                oneOrMore(sequence(testNot("</b>"), NoteChar(), createOrAppendTextNode(match()))),
                 "'''",
                 peek(1).appendChild(pop())
             ),
-            Sequence(
+            sequence(
                 breakRecursion(),
                 "<b>",
                 push(new ObAstNode(ObAstNode.NodeType.fat)),
-                OneOrMore(Sequence(TestNot("</b>"), NoteChar(), createOrAppendTextNode(match()))),
+                oneOrMore(sequence(testNot("</b>"), NoteChar(), createOrAppendTextNode(match()))),
                 "</b>",
                 peek(1).appendChild(pop())
             )
@@ -507,8 +507,8 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule NoteItalics() {
-        return FirstOf(
-            Sequence(
+        return firstOf(
+            sequence(
                 breakRecursion(),
                 "''",
                 push(new ObAstNode(ObAstNode.NodeType.italics)),
@@ -516,19 +516,19 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 "''",
                 peek(1).appendChild(pop())
             ),
-            Sequence(
+            sequence(
                 breakRecursion(),
                 "<em>",
                 push(new ObAstNode(ObAstNode.NodeType.italics)),
-                OneOrMore(Sequence(TestNot("</em>"), NoteChar(), createOrAppendTextNode(match()))),
+                oneOrMore(sequence(testNot("</em>"), NoteChar(), createOrAppendTextNode(match()))),
                 "</em>",
                 peek(1).appendChild(pop())
             ),
-            Sequence(
+            sequence(
                 breakRecursion(),
                 "<i>",
                 push(new ObAstNode(ObAstNode.NodeType.italics)),
-                OneOrMore(Sequence(TestNot("</i>"), NoteChar(), createOrAppendTextNode(match()))),
+                oneOrMore(sequence(testNot("</i>"), NoteChar(), createOrAppendTextNode(match()))),
                 "</i>",
                 peek(1).appendChild(pop())
             )
@@ -536,10 +536,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule Insertion() {
-        return Sequence(
+        return sequence(
             '[',
             push(new ObAstNode(ObAstNode.NodeType.insertion)),
-            OneOrMore(FirstOf(
+            oneOrMore(firstOf(
                     ScriptureText(),
                     Quote(),
                     Fat(),
@@ -558,15 +558,15 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule Omission() {
-        return Sequence(
+        return sequence(
             /*
              * For a little better error reporting we catch the most often encountered false positives, before
              * consuming input.
              */
-            TestNot(FirstOf("{{Studienfassung}}", "{{Lesefassung}}", "{{Bemerkungen}}", "{{Kapitelseite Fuß}}", "{{Sekundär}}", "{{Sekundär ende}}", "{{Hebr}}", "{{Hebr ende}}")),
+            testNot(firstOf("{{Studienfassung}}", "{{Lesefassung}}", "{{Bemerkungen}}", "{{Kapitelseite Fuß}}", "{{Sekundär}}", "{{Sekundär ende}}", "{{Hebr}}", "{{Hebr ende}}")),
             '{',
             push(new ObAstNode(ObAstNode.NodeType.omission)),
-            OneOrMore(FirstOf(
+            oneOrMore(firstOf(
                     ScriptureText(),
                     Quote(),
                     Fat(),
@@ -589,9 +589,9 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     public Rule TextParenthesis() {
-        return Sequence(
-            '(', TestNot('/'), TestNot('('), peek().appendChild(new ObTextNode(match())),
-            OneOrMore(FirstOf(
+        return sequence(
+            '(', testNot('/'), testNot('('), peek().appendChild(new ObTextNode(match())),
+            oneOrMore(firstOf(
                     BibleText(),
                     Verse(),
                     Heading(),
@@ -603,13 +603,13 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule Alternative() {
-        return Sequence(
+        return sequence(
             '(',
             push(new ObAstNode(ObAstNode.NodeType.alternative)),
-            OneOrMore(FirstOf(
+            oneOrMore(firstOf(
                 ScriptureText(),
                 Quote(),
-                Sequence(ACTION(isRuleAncestor("Quote")), InnerQuote()),
+                sequence(ACTION(isRuleAncestor("Quote")), InnerQuote()),
                 Insertion(),
                 Alternative(),
                 AlternateReading(),
@@ -632,29 +632,29 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      */
     public Rule AlternateReading() {
         StringVar part1 = new StringVar(), part2=new StringVar(), part3 = new StringVar();
-        return Sequence(
+        return sequence(
             "(/",
-            OneOrMore(
-                FirstOf(
+            oneOrMore(
+                firstOf(
                     '|',
-                    Sequence(
-                        TestNot('/'),
+                    sequence(
+                        testNot('/'),
                         TextChar()
                     )
                 )
             ),
             part1.set(match()),
             '/',
-            OneOrMore(
-                TestNot('/'),
+            oneOrMore(
+                testNot('/'),
                 TextChar()
             ),
             part2.set(match()),
-            Optional(
+            optional(
             '/',
-            TestNot(')'),
-            OneOrMore(
-                TestNot('/'),
+            testNot(')'),
+            oneOrMore(
+                testNot('/'),
                 TextChar()
             ),
             part3.set(match())),
@@ -700,10 +700,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      }
 
     public Rule SecondaryContent() {
-        return Sequence(
-                 FirstOf("{{Sekundär}}", "{{sekundär}}"),
+        return sequence(
+                 firstOf("{{Sekundär}}", "{{sekundär}}"),
                  push(new ObAstNode(ObAstNode.NodeType.secondaryContent)),
-                 OneOrMore(FirstOf(
+                 oneOrMore(firstOf(
                      ScriptureText(),
                      Verse(),
                      Quote(),
@@ -719,7 +719,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                      Omission(),
                      Comment()
                  )),
-                 FirstOf("{{Sekundär ende}}", "{{sekundär ende}}"),
+                 firstOf("{{Sekundär ende}}", "{{sekundär ende}}"),
                  peek(1).appendChild(pop())
                  );
     }
@@ -730,9 +730,9 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * TODO: Check for two PoemStarts without an intermediate PoemStop.
      */
     public Rule PoemStart() {
-        return Sequence(
+        return sequence(
                 "<poem>",
-                Optional("\n"),
+                optional("\n"),
                 peek().appendChild(new ObAstNode(ObAstNode.NodeType.poemStart)),
                 // We make sure there is a new line following the poem start
                 // to make sure the first line in a poem is also wrapped in <l> tags.
@@ -744,7 +744,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
      * See {@link PoemStart}.
      */
     public Rule PoemStop() {
-        return Sequence(
+        return sequence(
                 "</poem>",
                 peek().appendChild(new ObAstNode(ObAstNode.NodeType.poemStop))
                 );
@@ -767,17 +767,17 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
              * {@link SecondVoice} can not be matched in a completely hierarchical fashion, because the "\n" can occur inside
              * other elements. Thus we need a way to eat up "\n:" inside elements nested in {@link LineQuote}s. This is done here.
              */
-            /*Sequence(
+            /*sequence(
                 isRuleAncestor("SecondVoice"),
                 "\n_"
             ),*/
             /**
              * This is the actual {@link SecondVoice} matching part.
              */
-            /*Sequence(
+            /*sequence(
                 "\n_",
                 push(new ObAstNode(ObAstNode.NodeType.secondVoice)),
-                OneOrMore(FirstOf(
+                oneOrMore(firstOf(
                         BibleText(),
                         Verse(),
                         Note(),
@@ -790,7 +790,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule Break() {
-        return Sequence(FirstOf("<br/>", "<br />", "<br>"),
+        return sequence(firstOf("<br/>", "<br />", "<br>"),
                 peek().appendChild(new ObAstNode(ObAstNode.NodeType.textBreak))
                 );
     }
@@ -805,14 +805,14 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
         Var<Integer> chapter = new Var<Integer>();
         Var<Integer> startVerse = new Var<Integer>();
         Var<Integer> stopVerse = new Var<Integer>(-1);
-        return Sequence(
-            FirstOf("{{Par|", "{{par|"),
-            OneOrMore(NoneOf("|")), bookName.set(match()), ACTION(BookNameHelper.getInstance().isValid(bookName.get())),
+        return sequence(
+            firstOf("{{Par|", "{{par|"),
+            oneOrMore(noneOf("|")), bookName.set(match()), ACTION(BookNameHelper.getInstance().isValid(bookName.get())),
             '|',
             Number(), safeParseIntSet(chapter),
             '|',
             Number(), safeParseIntSet(startVerse),
-            Optional(Sequence(
+            optional(sequence(
                 '|',
                 Number(), safeParseIntSet(stopVerse)
             )),
@@ -822,26 +822,26 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     public Rule Note() {
         StringVar tagText = new StringVar();
-        return FirstOf(
-            Sequence(
-                FirstOf("<ref>", "<ref group=\"Text\">"), push(new ObNoteNode()),
+        return firstOf(
+            sequence(
+                firstOf("<ref>", "<ref group=\"Text\">"), push(new ObNoteNode()),
                 NoteText(new StringVar("</ref>")),
                 "</ref>",
                 peek(1).appendChild(pop())
             ),
-            Sequence(
+            sequence(
                 "<ref name=\"",
                 TagText(), tagText.set(match()),
                 "\"",
-                ZeroOrMore(Whitespace()),
+                zeroOrMore(Whitespace()),
                 "/>",
                 peek().appendChild(new ObNoteLinkNode(tagText.get()))
             ),
-            Sequence(
-                FirstOf("<ref name=\"", "<ref group=\"Text\" name=\""),
+            sequence(
+                firstOf("<ref name=\"", "<ref group=\"Text\" name=\""),
                 TagText(), tagText.set(match()),
                 "\"",
-                ZeroOrMore(Whitespace()),
+                zeroOrMore(Whitespace()),
                 ">", push(new ObNoteNode(tagText.get())),
                 NoteText(new StringVar("</ref>")),
                 "</ref>",
@@ -851,14 +851,14 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     public Rule NoteText(StringVar breaker) {
-        return OneOrMore(FirstOf(
+        return oneOrMore(firstOf(
                 NoteMarkup(),
-                Sequence(TestNot(breaker.get()), NoteChar(), createOrAppendTextNode(match()))
+                sequence(testNot(breaker.get()), NoteChar(), createOrAppendTextNode(match()))
         ));
     }
 
     public Rule NoteMarkup() {
-        return FirstOf(
+        return firstOf(
             Note(), // recursion is allowed
             BibleTextQuote(),
             UnsupportedMarkup(),
@@ -877,11 +877,11 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     @SuppressNode
     public Rule TagText() {
-        return OneOrMore(TagChar());
+        return oneOrMore(TagChar());
     }
     
     public Rule NoteQuote() {
-        return Sequence(
+        return sequence(
             '\u201e', // „
             push(new ObAstNode(ObAstNode.NodeType.quote)),
             NoteText(new StringVar("" + '\u201c')),
@@ -891,7 +891,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
 
     public Rule BibleTextQuote() {
-        return Sequence(
+        return sequence(
             '\u00BB', // »
             push(new ObAstNode(ObAstNode.NodeType.quote)),
             BibleText(),
@@ -901,53 +901,53 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule Hebrew() {
-        return Sequence(
-            FirstOf("{{Hebr}}", "{{hebr}}"),
-            FirstOf(Sequence(
+        return sequence(
+            firstOf("{{Hebr}}", "{{hebr}}"),
+            firstOf(sequence(
                     "[",
-                    Test(FirstOf("http://", "https://")), 
-                    OneOrMore(NoneOf(" ]")),
+                    test(firstOf("http://", "https://")), 
+                    oneOrMore(noneOf(" ]")),
                     push(new ObWikiLinkNode(match(), false)),
                     ' ',
                     push(new ObAstNode(NodeType.hebrew)),
-                    FirstOf(
-                        Sequence('\u202b',HebrewText(),'\u202c'), // optional directional markers
+                    firstOf(
+                        sequence('\u202b',HebrewText(),'\u202c'), // optional directional markers
                         HebrewText()
                     ),
                     "]",
                     peek(1).appendChild(pop())
-            ), Sequence(
+            ), sequence(
             push(new ObAstNode(NodeType.hebrew)),
-            FirstOf(
-                Sequence('\u202b',HebrewText(),'\u202c'), // optional directional markers
+            firstOf(
+                sequence('\u202b',HebrewText(),'\u202c'), // optional directional markers
                 HebrewText()
             ))),
-            FirstOf("{{Hebr ende}}", "{{hebr ende}}"),
+            firstOf("{{Hebr ende}}", "{{hebr ende}}"),
             peek(1).appendChild(pop())
         );
     }
     
     public Rule WikiLink() {
-        return FirstOf(
-            Sequence(
+        return firstOf(
+            sequence(
                 breakRecursion(),
                 "[[",
-                OneOrMore(NoneOf("|]")),
+                oneOrMore(noneOf("|]")),
                 push(new ObWikiLinkNode(match(), true)),
-                Optional(
+                optional(
                     '|',
                     NoteText(new StringVar("]]"))
                 ),
                 "]]",
                 peek(1).appendChild(pop())
             ),
-            Sequence(
+            sequence(
                 breakRecursion(),
                 "[",
-                Test(FirstOf("http://","https://")),
-                OneOrMore(NoneOf(" ]")),
+                test(firstOf("http://","https://")),
+                oneOrMore(noneOf(" ]")),
                 push(new ObWikiLinkNode(match(), false)),
-                Optional(
+                optional(
                     ' ',
                     NoteWikiLinkText()
                 ),
@@ -958,7 +958,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule NoteWikiLinkText() {
-        return OneOrMore(FirstOf(
+        return oneOrMore(firstOf(
                 BibleTextQuote(),
                 NoteQuote(),
                 NoteFat(),
@@ -967,12 +967,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 NoteSuperScript(),
                 Break(),
                 Comment(),
-                Sequence(TestNot("]"), NoteChar(), createOrAppendTextNode(match()))
+                sequence(testNot("]"), NoteChar(), createOrAppendTextNode(match()))
         ));
     }
     
     public Rule NoteSuperScript() {
-        return Sequence(
+        return sequence(
             breakRecursion(),
             "<sup>",
             push(new ObSuperScriptTextNode()),
@@ -983,7 +983,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule NoteStrikeThrough() {
-        return Sequence(
+        return sequence(
             breakRecursion(),
             "<s>",
             push(new ObAstNode(NodeType.strikeThrough)),
@@ -994,7 +994,7 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule NoteUnderline() {
-        return Sequence(
+        return sequence(
             breakRecursion(),
             "<u>",
             push(new ObAstNode(NodeType.underline)),
@@ -1005,10 +1005,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
     }
     
     public Rule Comment() {
-        return Sequence(
+        return sequence(
             "<!--",
-            OneOrMore(
-                TestNot("-->"),
+            oneOrMore(
+                testNot("-->"),
                 ANY
             ),
             "-->"
@@ -1017,10 +1017,10 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     @SuppressNode
     public Rule HebrewText() {
-        return Sequence(
-                OneOrMore(FirstOf(
-                    CharRange('\u0590', '\u05ff'), // hebrew alphabet
-                    CharRange('\ufb1d', '\ufb4f'),  // hebrew presentation forms
+        return sequence(
+                oneOrMore(firstOf(
+                    charRange('\u0590', '\u05ff'), // hebrew alphabet
+                    charRange('\ufb1d', '\ufb4f'),  // hebrew presentation forms
                     '(', ')', // (Klagelieder 1)
                     PunctuationChar()
                 )),
@@ -1030,12 +1030,12 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     @SuppressNode
     public Rule ScriptureText() {
-        return Sequence(OneOrMore(TextChar()), peek().appendChild(new ObTextNode(match()))); // this might cause a problem because OneOrMore() fights with ScriptureText() for the chars
+        return sequence(oneOrMore(TextChar()), peek().appendChild(new ObTextNode(match()))); // this might cause a problem because oneOrMore() fights with ScriptureText() for the chars
     }
 
     @SuppressNode
     public Rule TextChar() {
-        return FirstOf(
+        return firstOf(
             LetterChar(),
             PunctuationChar()
         );
@@ -1043,14 +1043,14 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     @SuppressNode
     public Rule LetterChar() {
-        return FirstOf(
+        return firstOf(
                 // C0 Controls and Basic Latin, http://unicode.org/charts/PDF/U0000.pdf
-                    CharRange('\u0041', '\u005a'), // A-Z
-                    CharRange('\u0061', '\u007a'), // a-z
+                    charRange('\u0041', '\u005a'), // A-Z
+                    charRange('\u0061', '\u007a'), // a-z
                 // C1 Controls and Latin-1 Supplement, http://unicode.org/charts/PDF/U0080.pdf
-                    CharRange('\u00c0', '\u00d6'), // all letters from C1
-                    CharRange('\u00d8', '\u00f6'), // all letters from C1
-                    CharRange('\u00f8', '\u00ff') // all letters from C1
+                    charRange('\u00c0', '\u00d6'), // all letters from C1
+                    charRange('\u00d8', '\u00f6'), // all letters from C1
+                    charRange('\u00f8', '\u00ff') // all letters from C1
                     /*'\u00c4', // Ä
                     '\u00d6', // Ö
                     '\u00dc', // Ü
@@ -1064,13 +1064,13 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     @SuppressNode
     public Rule PunctuationChar() {
-        return FirstOf(
+        return firstOf(
                 // C0 Controls and Basic Latin, http://unicode.org/charts/PDF/U0000.pdf
                     '=', // TODO: DELETE THIS
                     '\u0021', // !
                     '\'', // \u0027
-                    CharRange('\u002c', '\u002f'), // , - . /
-                    CharRange('\u0030', '\u003b'), // 0-9 : ;
+                    charRange('\u002c', '\u002f'), // , - . /
+                    charRange('\u0030', '\u003b'), // 0-9 : ;
                     '\u003f', // ?
                 // General Punctuation, http://unicode.org/charts/PDF/U2000.pdf
                     '\u2013', // – en dash
@@ -1079,18 +1079,18 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                 // C1 Controls and Latin-1 Supplement, http://unicode.org/charts/PDF/U0080.pdf
                     //'\u00b4', // ´
                     '\u2019', // ’ preferred character to be used for apostrophe
-                    //CharRange('\u2010', '\u2015'), // all sorts of dashes
+                    //charRange('\u2010', '\u2015'), // all sorts of dashes
                     '`', // Psalm 6, Psalm 11
                     '―', // Klagelieder 1
                 // Latin Extended Additional, http://www.unicode.org/charts/PDF/U1E00.pdf
-                    CharRange('\u1e00', '\u1eff'), 
+                    charRange('\u1e00', '\u1eff'), 
                 Whitespace()
             );
     }
     
     @SuppressNode
     public Rule NoteChar() {
-        return Sequence(
+        return sequence(
                    /*
                     * This rule generally consumes anything. In all calling cases it is guarded, not to consume
                     * input that is required by the surrounding rule and also guarded as to not consume elements
@@ -1105,33 +1105,33 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                     * other rules. Not everything can be prevented this way. Completely misspelled constructs that
                     * can not be recognized in any way will still slip through.
                     */
-                   TestNot("<ref"), TestNot("</ref"),
-                   TestNot("<i>"), TestNot("</i>"),
-                   TestNot("<sup>"), TestNot("</sup>"),
-                   TestNot("{{hebr"), TestNot("{{Hebr"),
-                   TestNot("{{Lesefassung}}"), TestNot("{{Studienfassung}}"),
-                   TestNot("{{Kapitelseite Fuß}}"),
-                   TestNot("{{Bemerkungen}}"),
-                   TestNot("{{L|"), TestNot("{{S|"),
-                   TestNot('\u201e'), TestNot('\u201c'), // „“
-                   TestNot('\u00BB'), TestNot('\u00AB'), // »«
-                   TestNot("<em>"), TestNot("</em>"), TestNot("<i>"), TestNot("</i>"),
-                   TestNot("<br/>"), TestNot("<br />"),TestNot("<br>"),
-                   //TestNot("\n:"), // Linequotes in comments not yet implemented
-                   TestNot("''"),
-                   TestNot("'''"),
-                   TestNot("[["),
-                   TestNot("<nowiki>"),
+                   testNot("<ref"), testNot("</ref"),
+                   testNot("<i>"), testNot("</i>"),
+                   testNot("<sup>"), testNot("</sup>"),
+                   testNot("{{hebr"), testNot("{{Hebr"),
+                   testNot("{{Lesefassung}}"), testNot("{{Studienfassung}}"),
+                   testNot("{{Kapitelseite Fuß}}"),
+                   testNot("{{Bemerkungen}}"),
+                   testNot("{{L|"), testNot("{{S|"),
+                   testNot('\u201e'), testNot('\u201c'), // „“
+                   testNot('\u00BB'), testNot('\u00AB'), // »«
+                   testNot("<em>"), testNot("</em>"), testNot("<i>"), testNot("</i>"),
+                   testNot("<br/>"), testNot("<br />"),testNot("<br>"),
+                   //testNot("\n:"), // Linequotes in comments not yet implemented
+                   testNot("''"),
+                   testNot("'''"),
+                   testNot("[["),
+                   testNot("<nowiki>"),
                    ANY
                );
-            /*FirstOf(
+            /*firstOf(
                 TextChar(),
                 '(', ')',
                 '[', ']',
                 '§',
                 '+',
                 '\n',
-                CharRange('\u0370', '\u03ff'), // Greek and Coptic, http://unicode.org/charts/PDF/U0370.pdf
+                charRange('\u0370', '\u03ff'), // Greek and Coptic, http://unicode.org/charts/PDF/U0370.pdf
                 '<', '>', '/', // swallow all sorts of unsupported XML like markup
                 '{', '}', '|', '=', '"', // swallow wiki tables for now
                 '*', '#' // swallow wiki lists for now
@@ -1141,27 +1141,27 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
 
     @SuppressNode
     public Rule TagChar() {
-        return FirstOf(
+        return firstOf(
             LetterChar(),
             '_',
             '-',
             '.',
             ' ',
-            CharRange('0', '9')
+            charRange('0', '9')
         );
     }
 
     @SuppressNode
     public Rule Number() {
-        return Sequence(
-            CharRange('1', '9'),
-            ZeroOrMore(CharRange('0', '9'))
+        return sequence(
+            charRange('1', '9'),
+            zeroOrMore(charRange('0', '9'))
         );
     }
 
     @SuppressNode
     public Rule Whitespace() {
-        return FirstOf(
+        return firstOf(
                 ' ',
                 '\t',
                 '\r',
@@ -1170,11 +1170,11 @@ public class OffeneBibelParser extends BaseParser<ObAstNode> {
                  * Thus we must not eat the "\n" if we are in a {@link LineQuote}, or if a colon follows. Otherwise
                  * {@link LineQuote}s could neither start, nor end. Same for {@link SecondVoice}.
                  */
-                Sequence(
+                sequence(
                     ACTION(false == isRuleAncestor("LineQuote")),
-                    TestNot("\n:"),
+                    testNot("\n:"),
                     ACTION(false == isRuleAncestor("SecondVoice")),
-                    TestNot("\n_"),
+                    testNot("\n_"),
                     '\n'
                 )
         );
