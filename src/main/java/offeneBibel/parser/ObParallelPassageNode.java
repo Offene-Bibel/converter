@@ -1,6 +1,7 @@
 package offeneBibel.parser;
 
 public class ObParallelPassageNode extends ObAstNode {
+    private static final long serialVersionUID = 1L;
     private String m_book;
     private int m_chapter;
     private int m_startVerse;

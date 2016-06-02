@@ -24,7 +24,6 @@ import offeneBibel.parser.BookNameHelper;
 import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.ObAstNode.NodeType;
 import offeneBibel.parser.ObFassungNode;
-import offeneBibel.parser.ObFassungNode.FassungType;
 import offeneBibel.parser.ObNoteNode;
 import offeneBibel.parser.ObParallelPassageNode;
 import offeneBibel.parser.ObTextNode;
@@ -33,9 +32,6 @@ import offeneBibel.parser.ObVerseStatus;
 import offeneBibel.parser.ObWikiLinkNode;
 import offeneBibel.visitorPattern.DifferentiatingVisitor;
 import offeneBibel.visitorPattern.IVisitor;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This visitor constructs a Studienfassung and Lesefassung from an AST tree.

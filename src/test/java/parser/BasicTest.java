@@ -4,7 +4,6 @@ import offeneBibel.parser.ObAstNode;
 import offeneBibel.parser.OffeneBibelParser;
 
 import org.parboiled.Parboiled;
-import org.parboiled.parserunners.BasicParseRunner;
 import org.parboiled.parserunners.ErrorReportingParseRunner;
 import org.parboiled.support.ParsingResult;
 import org.parboiled.errors.ErrorUtils;

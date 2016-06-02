@@ -4,16 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import offeneBibel.parser.ObAstNode;
-import offeneBibel.parser.ObChapterNode;
-import offeneBibel.parser.ObChapterTag;
-import offeneBibel.parser.ObChapterTag.ChapterTagName;
 import offeneBibel.parser.ObFassungNode;
 import offeneBibel.parser.ObFassungNode.FassungType;
-import offeneBibel.parser.ObNoteNode;
-import offeneBibel.parser.ObParallelPassageNode;
-import offeneBibel.parser.ObTextNode;
 import offeneBibel.parser.ObVerseNode;
-import offeneBibel.parser.ObVerseStatus;
 import offeneBibel.visitorPattern.DifferentiatingVisitor;
 import offeneBibel.visitorPattern.IVisitor;
 

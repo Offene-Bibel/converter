@@ -3,6 +3,7 @@ package offeneBibel.parser;
 import offeneBibel.parser.ObFassungNode.FassungType;
 
 public class ObVerseNode extends ObAstNode {
+    private static final long serialVersionUID = 1L;
     private int m_fromNumber;
     private int m_toNumber;
     private ObVerseStatus m_statusOverride = null;

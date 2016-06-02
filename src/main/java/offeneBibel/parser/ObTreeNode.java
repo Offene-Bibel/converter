@@ -17,6 +17,7 @@ import offeneBibel.visitorPattern.IVisitorHost;
  * @param <SELF>
  */
 public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements Serializable, IVisitorHost<SELF>{
+    private static final long serialVersionUID = 1L;
     protected LinkedList<SELF> m_children;
     protected SELF m_parent;
 

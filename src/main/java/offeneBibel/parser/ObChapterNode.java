@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Vector;
 
 public class ObChapterNode extends ObAstNode {
+    private static final long serialVersionUID = 1L;
     private List<ObChapterTag> m_chapterTags;
 
     public ObChapterNode() {

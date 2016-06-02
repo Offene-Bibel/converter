@@ -1,6 +1,8 @@
 package offeneBibel.parser;
 
 public class ObFassungNode extends ObAstNode {
+    private static final long serialVersionUID = 1L;
+
     public enum FassungType { lesefassung, studienfassung };
     private final FassungType m_fassung;
 

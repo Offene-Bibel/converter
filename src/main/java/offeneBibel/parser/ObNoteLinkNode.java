@@ -7,6 +7,7 @@ package offeneBibel.parser;
  * 2. In a second run the target will be searched and set.
  */
 public class ObNoteLinkNode extends ObAstNode {
+    private static final long serialVersionUID = 1L;
     private String m_noteTag;
     private ObNoteNode m_linkTarget;
 

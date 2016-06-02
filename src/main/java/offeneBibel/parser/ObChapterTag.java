@@ -6,6 +6,8 @@ import java.util.Vector;
 import offeneBibel.parser.ObFassungNode.FassungType;
 
 public class ObChapterTag implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public enum ChapterTagName {
         studienfassungKannErstelltWerden,
         studienfassunginArbeit,
@@ -111,6 +113,7 @@ public class ObChapterTag implements Serializable {
     }
 
     private class VerseRange implements Serializable {
+        private static final long serialVersionUID = 1L;
         private int m_startVerse;
         private int m_stopVerse;
 
@@ -123,13 +126,6 @@ public class ObChapterTag implements Serializable {
         {
             m_startVerse = verse;
             m_stopVerse = verse;
-        }
-
-        public int getStartVerse() {
-            return m_startVerse;
-        }
-        public int getStopVerse() {
-            return m_stopVerse;
         }
 
         public boolean verseInRange(int verseStart, int verseStop) {

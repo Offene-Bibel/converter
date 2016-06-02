@@ -3,11 +3,7 @@ package offeneBibel.zefania;
 import util.Misc;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -27,7 +23,7 @@ public class ZefaniaConverter {
         convert("offeneBibelStudienfassungModule.osis", "offbist.conf", "offeneBibelStudienfassungZefania.xml", "OffBiSt");
     }
 
-    private static Map<String, String[]> zefBooks = new HashMap();
+    private static Map<String, String[]> zefBooks = new HashMap<>();
 
     static {
         zefBooks.put("Gen", new String[] { "1", "Genesis", "Gen" });

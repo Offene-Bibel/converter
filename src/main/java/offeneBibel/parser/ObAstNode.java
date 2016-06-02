@@ -1,6 +1,8 @@
 package offeneBibel.parser;
 
 public class ObAstNode extends ObTreeNode<ObAstNode> { // implements IVisitorHost<ObAstNode> {
+    private static final long serialVersionUID = 1L;
+
     public enum NodeType {
         fassung,
         fassungNotes,
