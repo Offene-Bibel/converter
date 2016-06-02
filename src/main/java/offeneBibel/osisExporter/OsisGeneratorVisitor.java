@@ -43,27 +43,27 @@ public class OsisGeneratorVisitor extends DifferentiatingVisitor<AstNode> implem
 
     private static final Pattern DIVINE_NAME_PATTERN = Pattern.compile("JHWH|(JAHWE|HERR|GOTT)[A-Z]*");
 
-    private final int m_chapter;
-    private final String m_book;
+    private final int chapter;
+    private final String book;
 
-    private String m_studienFassung = null;
-    private String m_leseFassung = null;
-    private StringBuilder m_currentFassung = new StringBuilder();
-    private boolean m_currentFassungContainsVerses = false;
-    private VerseStatus m_currentVerseStatus = VerseStatus.none;
+    private String studienFassung = null;
+    private String leseFassung = null;
+    private StringBuilder currentFassung = new StringBuilder();
+    private boolean currentFassungContainsVerses = false;
+    private VerseStatus currentVerseStatus = VerseStatus.none;
 
-    private final String m_verseTagStart;
-    private String m_verseTag = null;
+    private final String verseTagStart;
+    private String verseTag = null;
 
-    private String m_lTagStart;
-    private String m_lgTagStart;
-    private String m_qTagStart;
-    private int m_lTagCounter = 1;
-    private int m_lgTagCounter = 1;
-    private int m_qTagCounter = 1;
+    private String lTagStart;
+    private String lgTagStart;
+    private String qTagStart;
+    private int lTagCounter = 1;
+    private int lgTagCounter = 1;
+    private int qTagCounter = 1;
 
-    private int m_quoteCounter = 0;
-    private boolean m_multiParallelPassage = false;
+    private int quoteCounter = 0;
+    private boolean multiParallelPassage = false;
 
     /**
      * Started by <poem> and stopped by </poem>.
@@ -72,7 +72,7 @@ public class OsisGeneratorVisitor extends DifferentiatingVisitor<AstNode> implem
      * there actually was some text. A </l> is added after the last text
      * block too.
      */
-    private boolean m_poemMode = false;
+    private boolean poemMode = false;
 
     /**
      * If in poem mode and a textual line has started, this is true.
@@ -81,18 +81,18 @@ public class OsisGeneratorVisitor extends DifferentiatingVisitor<AstNode> implem
      * It is also used to securely add the <l> before the first text after
      * the <poem> tag.
      */
-    private boolean m_lineStarted = false;
+    private boolean lineStarted = false;
 
     /** Skip the current verse if true. */
-    private boolean m_skipVerse = false;
+    private boolean skipVerse = false;
 
-    private VerseStatus m_requiredTranslationStatus;
+    private VerseStatus requiredTranslationStatus;
 
-    private NoteIndexCounter m_noteIndexCounter;
+    private NoteIndexCounter noteIndexCounter;
 
-    private boolean m_inlineVersStatus;
+    private boolean inlineVersStatus;
 
-    private boolean m_unmilestonedLineGroup;
+    private boolean unmilestonedLineGroup;
 
     /**
      * @param chapter The chapter number. Used in verse tags.
@@ -103,63 +103,63 @@ public class OsisGeneratorVisitor extends DifferentiatingVisitor<AstNode> implem
      */
     public OsisGeneratorVisitor(int chapter, String book, VerseStatus requiredTranslationStatus, boolean inlineVerseStatus, boolean unmilestonedLineGroup)
     {
-        m_chapter = chapter;
-        m_book = book;
-        m_verseTagStart = m_book + "." + m_chapter + ".";
-        m_lTagStart = m_book + "." + m_chapter + "_l_tag_";
-        m_lgTagStart = m_book + "." + m_chapter + "_lg_tag_";
-        m_qTagStart = m_book + "." + m_chapter + "_q_tag_";
-        m_noteIndexCounter = new NoteIndexCounter();
-        m_requiredTranslationStatus = requiredTranslationStatus;
-        m_inlineVersStatus = inlineVerseStatus;
-        m_unmilestonedLineGroup = unmilestonedLineGroup;
+        this.chapter = chapter;
+        this.book = book;
+        this.verseTagStart = book + "." + chapter + ".";
+        this.lTagStart = book + "." + chapter + "_l_tag_";
+        this.lgTagStart = book + "." + chapter + "_lg_tag_";
+        this.qTagStart = book + "." + chapter + "_q_tag_";
+        this.noteIndexCounter = new NoteIndexCounter();
+        this.requiredTranslationStatus = requiredTranslationStatus;
+        this.inlineVersStatus = inlineVerseStatus;
+        this.unmilestonedLineGroup = unmilestonedLineGroup;
     }
 
     @Override
     public void visitBeforeDefault(AstNode node) throws Throwable
     {
         if(node.getNodeType() == AstNode.NodeType.fassung) {
-            m_noteIndexCounter.reset();
-            m_currentFassung = new StringBuilder("");
-            m_currentFassungContainsVerses = false;
-            m_lTagCounter = 1;
-            m_currentVerseStatus = VerseStatus.none;
+            noteIndexCounter.reset();
+            currentFassung = new StringBuilder("");
+            currentFassungContainsVerses = false;
+            lTagCounter = 1;
+            currentVerseStatus = VerseStatus.none;
         }
 
         else if(node.getNodeType() == AstNode.NodeType.quote) {
-            if(m_skipVerse) return;
+            if(skipVerse) return;
             String end = ">";
-            if (m_unmilestonedLineGroup) {
-                end = " sID=\"" + m_qTagStart + m_qTagCounter + "\"/>";
+            if (unmilestonedLineGroup) {
+                end = " sID=\"" + qTagStart + qTagCounter + "\"/>";
             }
-            if(m_quoteCounter>0)
+            if(quoteCounter>0)
             {
-                m_quoteCounter++;
+                quoteCounter++;
                 
-                m_currentFassung.append("»");
+                currentFassung.append("»");
                 
                 if (node.getParent().isDescendantOf(AstNode.NodeType.italics))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
-                    m_currentFassung.append("</hi>");          
+                    currentFassung.append("</hi>");          
                 }
                 if (node.getParent().isDescendantOf(AstNode.NodeType.fat))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
-                    m_currentFassung.append("</hi>");
+                    currentFassung.append("</hi>");
                 }
 
-                m_currentFassung.append("<q level=\"" + m_quoteCounter + "\" marker=\"\"" + end);
+                currentFassung.append("<q level=\"" + quoteCounter + "\" marker=\"\"" + end);
                 
                 if (node.getParent().isDescendantOf(AstNode.NodeType.italics))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
-                    m_currentFassung.append("<hi type=\"italic\">");          
+                    currentFassung.append("<hi type=\"italic\">");          
                 }
                 if (node.getParent().isDescendantOf(AstNode.NodeType.fat))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
-                    m_currentFassung.append("<hi type=\"bold\">");
+                    currentFassung.append("<hi type=\"bold\">");
                 }
             }
             else
@@ -167,113 +167,113 @@ public class OsisGeneratorVisitor extends DifferentiatingVisitor<AstNode> implem
                 QuoteSearcher quoteSearcher = new QuoteSearcher();
                 node.host(quoteSearcher, false);
 
-                m_currentFassung.append("„");
+                currentFassung.append("„");
 
                 if (node.getParent().isDescendantOf(AstNode.NodeType.italics))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
-                    m_currentFassung.append("</hi>");          
+                    currentFassung.append("</hi>");          
                 }
                 if (node.getParent().isDescendantOf(AstNode.NodeType.fat))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
-                    m_currentFassung.append("</hi>");
+                    currentFassung.append("</hi>");
                 }
 
                 if(quoteSearcher.foundQuote == false)
-                    m_currentFassung.append("<q marker=\"\"" + end);
+                    currentFassung.append("<q marker=\"\"" + end);
                 else {
-                    m_quoteCounter++;
-                    m_currentFassung.append("<q level=\"" + m_quoteCounter + "\" marker=\"\"" + end);
+                    quoteCounter++;
+                    currentFassung.append("<q level=\"" + quoteCounter + "\" marker=\"\"" + end);
                 }
 
                 if (node.getParent().isDescendantOf(AstNode.NodeType.italics))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
-                    m_currentFassung.append("<hi type=\"italic\">");          
+                    currentFassung.append("<hi type=\"italic\">");          
                 }
                 if (node.getParent().isDescendantOf(AstNode.NodeType.fat))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
-                    m_currentFassung.append("<hi type=\"bold\">");
+                    currentFassung.append("<hi type=\"bold\">");
                 }
             }
         }
 
         else if(node.getNodeType() == AstNode.NodeType.alternative) {
-            if(m_skipVerse) return;
+            if(skipVerse) return;
             if (node.isDescendantOf(AstNode.NodeType.note))
-                m_currentFassung.append("(");
+                currentFassung.append("(");
             else
-                m_currentFassung.append("<seg type=\"x-alternative\">(");
+                currentFassung.append("<seg type=\"x-alternative\">(");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.insertion) {
-            if(m_skipVerse) return;
+            if(skipVerse) return;
             if (node.getParent().isDescendantOf(AstNode.NodeType.insertion) || node.isDescendantOf(AstNode.NodeType.omission))
-                m_currentFassung.append("[");
+                currentFassung.append("[");
             else
-                m_currentFassung.append("<transChange type=\"added\">[");
+                currentFassung.append("<transChange type=\"added\">[");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.omission) {
-            if(m_skipVerse) return;
+            if(skipVerse) return;
             if (node.getParent().isDescendantOf(AstNode.NodeType.omission) || node.isDescendantOf(AstNode.NodeType.insertion))
-                m_currentFassung.append("{");
+                currentFassung.append("{");
             else
-                m_currentFassung.append("<transChange type=\"deleted\">{");
+                currentFassung.append("<transChange type=\"deleted\">{");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.heading) {
-            m_currentFassung.append("<title>");
+            currentFassung.append("<title>");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.hebrew) {
-            if(m_skipVerse) return;
+            if(skipVerse) return;
 
             if (!node.getParent().isDescendantOf(AstNode.NodeType.wikiLink))
             {
                 // foreign are not allowed inside of <a>, so skip them
-                m_currentFassung.append("<foreign xml:lang=\"he\">");
+                currentFassung.append("<foreign xml:lang=\"he\">");
             }
         }
 
         else if(node.getNodeType() == AstNode.NodeType.note) {
-            if(m_skipVerse) return;
-            m_currentFassung.append("<note type=\"x-footnote\" n=\"" + m_noteIndexCounter.getNextNoteString() + "\">");
+            if(skipVerse) return;
+            currentFassung.append("<note type=\"x-footnote\" n=\"" + noteIndexCounter.getNextNoteString() + "\">");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.italics) {
-            if (m_skipVerse) return;
-            m_currentFassung.append("<hi type=\"italic\">");
+            if (skipVerse) return;
+            currentFassung.append("<hi type=\"italic\">");
         }
         else if(node.getNodeType() == AstNode.NodeType.fat) {
-            if (m_skipVerse) return;
-            m_currentFassung.append("<hi type=\"bold\">");
+            if (skipVerse) return;
+            currentFassung.append("<hi type=\"bold\">");
         }
         else if (node.getNodeType() == AstNode.NodeType.superScript) {
-            if (m_skipVerse) return;
-            m_currentFassung.append("<hi type=\"super\">");
+            if (skipVerse) return;
+            currentFassung.append("<hi type=\"super\">");
         }
         else if (node.getNodeType() == AstNode.NodeType.strikeThrough) {
-            if (m_skipVerse) return;
-            m_currentFassung.append("<hi type=\"line-through\">");
+            if (skipVerse) return;
+            currentFassung.append("<hi type=\"line-through\">");
         }
         else if (node.getNodeType() == AstNode.NodeType.underline) {
-            if (m_skipVerse) return;
-            m_currentFassung.append("<hi type=\"underline\">");
+            if (skipVerse) return;
+            currentFassung.append("<hi type=\"underline\">");
         }
         else if (node.getNodeType() == AstNode.NodeType.wikiLink) {
-            if (m_skipVerse) return;
+            if (skipVerse) return;
             WikiLinkNode obWikiLinkNode = (WikiLinkNode)node;
-            m_currentFassung.append("<a href=\"");
+            currentFassung.append("<a href=\"");
             if(obWikiLinkNode.isWikiLink())
-                m_currentFassung.append("http://offene-bibel.de/wiki/");
-            m_currentFassung.append(obWikiLinkNode.getLink().replace("&", "&amp;"));
-            m_currentFassung.append("\">");
+                currentFassung.append("http://offene-bibel.de/wiki/");
+            currentFassung.append(obWikiLinkNode.getLink().replace("&", "&amp;"));
+            currentFassung.append("\">");
             
             if(obWikiLinkNode.childCount() == 0)
-                m_currentFassung.append(obWikiLinkNode.getLink().replace("&", "&amp;"));
+                currentFassung.append(obWikiLinkNode.getLink().replace("&", "&amp;"));
         }
     }
 
@@ -281,7 +281,7 @@ public class OsisGeneratorVisitor extends DifferentiatingVisitor<AstNode> implem
     public void visitDefault(AstNode node) throws Throwable
     {
         if(node.getNodeType() == AstNode.NodeType.text) {
-            if(m_skipVerse) return;
+            if(skipVerse) return;
             TextNode text = (TextNode)node;
             String textString = text.getText();
 
@@ -316,11 +316,11 @@ public class OsisGeneratorVisitor extends DifferentiatingVisitor<AstNode> implem
                 }
             }
 
-            if(m_poemMode && ! node.isDescendantOf(NoteNode.class)) {
+            if(poemMode && ! node.isDescendantOf(NoteNode.class)) {
                 if(textString.contains("\n")) {
-                    if(m_lineStarted == false) {
+                    if(lineStarted == false) {
                         textString = textString.replaceFirst("\n", getLTagStart());
-                        m_lineStarted = true;
+                        lineStarted = true;
                     }
                     while(textString.contains("\n")) {
                         String stop = getLTagStop();
@@ -329,23 +329,23 @@ public class OsisGeneratorVisitor extends DifferentiatingVisitor<AstNode> implem
                     }
                 }
             }
-            m_currentFassung.append(textString);
+            currentFassung.append(textString);
         }
 
         else if(node.getNodeType() == AstNode.NodeType.verse) {
             VerseNode verse = (VerseNode)node;
             addStopTag();
-            //System.out.println("Verse:" + m_verseTagStart + verse.getNumber() + " " + verse.getStatus().toString());
-            if(verse.getStatus().ordinal() >= m_requiredTranslationStatus.ordinal()) {
-                m_currentFassungContainsVerses = true;
-                m_skipVerse = false;
-                m_verseTag = m_verseTagStart + verse.getNumber();
-                m_currentFassung.append("<verse osisID=\"" + m_verseTag + "\" sID=\"" + m_verseTag + "\"/>");
-                if(m_poemMode && m_lineStarted == false){
-                    m_currentFassung.append(getLTagStart());
-                    m_lineStarted = true;
+            //System.out.println("Verse:" + verseTagStart + verse.getNumber() + " " + verse.getStatus().toString());
+            if(verse.getStatus().ordinal() >= requiredTranslationStatus.ordinal()) {
+                currentFassungContainsVerses = true;
+                skipVerse = false;
+                verseTag = verseTagStart + verse.getNumber();
+                currentFassung.append("<verse osisID=\"" + verseTag + "\" sID=\"" + verseTag + "\"/>");
+                if(poemMode && lineStarted == false){
+                    currentFassung.append(getLTagStart());
+                    lineStarted = true;
                 }
-                if (m_inlineVersStatus) {
+                if (inlineVersStatus) {
                     AstNode nextNode = verse.getNextSibling();
                     while(nextNode != null) {
                         if(nextNode instanceof TextNode) {
@@ -359,56 +359,56 @@ public class OsisGeneratorVisitor extends DifferentiatingVisitor<AstNode> implem
                     }
                     if (nextNode == null || nextNode instanceof VerseNode || nextNode.getNodeType() == NodeType.heading) {
                         // empty verses do not need any status
-                        m_currentVerseStatus = VerseStatus.none;
+                        currentVerseStatus = VerseStatus.none;
                     } else {
                         VerseStatus status = verse.getStatus();
-                        if (m_currentVerseStatus != status) {
-                            m_currentVerseStatus = status;
-                            m_currentFassung.append("<note type=\"x-footnote\" n=\"Status\">[Status: " + status.getExportStatusString() + "]</note> ");
+                        if (currentVerseStatus != status) {
+                            currentVerseStatus = status;
+                            currentFassung.append("<note type=\"x-footnote\" n=\"Status\">[Status: " + status.getExportStatusString() + "]</note> ");
                         }
                     }
                 }
             }
             else {
                 // skip this verse
-                m_skipVerse = true;
+                skipVerse = true;
             }
         }
 
         else if(node.getNodeType() == AstNode.NodeType.parallelPassage) {
-            if(m_skipVerse) return;
+            if(skipVerse) return;
             ParallelPassageNode passage = (ParallelPassageNode)node;
 
-            if(m_multiParallelPassage == false) {
-                m_currentFassung.append("<note type=\"crossReference\" osisID=\"" + m_verseTag + "!crossReference\" osisRef=\"" + m_verseTag + "\">");
+            if(multiParallelPassage == false) {
+                currentFassung.append("<note type=\"crossReference\" osisID=\"" + verseTag + "!crossReference\" osisRef=\"" + verseTag + "\">");
             }
 
-            m_currentFassung.append("<reference osisRef=\"" +
+            currentFassung.append("<reference osisRef=\"" +
                                             passage.getOsisBookId() + "." + passage.getChapter() + "." + passage.getStartVerse() + "\">" +
                                             BookNameHelper.getInstance().getGermanBookNameForOsisId(passage.getOsisBookId()) + " " + passage.getChapter() + "," + passage.getStartVerse() + "</reference>");
 
             if(passage.getNextSibling() != null && passage.getNextSibling().getNodeType() == AstNode.NodeType.parallelPassage) {
-                m_multiParallelPassage = true;
-                m_currentFassung.append("; ");
+                multiParallelPassage = true;
+                currentFassung.append("; ");
             }
             else {
-                m_multiParallelPassage = false;
-                m_currentFassung.append("</note>");
+                multiParallelPassage = false;
+                currentFassung.append("</note>");
             }
         }
 
         else if(node.getNodeType() == AstNode.NodeType.poemStart) {
-            m_poemMode = true;
-            m_currentFassung.append(getLgTagStart());
+            poemMode = true;
+            currentFassung.append(getLgTagStart());
         }
 
         else if(node.getNodeType() == AstNode.NodeType.poemStop) {
-            m_poemMode = false;
-            if(m_lineStarted) {
-                m_currentFassung.append(getLTagStop());
-                m_lineStarted = false;
+            poemMode = false;
+            if(lineStarted) {
+                currentFassung.append(getLTagStop());
+                lineStarted = false;
             }
-            m_currentFassung.append(getLgTagStop());
+            currentFassung.append(getLgTagStop());
         }
     }
 
@@ -421,172 +421,172 @@ public class OsisGeneratorVisitor extends DifferentiatingVisitor<AstNode> implem
             addStopTag();
 
             // prevent empty chapters
-            if(m_currentFassungContainsVerses == false) {
-                m_currentFassung = null;
+            if(currentFassungContainsVerses == false) {
+                currentFassung = null;
             }
 
             if(fassung.getFassung() == FassungNode.FassungType.lesefassung) {
-                m_leseFassung = m_currentFassung == null ? null : m_currentFassung.toString();
+                leseFassung = currentFassung == null ? null : currentFassung.toString();
             }
             else {
-                m_studienFassung = m_currentFassung == null ? null : m_currentFassung.toString();
+                studienFassung = currentFassung == null ? null : currentFassung.toString();
             }
         }
 
         else if(node.getNodeType() == AstNode.NodeType.quote) {
-            if(m_skipVerse) return;
-            if(m_quoteCounter>0)
-                m_quoteCounter--;
+            if(skipVerse) return;
+            if(quoteCounter>0)
+                quoteCounter--;
 
             if (node.getParent().isDescendantOf(AstNode.NodeType.italics))
             {
                 // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
-                m_currentFassung.append("</hi>");          
+                currentFassung.append("</hi>");          
             }
             if (node.getParent().isDescendantOf(AstNode.NodeType.fat))
             {
                 // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
-                m_currentFassung.append("</hi>");
+                currentFassung.append("</hi>");
             }
 
-            if (m_unmilestonedLineGroup) {
-                m_currentFassung.append("<q marker=\"\" eID=\""+m_qTagStart+m_qTagCounter+"\"/>");
-                ++m_qTagCounter;
+            if (unmilestonedLineGroup) {
+                currentFassung.append("<q marker=\"\" eID=\""+qTagStart+qTagCounter+"\"/>");
+                ++qTagCounter;
             } else {
-                m_currentFassung.append("</q>");
+                currentFassung.append("</q>");
             }
 
             if (node.getParent().isDescendantOf(AstNode.NodeType.italics))
             {
                 // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
-                m_currentFassung.append("<hi type=\"italic\">");          
+                currentFassung.append("<hi type=\"italic\">");          
             }
             if (node.getParent().isDescendantOf(AstNode.NodeType.fat))
             {
                 // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
-                m_currentFassung.append("<hi type=\"bold\">");
+                currentFassung.append("<hi type=\"bold\">");
             }
 
-            if(m_quoteCounter>0)
-                m_currentFassung.append("«");
+            if(quoteCounter>0)
+                currentFassung.append("«");
             else
-                m_currentFassung.append("“");
+                currentFassung.append("“");
 
         }
 
         else if(node.getNodeType() == AstNode.NodeType.alternative) {
-            if(m_skipVerse) return;
+            if(skipVerse) return;
             if (node.isDescendantOf(AstNode.NodeType.note))
-                m_currentFassung.append(")");
+                currentFassung.append(")");
             else
-                m_currentFassung.append(")</seg>");
+                currentFassung.append(")</seg>");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.insertion) {
-            if(m_skipVerse) return;
+            if(skipVerse) return;
             if (node.getParent().isDescendantOf(AstNode.NodeType.insertion) || node.isDescendantOf(AstNode.NodeType.omission))
-                m_currentFassung.append("]");
+                currentFassung.append("]");
             else
-                m_currentFassung.append("]</transChange>");
+                currentFassung.append("]</transChange>");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.omission) {
-            if(m_skipVerse) return;
+            if(skipVerse) return;
             if (node.getParent().isDescendantOf(AstNode.NodeType.omission) || node.isDescendantOf(AstNode.NodeType.insertion))
-                m_currentFassung.append("}");
+                currentFassung.append("}");
             else
-                m_currentFassung.append("}</transChange>");
+                currentFassung.append("}</transChange>");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.heading) {
-            m_currentFassung.append("</title>");
+            currentFassung.append("</title>");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.hebrew) {
-            if(m_skipVerse) return;
+            if(skipVerse) return;
             if (!node.getParent().isDescendantOf(AstNode.NodeType.wikiLink))
             {
                 // foreign are not allowed inside of <a>, so skip them
-                m_currentFassung.append("</foreign>");
+                currentFassung.append("</foreign>");
             }
         }
 
         else if(node.getNodeType() == AstNode.NodeType.note) {
-            if(m_skipVerse) return;
-            m_currentFassung.append("</note>");
+            if(skipVerse) return;
+            currentFassung.append("</note>");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.italics) {
-            if (m_skipVerse) return;
-            m_currentFassung.append("</hi>");
+            if (skipVerse) return;
+            currentFassung.append("</hi>");
         }
         else if(node.getNodeType() == AstNode.NodeType.fat) {
-            if (m_skipVerse) return;
-            m_currentFassung.append("</hi>");
+            if (skipVerse) return;
+            currentFassung.append("</hi>");
         }
         else if(node.getNodeType() == AstNode.NodeType.superScript) {
-            if (m_skipVerse) return;
-            m_currentFassung.append("</hi>");
+            if (skipVerse) return;
+            currentFassung.append("</hi>");
         }
         else if(node.getNodeType() == AstNode.NodeType.strikeThrough) {
-            if (m_skipVerse) return;
-            m_currentFassung.append("</hi>");
+            if (skipVerse) return;
+            currentFassung.append("</hi>");
         }
         else if(node.getNodeType() == AstNode.NodeType.underline) {
-            if (m_skipVerse) return;
-            m_currentFassung.append("</hi>");
+            if (skipVerse) return;
+            currentFassung.append("</hi>");
         }
         else if (node.getNodeType() == AstNode.NodeType.wikiLink) {
-            if (m_skipVerse) return;
-            m_currentFassung.append("</a>");
+            if (skipVerse) return;
+            currentFassung.append("</a>");
         }
     }
 
     public String getStudienFassung() {
-        return m_studienFassung;
+        return studienFassung;
     }
 
     public String getLeseFassung() {
-        return m_leseFassung;
+        return leseFassung;
     }
 
     private void addStopTag() {
-        if(m_verseTag != null) {
-            if(m_poemMode && m_lineStarted) {
-                m_currentFassung.append(getLTagStop());
-                m_lineStarted = false;
+        if(verseTag != null) {
+            if(poemMode && lineStarted) {
+                currentFassung.append(getLTagStop());
+                lineStarted = false;
             }
-            m_currentFassung.append("<verse eID=\"" + m_verseTag + "\"/>\n");
-            m_verseTag = null;
+            currentFassung.append("<verse eID=\"" + verseTag + "\"/>\n");
+            verseTag = null;
         }
     }
 
     private String getLTagStop() {
-        if (m_unmilestonedLineGroup)
+        if (unmilestonedLineGroup)
             return "</l>";
-        return "<l eID=\"" + m_lTagStart + m_lTagCounter + "\"/>";
+        return "<l eID=\"" + lTagStart + lTagCounter + "\"/>";
     }
 
     private String getLTagStart() {
-        if (m_unmilestonedLineGroup)
+        if (unmilestonedLineGroup)
             return "<l>";
-        String m_lTag = m_lTagStart + m_lTagCounter;
-        ++m_lTagCounter;
-        return "<l sID=\"" + m_lTag + "\"/>";
+        String lTag = lTagStart + lTagCounter;
+        ++lTagCounter;
+        return "<l sID=\"" + lTag + "\"/>";
     }
     
     private String getLgTagStop() {
-        if (m_unmilestonedLineGroup)
+        if (unmilestonedLineGroup)
             return "</lg>";
-        return "<lg eID=\"" + m_lgTagStart + m_lgTagCounter + "\"/>";
+        return "<lg eID=\"" + lgTagStart + lgTagCounter + "\"/>";
     }
 
     private String getLgTagStart() {
-        if (m_unmilestonedLineGroup)
+        if (unmilestonedLineGroup)
             return "<lg>";
-        String m_lgTag = m_lgTagStart + m_lgTagCounter;
-        ++m_lgTagCounter;
-        return "<lg sID=\"" + m_lgTag + "\"/>";
+        String lgTag = lgTagStart + lgTagCounter;
+        ++lgTagCounter;
+        return "<lg sID=\"" + lgTag + "\"/>";
     }
 
     private static final Pattern FIND_GREEK = Pattern.compile("[\\p{IsGreek}]+([\\p{IsCommon}]+[\\p{IsGreek}]+)*");
@@ -616,43 +616,43 @@ public class OsisGeneratorVisitor extends DifferentiatingVisitor<AstNode> implem
     }
 
     public static class NoteIndexCounter {
-        private String m_noteIndexCounter;
+        private String noteIndexCounter;
 
         public NoteIndexCounter()
         {
-            m_noteIndexCounter = "a";
+            noteIndexCounter = "a";
         }
 
         public void reset()
         {
-            m_noteIndexCounter = "a";
+            noteIndexCounter = "a";
         }
 
         public String getNextNoteString()
         {
-            String result = m_noteIndexCounter;
+            String result = noteIndexCounter;
             incrementNoteCounter();
             return result;
         }
 
         private void incrementNoteCounter()
         {
-            int walker = m_noteIndexCounter.length() - 1;
+            int walker = noteIndexCounter.length() - 1;
 
             while(walker >=0) {
-                String preWalkerString = walker>0 ? m_noteIndexCounter.substring(0, walker) : "";
-                String postWalkerString = walker<m_noteIndexCounter.length()-1 ? m_noteIndexCounter.substring(walker+1, m_noteIndexCounter.length()) : "";
-                if(m_noteIndexCounter.charAt(walker) < 'z') {
-                    m_noteIndexCounter = preWalkerString + (char)(m_noteIndexCounter.charAt(walker)+1) + postWalkerString;
+                String preWalkerString = walker>0 ? noteIndexCounter.substring(0, walker) : "";
+                String postWalkerString = walker<noteIndexCounter.length()-1 ? noteIndexCounter.substring(walker+1, noteIndexCounter.length()) : "";
+                if(noteIndexCounter.charAt(walker) < 'z') {
+                    noteIndexCounter = preWalkerString + (char)(noteIndexCounter.charAt(walker)+1) + postWalkerString;
                     break;
                 }
                 else {
-                    m_noteIndexCounter = preWalkerString + 'a' + postWalkerString;
+                    noteIndexCounter = preWalkerString + 'a' + postWalkerString;
                 }
                 --walker;
             }
             if(walker == -1) {
-                m_noteIndexCounter = "a" + m_noteIndexCounter;
+                noteIndexCounter = "a" + noteIndexCounter;
             }
         }
     }

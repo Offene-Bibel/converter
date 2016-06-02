@@ -16,14 +16,14 @@ import offeneBibel.visitorPattern.IVisitor;
 
 public class WebViewerVisitor extends DifferentiatingVisitor<AstNode> implements IVisitor<AstNode>
 {
-    private VerseStatus m_studienFassungStatus = VerseStatus.none;
-    private VerseStatus m_leseFassungStatus = VerseStatus.none;
-    private String m_studienFassung = null;
-    private String m_leseFassung = null;
-    private StringBuilder m_currentFassung = new StringBuilder();
-    private boolean m_currentFassungContainsVerses = false;
+    private VerseStatus studienFassungStatus = VerseStatus.none;
+    private VerseStatus leseFassungStatus = VerseStatus.none;
+    private String studienFassung = null;
+    private String leseFassung = null;
+    private StringBuilder currentFassung = new StringBuilder();
+    private boolean currentFassungContainsVerses = false;
 
-    private int m_quoteCounter = 0;
+    private int quoteCounter = 0;
 
     /**
      * Started by <poem> and stopped by </poem>.
@@ -32,72 +32,72 @@ public class WebViewerVisitor extends DifferentiatingVisitor<AstNode> implements
      * there actually was some text. A </l> is added after the last text
      * block too.
      */
-    private boolean m_poemMode;
+    private boolean poemMode;
 
     /** Skip the current verse if true. */
-    private boolean m_skipVerse = false;
+    private boolean skipVerse = false;
 
-    private VerseStatus m_requiredTranslationStatus;
+    private VerseStatus requiredTranslationStatus;
 
-    private NoteIndexCounter m_noteIndexCounter;
+    private NoteIndexCounter noteIndexCounter;
 
     public WebViewerVisitor(VerseStatus requiredTranslationStatus)
     {
-        m_noteIndexCounter = new NoteIndexCounter();
-        m_requiredTranslationStatus = requiredTranslationStatus;
+        this.noteIndexCounter = new NoteIndexCounter();
+        this.requiredTranslationStatus = requiredTranslationStatus;
     }
 
     @Override
     public void visitBeforeDefault(AstNode node) throws Throwable
     {
         if(node.getNodeType() == AstNode.NodeType.fassung) {
-            m_noteIndexCounter.reset();
-            m_currentFassung = new StringBuilder();
-            m_currentFassungContainsVerses = false;
+            noteIndexCounter.reset();
+            currentFassung = new StringBuilder();
+            currentFassungContainsVerses = false;
         }
 
         else if(node.getNodeType() == AstNode.NodeType.quote) {
-            if(m_skipVerse) return;
-            if(m_quoteCounter>0)
+            if(skipVerse) return;
+            if(quoteCounter>0)
             {
-                m_quoteCounter++;
-                m_currentFassung.append("»");
+                quoteCounter++;
+                currentFassung.append("»");
             }
             else
             {
                 QuoteSearcher quoteSearcher = new QuoteSearcher();
                 node.host(quoteSearcher, false);
                 if(quoteSearcher.foundQuote == false)
-                    m_currentFassung.append("„");
+                    currentFassung.append("„");
                 else {
-                    m_quoteCounter++;
-                    m_currentFassung.append("„");
+                    quoteCounter++;
+                    currentFassung.append("„");
                 }
             }
         }
 
         else if(node.getNodeType() == AstNode.NodeType.alternative) {
-            if(m_skipVerse) return;
-            m_currentFassung.append("<span class=\"alternative\">(");
+            if(skipVerse) return;
+            currentFassung.append("<span class=\"alternative\">(");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.insertion) {
-            if(m_skipVerse) return;
-            m_currentFassung.append("<span class=\"insertion-start\">[</span><span class=\"insertion\">");
+            if(skipVerse) return;
+            currentFassung.append("<span class=\"insertion-start\">[</span><span class=\"insertion\">");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.omission) {
-            if(m_skipVerse) return;
-            m_currentFassung.append("<span class=\"omission\">{");
+            if(skipVerse) return;
+            currentFassung.append("<span class=\"omission\">{");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.heading) {
-            m_currentFassung.append("<h3>");
+            currentFassung.append("<h3>");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.note) {
-            if(m_skipVerse) return;
-            m_currentFassung.append("<a href=\"#\" data-toggle=\"tooltip\" data-placement=\"auto bottom\" title=\"");
+            if(skipVerse) return;
+            currentFassung.append("<a href=\"#\" data-toggle=\"tooltip\" data-placement=\"auto bottom\" title=\"");
         }
     }
 
@@ -105,46 +105,46 @@ public class WebViewerVisitor extends DifferentiatingVisitor<AstNode> implements
     public void visitDefault(AstNode node) throws Throwable
     {
         if(node.getNodeType() == AstNode.NodeType.text) {
-            if(m_skipVerse) return;
+            if(skipVerse) return;
             TextNode text = (TextNode)node;
             String textString = text.getText();
 
-            if(m_poemMode && ! node.isDescendantOf(NoteNode.class)) {
+            if(poemMode && ! node.isDescendantOf(NoteNode.class)) {
                 textString.replaceAll("\n", "<br/>");
             }
 
             textString = textString.replaceAll("&", "&amp;");
 
-            m_currentFassung.append(textString);
+            currentFassung.append(textString);
         }
 
         else if(node.getNodeType() == AstNode.NodeType.verse) {
             VerseNode verse = (VerseNode)node;
-            if(verse.getStatus().ordinal() >= m_requiredTranslationStatus.ordinal()) {
-                m_currentFassungContainsVerses = true;
-                m_skipVerse = false;
-                m_currentFassung.append("<span class=\"verse_num\">" + verse.getNumber() + "</span>");
+            if(verse.getStatus().ordinal() >= requiredTranslationStatus.ordinal()) {
+                currentFassungContainsVerses = true;
+                skipVerse = false;
+                currentFassung.append("<span class=\"verse_num\">" + verse.getNumber() + "</span>");
             }
             else {
                 // skip this verse
-                m_skipVerse = true;
+                skipVerse = true;
             }
         }
 
         else if(node.getNodeType() == AstNode.NodeType.parallelPassage) {
-            if(m_skipVerse) return;
+            if(skipVerse) return;
             ParallelPassageNode passage = (ParallelPassageNode)node;
-            m_currentFassung.append("<a href=\"" + passage.getOsisBookId() + "_" + passage.getChapter() + "?verse=" + passage.getStartVerse() +
+            currentFassung.append("<a href=\"" + passage.getOsisBookId() + "_" + passage.getChapter() + "?verse=" + passage.getStartVerse() +
                                             "\" data-toggle=\"tooltip\" data-placement=\"auto bottom\" title=\"" +
                                             passage.getOsisBookId() + " " + passage.getChapter() + ", " + passage.getStartVerse() + "\">℘</a>");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.poemStart) {
-            m_poemMode = true;
+            poemMode = true;
         }
 
         else if(node.getNodeType() == AstNode.NodeType.poemStop) {
-            m_poemMode = false;
+            poemMode = false;
         }
 
         else if(node.getNodeType() == AstNode.NodeType.chapter) {
@@ -158,8 +158,8 @@ public class WebViewerVisitor extends DifferentiatingVisitor<AstNode> implements
                 }
             }
             if(tagName != null) {
-                m_leseFassungStatus = tagName.getVerseStatus(FassungType.lesefassung);
-                m_studienFassungStatus = tagName.getVerseStatus(FassungType.studienfassung);
+                leseFassungStatus = tagName.getVerseStatus(FassungType.lesefassung);
+                studienFassungStatus = tagName.getVerseStatus(FassungType.studienfassung);
             }
         }
     }
@@ -172,51 +172,51 @@ public class WebViewerVisitor extends DifferentiatingVisitor<AstNode> implements
             FassungNode fassung = (FassungNode)node;
 
             // prevent empty chapters
-            if(m_currentFassungContainsVerses == false) {
-                m_currentFassung = null;
+            if(currentFassungContainsVerses == false) {
+                currentFassung = null;
             }
 
             if(fassung.getFassung() == FassungNode.FassungType.lesefassung) {
-                m_leseFassung = m_currentFassung == null ? null : m_currentFassung.toString();
+                leseFassung = currentFassung == null ? null : currentFassung.toString();
             }
             else {
-                m_studienFassung = m_currentFassung == null ? null : m_currentFassung.toString();
+                studienFassung = currentFassung == null ? null : currentFassung.toString();
             }
         }
 
         else if(node.getNodeType() == AstNode.NodeType.quote) {
-            if(m_skipVerse) return;
-            if(m_quoteCounter>0)
-                m_quoteCounter--;
-            if(m_quoteCounter>0)
-                m_currentFassung.append("«");
+            if(skipVerse) return;
+            if(quoteCounter>0)
+                quoteCounter--;
+            if(quoteCounter>0)
+                currentFassung.append("«");
             else
-                m_currentFassung.append("“");
+                currentFassung.append("“");
 
         }
 
         else if(node.getNodeType() == AstNode.NodeType.alternative) {
-            if(m_skipVerse) return;
-            m_currentFassung.append(")</span>");
+            if(skipVerse) return;
+            currentFassung.append(")</span>");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.insertion) {
-            if(m_skipVerse) return;
-            m_currentFassung.append("</span><span class=\"insertion-end\">]</span>");
+            if(skipVerse) return;
+            currentFassung.append("</span><span class=\"insertion-end\">]</span>");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.omission) {
-            if(m_skipVerse) return;
-            m_currentFassung.append("}</span>");
+            if(skipVerse) return;
+            currentFassung.append("}</span>");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.heading) {
-            m_currentFassung.append("</h3>");
+            currentFassung.append("</h3>");
         }
 
         else if(node.getNodeType() == AstNode.NodeType.note) {
-            if(m_skipVerse) return;
-            m_currentFassung.append("\">〈" + m_noteIndexCounter.getNextNoteString() + "〉</a>");
+            if(skipVerse) return;
+            currentFassung.append("\">〈" + noteIndexCounter.getNextNoteString() + "〉</a>");
         }
     }
 
@@ -224,22 +224,22 @@ public class WebViewerVisitor extends DifferentiatingVisitor<AstNode> implements
      * @return Studienfassung string or null if there was no Studienfassung in this text.
      */
     public String getStudienFassung() {
-        return m_studienFassung;
+        return studienFassung;
     }
 
     /**
      * @return Lesefassung string or null if there was no Lesefassung in this text.
      */
     public String getLeseFassung() {
-        return m_leseFassung;
+        return leseFassung;
     }
 
     public VerseStatus getStudienFassungStatus() {
-        return m_studienFassungStatus;
+        return studienFassungStatus;
     }
 
     public VerseStatus getLeseFassungStatus() {
-        return m_leseFassungStatus;
+        return leseFassungStatus;
     }
 
     class QuoteSearcher implements IVisitor<AstNode>
@@ -257,43 +257,43 @@ public class WebViewerVisitor extends DifferentiatingVisitor<AstNode> implements
     }
 
     class NoteIndexCounter {
-        private String m_noteIndexCounter;
+        private String noteIndexCounter;
 
         public NoteIndexCounter()
         {
-            m_noteIndexCounter = "a";
+            noteIndexCounter = "a";
         }
 
         public void reset()
         {
-            m_noteIndexCounter = "a";
+            noteIndexCounter = "a";
         }
 
         public String getNextNoteString()
         {
-            String result = m_noteIndexCounter;
+            String result = noteIndexCounter;
             incrementNoteCounter();
             return result;
         }
 
         private void incrementNoteCounter()
         {
-            int walker = m_noteIndexCounter.length() - 1;
+            int walker = noteIndexCounter.length() - 1;
 
             while(walker >=0) {
-                String preWalkerString = walker>0 ? m_noteIndexCounter.substring(0, walker) : "";
-                String postWalkerString = walker<m_noteIndexCounter.length()-1 ? m_noteIndexCounter.substring(walker+1, m_noteIndexCounter.length()) : "";
-                if(m_noteIndexCounter.charAt(walker) < 'z') {
-                    m_noteIndexCounter = preWalkerString + (char)(m_noteIndexCounter.charAt(walker)+1) + postWalkerString;
+                String preWalkerString = walker>0 ? noteIndexCounter.substring(0, walker) : "";
+                String postWalkerString = walker<noteIndexCounter.length()-1 ? noteIndexCounter.substring(walker+1, noteIndexCounter.length()) : "";
+                if(noteIndexCounter.charAt(walker) < 'z') {
+                    noteIndexCounter = preWalkerString + (char)(noteIndexCounter.charAt(walker)+1) + postWalkerString;
                     break;
                 }
                 else {
-                    m_noteIndexCounter = preWalkerString + 'a' + postWalkerString;
+                    noteIndexCounter = preWalkerString + 'a' + postWalkerString;
                 }
                 --walker;
             }
             if(walker == -1) {
-                m_noteIndexCounter = "a" + m_noteIndexCounter;
+                noteIndexCounter = "a" + noteIndexCounter;
             }
         }
     }

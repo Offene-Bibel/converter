@@ -11,7 +11,7 @@ public class ValidateBook implements IParameterValidator {
         if (value.length() == 0) return;
         for(String bookName : value.split(",", -1)) {
             if (!BookNameHelper.getInstance().isValid(bookName)) {
-                throw new ParameterException("Parameter "+name+" refers to unknown book \""+bookName+"\".");
+                throw new ParameterException("Parameter " + name + " refers to unknown book \"" + bookName + "\".");
             }
         }
     }

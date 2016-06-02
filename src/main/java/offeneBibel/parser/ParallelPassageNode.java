@@ -2,37 +2,37 @@ package offeneBibel.parser;
 
 public class ParallelPassageNode extends AstNode {
     private static final long serialVersionUID = 1L;
-    private String m_book;
-    private int m_chapter;
-    private int m_startVerse;
-    private int m_stopVerse;
+    private String book;
+    private int chapter;
+    private int startVerse;
+    private int stopVerse;
 
     public ParallelPassageNode(String book, int chapter, int verse) {
         super(NodeType.parallelPassage);
-        m_book = BookNameHelper.getInstance().getUnifiedBookNameForString(book);
-        m_chapter = chapter;
-        m_startVerse = verse;
-        m_stopVerse = -1;
+        this.book = BookNameHelper.getInstance().getUnifiedBookNameForString(book);
+        this.chapter = chapter;
+        this.startVerse = verse;
+        this.stopVerse = -1;
     }
 
     public ParallelPassageNode(String book, int chapter, int startVerse, int stopVerse) {
         super(NodeType.parallelPassage);
-        m_book = BookNameHelper.getInstance().getUnifiedBookNameForString(book);
-        m_chapter = chapter;
-        m_startVerse = startVerse;
-        m_stopVerse = stopVerse;
+        this.book = BookNameHelper.getInstance().getUnifiedBookNameForString(book);
+        this.chapter = chapter;
+        this.startVerse = startVerse;
+        this.stopVerse = stopVerse;
     }
 
     public String getOsisBookId() {
-        return m_book;
+        return book;
     }
 
     public int getChapter() {
-        return m_chapter;
+        return chapter;
     }
 
     public int getStartVerse() {
-        return m_startVerse;
+        return startVerse;
     }
 
     /**
@@ -40,6 +40,6 @@ public class ParallelPassageNode extends AstNode {
      * @return
      */
     public int getStopVerse() {
-        return m_stopVerse;
+        return stopVerse;
     }
 }

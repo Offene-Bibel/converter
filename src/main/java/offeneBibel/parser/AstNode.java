@@ -32,7 +32,7 @@ public class AstNode extends TreeNode<AstNode> { // implements IVisitorHost<ObAs
         strikeThrough,
         underline,
     }
-    private NodeType m_nodeType;
+    private NodeType nodeType;
 
     public AstNode(NodeType type)
     {
@@ -40,11 +40,11 @@ public class AstNode extends TreeNode<AstNode> { // implements IVisitorHost<ObAs
     }
 
     public NodeType getNodeType() {
-        return m_nodeType;
+        return nodeType;
     }
 
     public boolean setNodeType(NodeType nodeType) {
-        m_nodeType = nodeType;
+        this.nodeType = nodeType;
         return true;
     }
 

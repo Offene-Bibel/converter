@@ -13,7 +13,7 @@ public class AstFixuper
             ObAstNoteSearcher noteSearcher = new ObAstNoteSearcher();
             tree.host(noteSearcher);
 
-            ObAstNoteLinkSetter linkSetter = new ObAstNoteLinkSetter(noteSearcher.m_noteList);
+            ObAstNoteLinkSetter linkSetter = new ObAstNoteLinkSetter(noteSearcher.noteList);
             tree.host(linkSetter);
         } catch (Throwable e) {
             e.printStackTrace();
@@ -22,11 +22,11 @@ public class AstFixuper
 
     private static class ObAstNoteLinkSetter implements IVisitor<AstNode>
     {
-        public List<NoteNode> m_noteList = new Vector<NoteNode>();
+        public List<NoteNode> noteList = new Vector<NoteNode>();
 
         public ObAstNoteLinkSetter(List<NoteNode> noteList)
         {
-            m_noteList = noteList;
+            this.noteList = noteList;
         }
 
         @Override
@@ -34,7 +34,7 @@ public class AstFixuper
         {
             if(node.getNodeType() == AstNode.NodeType.noteLink) {
                 NoteLinkNode link = (NoteLinkNode) node;
-                for(NoteNode note : m_noteList) {
+                for(NoteNode note : noteList) {
                     if(link.getTag().equals(note.getTag())) {
                         link.setLinkTarget(note);
                     }
@@ -50,13 +50,13 @@ public class AstFixuper
 
     private static class ObAstNoteSearcher implements IVisitor<AstNode>
     {
-        public List<NoteNode> m_noteList = new Vector<NoteNode>();
+        public List<NoteNode> noteList = new Vector<NoteNode>();
 
         @Override
         public void visit(AstNode node) throws Throwable
         {
             if(node.getNodeType() == AstNode.NodeType.note) {
-                m_noteList.add((NoteNode) node);
+                noteList.add((NoteNode) node);
             }
         }
 

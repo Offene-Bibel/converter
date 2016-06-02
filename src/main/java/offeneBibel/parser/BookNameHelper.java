@@ -6,24 +6,24 @@ import java.util.List;
 import util.Misc;
 
 public class BookNameHelper {
-    static final String m_bibleBooks = Misc.getResourceDir() + "bibleBooks.txt";
+    static final String bibleBooks = Misc.getResourceDir() + "bibleBooks.txt";
     /*
      * OSIS tag
      * german book name
      * zero or more
      */
-    private List<List<String>> m_bookList;
-    private static BookNameHelper m_instance = null;
+    private List<List<String>> bookList;
+    private static BookNameHelper instance = null;
 
 
     private BookNameHelper()
     {
         try {
-            m_bookList = Misc.readCsv(m_bibleBooks);
+            bookList = Misc.readCsv(bibleBooks);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        for (List<String> bookEntry : m_bookList) {
+        for (List<String> bookEntry : bookList) {
             bookEntry.remove(2); // remove chapter count
             bookEntry.remove(0); // remove URL name
         }
@@ -31,10 +31,10 @@ public class BookNameHelper {
 
     public static BookNameHelper getInstance()
     {
-        if(m_instance == null) {
-            m_instance = new BookNameHelper();
+        if(instance == null) {
+            instance = new BookNameHelper();
         }
-        return m_instance;
+        return instance;
     }
 
     public boolean isValid(String bookName)
@@ -47,7 +47,7 @@ public class BookNameHelper {
 
     public String getUnifiedBookNameForString(String bookName)
     {
-        for (List<String> book : m_bookList) {
+        for (List<String> book : bookList) {
             for (int i = 1; i < book.size(); ++i) {
                 if(book.get(i).equals(bookName))
                     return book.get(0);
@@ -58,7 +58,7 @@ public class BookNameHelper {
 
     public String getGermanBookNameForOsisId(String osisId)
     {
-        for (List<String> book : m_bookList) {
+        for (List<String> book : bookList) {
             if(book.get(0).equals(osisId))
                 return book.get(1);
         }

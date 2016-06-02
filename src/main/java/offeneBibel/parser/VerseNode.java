@@ -4,40 +4,40 @@ import offeneBibel.parser.FassungNode.FassungType;
 
 public class VerseNode extends AstNode {
     private static final long serialVersionUID = 1L;
-    private int m_fromNumber;
-    private int m_toNumber;
-    private VerseStatus m_statusOverride = null;
+    private int fromNumber;
+    private int toNumber;
+    private VerseStatus statusOverride = null;
 
     public VerseNode(int number) {
         super(NodeType.verse);
-        m_fromNumber = number;
-        m_toNumber = number;
+        fromNumber = number;
+        toNumber = number;
     }
 
     public VerseNode(int fromNumber, int toNumber) {
         super(NodeType.verse);
-        m_fromNumber = fromNumber;
-        m_toNumber = toNumber;
+        this.fromNumber = fromNumber;
+        this.toNumber = toNumber;
     }
 
     public boolean isSingleVerse() {
-        return m_fromNumber == m_toNumber;
+        return fromNumber == toNumber;
     }
 
     public int getNumber() {
-        return m_fromNumber;
+        return fromNumber;
     }
 
     public int getFromNumber() {
-        return m_fromNumber;
+        return fromNumber;
     }
 
     public int getToNumber() {
-        return m_toNumber;
+        return toNumber;
     }
     
     public void setStatusOverride(VerseStatus status) {
-    	m_statusOverride = status;
+    	statusOverride = status;
     }
 
     public VerseStatus getStatus() {
@@ -47,8 +47,8 @@ public class VerseNode extends AstNode {
     }
 
     public VerseStatus getStatus(FassungType fassung) {
-    	if(m_statusOverride != null) {
-    		return m_statusOverride;
+    	if(statusOverride != null) {
+    		return statusOverride;
     	}
     	else {
 	        ChapterNode chapterNode = getChapterNode();
@@ -59,7 +59,7 @@ public class VerseNode extends AstNode {
 	
 	        for (ChapterTag tag  : chapterNode.getChapterTags()) {
 	            if(tag.getTag().doesMatchFassung(fassung)) {
-	                if(tag.tagAppliesToVerse(m_fromNumber, m_toNumber)) {
+	                if(tag.tagAppliesToVerse(fromNumber, toNumber)) {
 	                    // tag applies to this verse
 	                    if(status == VerseStatus.none) {
 	                        status = tag.getTag().getVerseStatus(fassung);

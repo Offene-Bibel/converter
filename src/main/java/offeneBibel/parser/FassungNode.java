@@ -4,14 +4,14 @@ public class FassungNode extends AstNode {
     private static final long serialVersionUID = 1L;
 
     public enum FassungType { lesefassung, studienfassung };
-    private final FassungType m_fassung;
+    private final FassungType fassung;
 
     public FassungNode(FassungType fassung) {
         super(NodeType.fassung);
-        m_fassung = fassung;
+        this.fassung = fassung;
     }
 
     public FassungType getFassung() {
-        return m_fassung;
+        return fassung;
     }
 }

@@ -32,10 +32,10 @@ import offeneBibel.visitorPattern.IVisitor;
  */
 public class WebsiteDbVisitor extends DifferentiatingVisitor<AstNode> implements IVisitor<AstNode>
 {
-	private String m_currentFassung = "";
-	private StringBuilder m_result = new StringBuilder();
-    private StringBuilder m_verseText = new StringBuilder();
-    private int m_quoteCounter = 0;
+	private String currentFassung = "";
+	private StringBuilder result = new StringBuilder();
+    private StringBuilder verseText = new StringBuilder();
+    private int quoteCounter = 0;
 
     public WebsiteDbVisitor()
     {
@@ -53,16 +53,16 @@ public class WebsiteDbVisitor extends DifferentiatingVisitor<AstNode> implements
     	}
     	
     	if(node.getNodeType() == AstNode.NodeType.chapter) {
-    		m_result.append("[\n");
+    		result.append("[\n");
     	}
 
     	else if(node.getNodeType() == AstNode.NodeType.fassung) {
         	FassungNode fassung = (FassungNode)node;
         	if(fassung.getFassung() == FassungNode.FassungType.lesefassung) {
-        		m_currentFassung = "lf";
+        		currentFassung = "lf";
         	}
         	else if(fassung.getFassung() == FassungNode.FassungType.studienfassung) {
-        		m_currentFassung = "sf";
+        		currentFassung = "sf";
         	}
         	else {
         		// TODO: Leichte Sprache
@@ -70,11 +70,11 @@ public class WebsiteDbVisitor extends DifferentiatingVisitor<AstNode> implements
         }
 
         else if(node.getNodeType() == AstNode.NodeType.quote) {
-            if(m_quoteCounter > 0)
+            if(quoteCounter > 0)
             	appendToVerse("»");
             else
             	appendToVerse("„");
-            m_quoteCounter++;
+            quoteCounter++;
         }
 
         else if(node.getNodeType() == AstNode.NodeType.alternative) {
@@ -111,12 +111,12 @@ public class WebsiteDbVisitor extends DifferentiatingVisitor<AstNode> implements
         	finishVerse();
         	
             VerseNode verse = (VerseNode)node;
-            m_verseText.append("{\n");
-            m_verseText.append("version: \"" + m_currentFassung + "\",\n");
-            m_verseText.append("from: \"" + verse.getFromNumber() + "\",\n");
-            m_verseText.append("to: \"" + verse.getToNumber() + "\",\n");
-            m_verseText.append("status: \"" + verse.getStatus().quality() + "\",\n");
-            m_verseText.append("text: \"");
+            verseText.append("{\n");
+            verseText.append("version: \"" + currentFassung + "\",\n");
+            verseText.append("from: \"" + verse.getFromNumber() + "\",\n");
+            verseText.append("to: \"" + verse.getToNumber() + "\",\n");
+            verseText.append("status: \"" + verse.getStatus().quality() + "\",\n");
+            verseText.append("text: \"");
         }
     }
 
@@ -133,12 +133,12 @@ public class WebsiteDbVisitor extends DifferentiatingVisitor<AstNode> implements
     	
     	if(node.getNodeType() == AstNode.NodeType.chapter) {
     		finishVerse();
-    		m_result.append("]");
+    		result.append("]");
     	}
 
     	else if(node.getNodeType() == AstNode.NodeType.quote) {
-            m_quoteCounter--;
-            if(m_quoteCounter > 0)
+            quoteCounter--;
+            if(quoteCounter > 0)
             	appendToVerse("«");
             else
             	appendToVerse("“");
@@ -158,27 +158,27 @@ public class WebsiteDbVisitor extends DifferentiatingVisitor<AstNode> implements
     }
     
     private void appendToVerse(String text) throws Exception {
-    	if(m_verseText.length() == 0) {
+    	if(verseText.length() == 0) {
             if(text.trim().length() != 0) {
                 // Ignore for now.
                 // throw new Exception("Text outside verse found: \"" + text + "\".");
             }
     	}
         else {
-    	    m_verseText.append(text);
+    	    verseText.append(text);
         }
     }
 
 	private void finishVerse() {
-		if(m_verseText.length() != 0) {
+		if(verseText.length() != 0) {
             // Trim the verse text to suppress verses with trailing newlines.
-			m_result.append(m_verseText.toString().trim());
-			m_result.append("\"\n},\n");
-			m_verseText = new StringBuilder();
+			result.append(verseText.toString().trim());
+			result.append("\"\n},\n");
+			verseText = new StringBuilder();
 		}
 	}
 
     public String getResult() {
-        return m_result.toString();
+        return result.toString();
     }
 }

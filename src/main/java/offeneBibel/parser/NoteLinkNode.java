@@ -8,24 +8,24 @@ package offeneBibel.parser;
  */
 public class NoteLinkNode extends AstNode {
     private static final long serialVersionUID = 1L;
-    private String m_noteTag;
-    private NoteNode m_linkTarget;
+    private String noteTag;
+    private NoteNode linkTarget;
 
     public NoteLinkNode(String tag) {
         super(NodeType.noteLink);
-        m_noteTag = tag;
-        m_linkTarget = null;
+        noteTag = tag;
+        linkTarget = null;
     }
 
     public String getTag() {
-        return m_noteTag;
+        return noteTag;
     }
 
     public void setLinkTarget(NoteNode target) {
-        m_linkTarget = target;
+        linkTarget = target;
     }
 
     public NoteNode getLinkTarget() {
-        return m_linkTarget;
+        return linkTarget;
     }
 }

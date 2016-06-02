@@ -18,20 +18,20 @@ import offeneBibel.visitorPattern.IVisitorHost;
  */
 public abstract class TreeNode<SELF extends TreeNode<SELF>> implements Serializable, IVisitorHost<SELF>{
     private static final long serialVersionUID = 1L;
-    protected LinkedList<SELF> m_children;
-    protected SELF m_parent;
+    protected LinkedList<SELF> children;
+    protected SELF parent;
 
     public TreeNode()
     {
-        m_children = new LinkedList<SELF>();
-        m_parent = null;
+        children = new LinkedList<SELF>();
+        parent = null;
     }
 
     @SuppressWarnings("unchecked")
     public boolean insertChild(int index, SELF node)
     {
         node.setParent((SELF) this);
-        m_children.add(index, node);
+        children.add(index, node);
 
         return true;
     }
@@ -40,87 +40,87 @@ public abstract class TreeNode<SELF extends TreeNode<SELF>> implements Serializa
     public boolean appendChild(SELF node)
     {
         node.setParent((SELF) this);
-        m_children.add(node);
+        children.add(node);
         return true;
     }
 
     public SELF removeLastChild()
     {
-        m_children.peekLast().m_parent = null;
-        return m_children.removeLast();
+        children.peekLast().parent = null;
+        return children.removeLast();
     }
 
     public SELF peekChild()
     {
-        return m_children.peekLast();
+        return children.peekLast();
     }
 
     public int childCount()
     {
-        return m_children.size();
+        return children.size();
     }
 
     public boolean removeChild(SELF node)
     {
-        if(m_children.remove(node) == true) {
-            node.m_parent = null;
+        if(children.remove(node) == true) {
+            node.parent = null;
         }
         return true;
     }
 
     public SELF getNextChild(SELF child)
     {
-        int position = m_children.indexOf(child);
-        if(position == -1 || position == m_children.size()-1) {
+        int position = children.indexOf(child);
+        if(position == -1 || position == children.size()-1) {
             return null;
         }
         else {
-            return m_children.get(position + 1);
+            return children.get(position + 1);
         }
     }
 
     public SELF getPreviousChild(SELF child)
     {
-        int position = m_children.indexOf(child);
+        int position = children.indexOf(child);
         if(position == -1 || position == 0) {
             return null;
         }
         else {
-            return m_children.get(position - 1);
+            return children.get(position - 1);
         }
     }
 
     @SuppressWarnings("unchecked")
     public SELF getNextSibling()
     {
-        if(m_parent == null)
+        if(parent == null)
             return null;
         else
-            return (SELF) m_parent.getNextChild((SELF) this);
+            return (SELF) parent.getNextChild((SELF) this);
     }
 
     @SuppressWarnings("unchecked")
     public SELF getPreviousSibling()
     {
-        if(m_parent == null)
+        if(parent == null)
             return null;
         else
-            return m_parent.getPreviousChild((SELF) this);
+            return parent.getPreviousChild((SELF) this);
     }
 
     protected boolean setParent(SELF node)
     {
-        if(m_parent != null) {
-            m_parent.m_children.remove(this);
-            m_parent = null;
+        if(parent != null) {
+            parent.children.remove(this);
+            parent = null;
         }
-        m_parent = node;
+        parent = node;
         return true;
     }
 
     public SELF getParent()
     {
-        return m_parent;
+        return parent;
     }
 
     @Override
@@ -136,7 +136,7 @@ public abstract class TreeNode<SELF extends TreeNode<SELF>> implements Serializa
             visitor.visit((SELF) this);
         }
 
-        for(SELF child : m_children) {
+        for(SELF child : children) {
             child.host(visitor);
         }
 

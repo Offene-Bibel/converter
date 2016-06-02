@@ -22,7 +22,7 @@ import com.github.parboiled1.grappa.backport.EventBasedParseRunner;
 import com.github.parboiled1.grappa.backport.TracingParseRunnerListener;
 
 public class Validator {
-    CommandLineArguments m_commandLineArguments;
+    CommandLineArguments commandLineArguments;
 
     public static void main(String[] args) {
         Validator validator = new Validator();
@@ -31,33 +31,33 @@ public class Validator {
 
     public void run(String[] args) {
     	try {
-	        m_commandLineArguments = new CommandLineArguments();
-	        JCommander commander = new JCommander(m_commandLineArguments, args);
-	        if (m_commandLineArguments.m_help) {
+	        commandLineArguments = new CommandLineArguments();
+	        JCommander commander = new JCommander(commandLineArguments, args);
+	        if (commandLineArguments.help) {
 	            commander.usage();
 	            return;
 	        }
 	
-	        if((m_commandLineArguments.m_inputFile != null && m_commandLineArguments.m_inputUrl != null) ||
-	                                        (m_commandLineArguments.m_inputFile == null && m_commandLineArguments.m_inputUrl == null)) {
+	        if((commandLineArguments.inputFile != null && commandLineArguments.inputUrl != null) ||
+	                                        (commandLineArguments.inputFile == null && commandLineArguments.inputUrl == null)) {
 	            System.out.println("Specify either a file *or* a URL, not both.");
 	            commander.usage();
 	            return;
 	        }
 	
 	        String text = null;
-	        if(m_commandLineArguments.m_inputUrl != null) {
+	        if(commandLineArguments.inputUrl != null) {
 	            // retrieve URL and put into file
 	            try {
-	                text = Misc.retrieveUrl(m_commandLineArguments.m_inputUrl);
+	                text = Misc.retrieveUrl(commandLineArguments.inputUrl);
 	            } catch (IOException e) {
 	                System.err.println("URL could not be retrieved: " + e.getMessage());
 	                System.exit(2);
 	            }
 	        }
-	        else { // m_commandLineArguments.m_inputFile != null
+	        else { // commandLineArguments.inputFile != null
 	            try {
-	                text = Misc.readFile(m_commandLineArguments.m_inputFile);
+	                text = Misc.readFile(commandLineArguments.inputFile);
 	            } catch (IOException e) {
 	                System.err.println("File could not be read: " + e.getMessage());
 	                System.exit(2);
@@ -67,17 +67,17 @@ public class Validator {
 	        OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
 	
 	        ParseRunner<AstNode> parseRunner = null;
-	        if(m_commandLineArguments.m_debugFile != null) {
+	        if(commandLineArguments.debugFile != null) {
 	        	TracingParseRunnerListener<AstNode> listener
-	        		= new TracingParseRunnerListener<>(m_commandLineArguments.m_debugFile);
+	        		= new TracingParseRunnerListener<>(commandLineArguments.debugFile);
 	        	parseRunner = new EventBasedParseRunner<AstNode>(parser.Page());
 	        	((EventBasedParseRunner<AstNode>)parseRunner).registerListener(listener);
 	        }
-	        else if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("tracing")) {
+	        else if(commandLineArguments.parseRunner.equalsIgnoreCase("tracing")) {
 	            parseRunner = new TracingParseRunner<AstNode>(parser.Page());
 	        }
-	        else if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("recovering")) {
-	            parseRunner = new RecoveringParseRunner<AstNode>(parser.Page(), m_commandLineArguments.m_timeout);
+	        else if(commandLineArguments.parseRunner.equalsIgnoreCase("recovering")) {
+	            parseRunner = new RecoveringParseRunner<AstNode>(parser.Page(), commandLineArguments.timeout);
 	        }
 	        else {
 	            parseRunner = new ReportingParseRunner<AstNode>(parser.Page());
@@ -90,7 +90,7 @@ public class Validator {
 	            System.out.println(ErrorUtils.printParseErrors(result));
 	            System.exit(1);
 	        } else {
-	        	if(m_commandLineArguments.m_json) {
+	        	if(commandLineArguments.json) {
 		        	AstNode node = result.resultValue;
 	                node.host(new EmptyVerseFixupVisitor());
 	        		WebsiteDbVisitor visitor = new WebsiteDbVisitor();

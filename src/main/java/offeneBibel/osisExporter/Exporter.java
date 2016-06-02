@@ -73,40 +73,40 @@ public class Exporter
     /**
      * URL prefix to use for retrieving the translation pages.
      */
-    //static final String m_urlBase = "http://www.offene-bibel.de/wiki/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
-    static final String m_urlBase = "http://www.offene-bibel.de/mediawiki/index.php?action=raw&title=";
+    //static final String urlBase = "http://www.offene-bibel.de/wiki/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
+    static final String urlBase = "http://www.offene-bibel.de/mediawiki/index.php?action=raw&title=";
 
     /**
      * URL prefix to use for retrieving history of a page.
      */
-    static final String m_historyURLBase = "http://www.offene-bibel.de/mediawiki/api.php?action=query&prop=revisions&rvprop=ids|timestamp&rvlimit=100&format=xml&titles=";
+    static final String historyURLBase = "http://www.offene-bibel.de/mediawiki/api.php?action=query&prop=revisions&rvprop=ids|timestamp&rvlimit=100&format=xml&titles=";
 
     /**
      * Oldest date for a history page to be considered to be retrieved. Increase it when parsing succeeded to find errors faster.
      */
-    static final String m_minHistoryDate = "2015-01-01";
+    static final String minHistoryDate = "2015-01-01";
 
     /**
      * A list of all bible books as they are named on the wiki.
      * It was created by combining the wiki page: Vorlage:Kapitelzahl and the OSIS 2.1.1 manual Appendix C.1
      */
-    static final String m_bibleBooks = Misc.getResourceDir() + "bibleBooks.txt";
-    //static final String m_bibleBooks = Misc.getResourceDir() + "testbibleBooks.txt";
+    static final String bibleBooks = Misc.getResourceDir() + "bibleBooks.txt";
+    //static final String bibleBooks = Misc.getResourceDir() + "testbibleBooks.txt";
     /**
      * The template OSIS files. These files will be populated with the converted pages to form the final .osis document.
      */
-    static final String m_studienFassungTemplate = Misc.getResourceDir() + "offene-bibel-studienfassung_template.txt";
-    static final String m_leseFassungTemplate = Misc.getResourceDir() + "offene-bibel-lesefassung_template.txt";
+    static final String studienFassungTemplate = Misc.getResourceDir() + "offene-bibel-studienfassung_template.txt";
+    static final String leseFassungTemplate = Misc.getResourceDir() + "offene-bibel-lesefassung_template.txt";
     /**
      * Where the resulting .osis files should be saved.
      */
-    static final String m_studienFassungFilename = Misc.getResultsDir() + "offeneBibelStudienfassungModule.osis";
-    static final String m_leseFassungFilename = Misc.getResultsDir() + "offeneBibelLesefassungModule.osis";
+    static final String studienFassungFilename = Misc.getResultsDir() + "offeneBibelStudienfassungModule.osis";
+    static final String leseFassungFilename = Misc.getResultsDir() + "offeneBibelLesefassungModule.osis";
 
-    static final String m_studienFassungConfigFilename = "offbist.conf";
-    static final String m_leseFassungConfigFilename = "offbile.conf";
+    static final String studienFassungConfigFilename = "offbist.conf";
+    static final String leseFassungConfigFilename = "offbile.conf";
 
-    CommandLineArguments m_commandLineArguments;
+    CommandLineArguments commandLineArguments;
 
     class Chapter {
         Book book;
@@ -143,7 +143,7 @@ public class Exporter
                 }
                 else {
                     try {
-                        result = Misc.retrieveUrl(m_urlBase + URLEncoder.encode(wikiPage, "UTF-8"));
+                        result = Misc.retrieveUrl(urlBase + URLEncoder.encode(wikiPage, "UTF-8"));
                         System.out.println(wikiPage);
                     } catch (IOException e) {
                         // chapter not yet created, skip
@@ -165,7 +165,7 @@ public class Exporter
         public boolean generateAst(OffeneBibelParser parser, BasicParseRunner<AstNode> parseRunner) throws Throwable {
             if(wikiText != null) {
                 File cacheFile = null;
-                if (m_commandLineArguments.m_cacheAST) {
+                if (commandLineArguments.cacheAST) {
                     MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
                     sha1.update(wikiText.getBytes("UTF-8"));
                     cacheFile = new File(Misc.getPageCacheDir() + ".." + File.separator + "asts" + File.separator + Base64.custom().encodeToString(sha1.digest(), false) + ".ast");
@@ -182,10 +182,10 @@ public class Exporter
                 if(result.matched == false) {
 
                     ParseRunner<AstNode> errorParseRunner = null;
-                    if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("tracing")) {
+                    if(commandLineArguments.parseRunner.equalsIgnoreCase("tracing")) {
                         errorParseRunner = new TracingParseRunner<AstNode>(parser.Page());
                     }
-                    else if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("recovering")) {
+                    else if(commandLineArguments.parseRunner.equalsIgnoreCase("recovering")) {
                         errorParseRunner = new RecoveringParseRunner<AstNode>(parser.Page());
                     }
                     else {
@@ -245,9 +245,9 @@ public class Exporter
     public void run(String [] args)
     {
         try {
-            m_commandLineArguments = new CommandLineArguments();
-            JCommander commander = new JCommander(m_commandLineArguments, args);
-            if(m_commandLineArguments.m_help) {
+            commandLineArguments = new CommandLineArguments();
+            JCommander commander = new JCommander(commandLineArguments, args);
+            if(commandLineArguments.help) {
                 commander.usage();
                 return;
             }
@@ -257,28 +257,28 @@ public class Exporter
             System.out.println(" Done.");
 
             System.out.println("Parsing wiki pages...");
-            boolean success = generateAsts(books, VerseStatus.values()[m_commandLineArguments.m_exportLevel], !m_commandLineArguments.m_continueOnError);
+            boolean success = generateAsts(books, VerseStatus.values()[commandLineArguments.exportLevel], !commandLineArguments.continueOnError);
             if(false == success) {
                 return;
             }
             System.out.println("Done parsing wiki pages.");
 
-            if(false == m_commandLineArguments.m_skipGenerateOsis) {
+            if(false == commandLineArguments.skipGenerateOsis) {
                 System.out.print("Generating OSIS documents...");
-                generateOsisChapterFragments(books, VerseStatus.values()[m_commandLineArguments.m_exportLevel]);
+                generateOsisChapterFragments(books, VerseStatus.values()[commandLineArguments.exportLevel]);
                 String studienFassung = generateCompleteOsisString(generateOsisBookFragment(books, false), false);
                 String leseFassung = generateCompleteOsisString(generateOsisBookFragment(books, true), true);
-                Misc.writeFile(studienFassung, m_studienFassungFilename);
-                Misc.writeFile(leseFassung, m_leseFassungFilename);
+                Misc.writeFile(studienFassung, studienFassungFilename);
+                Misc.writeFile(leseFassung, leseFassungFilename);
                 System.out.println(" Done.");
             }
 
-            if(m_commandLineArguments.m_generateWeb) {
+            if(commandLineArguments.generateWeb) {
                 System.out.print("Generating website backing files...");
-                generateWebViewerFragments(books, VerseStatus.values()[m_commandLineArguments.m_exportLevel]);
+                generateWebViewerFragments(books, VerseStatus.values()[commandLineArguments.exportLevel]);
                 System.out.println(" Done.");
             }
-            if (m_commandLineArguments.m_generateStatistics) {
+            if (commandLineArguments.generateStatistics) {
                 System.out.print("Generating statistics...");
                 generateStatistics(books);
                 System.out.println(" Done.");
@@ -297,12 +297,12 @@ public class Exporter
     private List<Book> retrieveBooks() throws IOException
     {
         List<String> bookFilter = new ArrayList<String>();
-        if (m_commandLineArguments.m_books.length() > 0) {
-            for(String bookName : m_commandLineArguments.m_books.split(",")) {
+        if (commandLineArguments.books.length() > 0) {
+            for(String bookName : commandLineArguments.books.split(",")) {
                 bookFilter.add(BookNameHelper.getInstance().getUnifiedBookNameForString(bookName));
             }
         }
-        List<List<String>> bookDataList = Misc.readCsv(m_bibleBooks);
+        List<List<String>> bookDataList = Misc.readCsv(bibleBooks);
         List<Book>  bookDataCollection = new Vector<Book>();
         for(List<String> bookData : bookDataList) {
             Book book = new Book();
@@ -329,9 +329,9 @@ public class Exporter
     private boolean generateAsts(List<Book> books, VerseStatus requiredTranslationStatus, boolean stopOnError) throws Throwable
     {
         OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
-        parser.setDivineNameStyle(m_commandLineArguments.m_divineNameStyle);
+        parser.setDivineNameStyle(commandLineArguments.divineNameStyle);
         BasicParseRunner<AstNode> parseRunner = new BasicParseRunner<AstNode>(parser.Page());
-        boolean reloadOnError = m_commandLineArguments.m_reloadOnError;
+        boolean reloadOnError = commandLineArguments.reloadOnError;
         StringBuilder errorList = new StringBuilder();
         for(Book book : books) {
             for(Chapter chapter : book.chapters) {
@@ -341,15 +341,15 @@ public class Exporter
                     chapter.retrieveWikiPage(true);
                     success = chapter.generateAst(parser, parseRunner);
                 }
-                if (false == success && m_commandLineArguments.m_tryPreviousVersions) {
+                if (false == success && commandLineArguments.tryPreviousVersions) {
                     String wikiPage = chapter.book.urlName + "_" + chapter.number;
                     List<Integer> ids = new ArrayList<Integer>();
-                    String revisions = Misc.retrieveUrl(m_historyURLBase + URLEncoder.encode(wikiPage, "UTF-8"));
+                    String revisions = Misc.retrieveUrl(historyURLBase + URLEncoder.encode(wikiPage, "UTF-8"));
                     Document revisionsXML = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(revisions)));
                     NodeList revisionNodes = (NodeList) XPathFactory.newInstance().newXPath().evaluate("/api/query/pages/page/revisions/rev", revisionsXML, XPathConstants.NODESET);
                     for(int i=0; i < revisionNodes.getLength(); i++) {
                         Element revision = (Element) revisionNodes.item(i);
-                        if (revision.getAttribute("timestamp").compareTo(m_minHistoryDate) < 0)
+                        if (revision.getAttribute("timestamp").compareTo(minHistoryDate) < 0)
                             break;
                         ids.add(Integer.parseInt(revision.getAttribute("revid")));
                     }
@@ -357,7 +357,7 @@ public class Exporter
                     String fileCacheString = Misc.getPageCacheDir() + wikiPage;
                     for(int id : ids) {
                         try {
-                            String result = Misc.retrieveUrl(m_urlBase + URLEncoder.encode(wikiPage, "UTF-8")+"&oldid="+id);
+                            String result = Misc.retrieveUrl(urlBase + URLEncoder.encode(wikiPage, "UTF-8")+"&oldid="+id);
                             Misc.writeFile(result, fileCacheString);
                             System.out.println(wikiPage+"@"+id);
                         } catch (IOException e) {
@@ -391,7 +391,7 @@ public class Exporter
         Date date = new Date();
         DateFormat format = DateFormat.getDateInstance();
         StringBuilder statusFileString = new StringBuilder("# Generated on " + format.format(date) + ".\n");
-        statusFileString.append("# Export level: " + m_commandLineArguments.m_exportLevel + "\n");
+        statusFileString.append("# Export level: " + commandLineArguments.exportLevel + "\n");
         for (Book book : books) {
             for (Chapter chapter : book.chapters) {
                 if (chapter.node != null) {
@@ -489,7 +489,7 @@ public class Exporter
     public String[] generateOsisTexts(Chapter chapter, VerseStatus requiredTranslationStatus) throws Throwable {
         String[] texts = new String[] {null, null};
         if(chapter.node != null) {
-            OsisGeneratorVisitor visitor = new OsisGeneratorVisitor(chapter.number, chapter.book.osisName, requiredTranslationStatus, m_commandLineArguments.m_inlineVerseStatus, m_commandLineArguments.m_unmilestonedLineGroup);
+            OsisGeneratorVisitor visitor = new OsisGeneratorVisitor(chapter.number, chapter.book.osisName, requiredTranslationStatus, commandLineArguments.inlineVerseStatus, commandLineArguments.unmilestonedLineGroup);
             chapter.node.host(visitor);
             texts[0] = visitor.getStudienFassung();
             texts[1] = visitor.getLeseFassung();
@@ -543,10 +543,10 @@ public class Exporter
         String confFile = null;
 
         if (leseFassung == true) {
-            confFile = m_leseFassungConfigFilename;
+            confFile = leseFassungConfigFilename;
         }
         else {
-            confFile = m_studienFassungConfigFilename;
+            confFile = studienFassungConfigFilename;
         }
 
         Properties config = new Properties();
@@ -560,7 +560,7 @@ public class Exporter
             config.put(prop, new String(config.get(prop).toString().getBytes("ISO-8859-1"), "UTF-8"));
         }
 
-        String result = Misc.readFile(leseFassung ? m_leseFassungTemplate : m_studienFassungTemplate);
+        String result = Misc.readFile(leseFassung ? leseFassungTemplate : studienFassungTemplate);
 
         String dateString = new SimpleDateFormat("yyyy.MM.dd'T'HH.mm.ss").format(new Date());
         result = result.replace("{{date}}", "" + dateString);
