@@ -6,12 +6,12 @@ package offeneBibel.parser;
  * 1. During parsing only the note tag will be set.
  * 2. In a second run the target will be searched and set.
  */
-public class ObNoteLinkNode extends ObAstNode {
+public class NoteLinkNode extends AstNode {
     private static final long serialVersionUID = 1L;
     private String m_noteTag;
-    private ObNoteNode m_linkTarget;
+    private NoteNode m_linkTarget;
 
-    public ObNoteLinkNode(String tag) {
+    public NoteLinkNode(String tag) {
         super(NodeType.noteLink);
         m_noteTag = tag;
         m_linkTarget = null;
@@ -21,11 +21,11 @@ public class ObNoteLinkNode extends ObAstNode {
         return m_noteTag;
     }
 
-    public void setLinkTarget(ObNoteNode target) {
+    public void setLinkTarget(NoteNode target) {
         m_linkTarget = target;
     }
 
-    public ObNoteNode getLinkTarget() {
+    public NoteNode getLinkTarget() {
         return m_linkTarget;
     }
 }

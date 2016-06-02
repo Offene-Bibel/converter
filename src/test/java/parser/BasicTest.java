@@ -1,6 +1,6 @@
 package parser;
 
-import offeneBibel.parser.ObAstNode;
+import offeneBibel.parser.AstNode;
 import offeneBibel.parser.OffeneBibelParser;
 
 import org.parboiled.Parboiled;
@@ -15,8 +15,8 @@ public class BasicTest {
 
     public void parseOk(String text) {
         OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
-        ErrorReportingParseRunner<ObAstNode> parseRunner = new ErrorReportingParseRunner<ObAstNode>(parser.Page(), 0);
-        ParsingResult<ObAstNode> result = parseRunner.run(text);
+        ErrorReportingParseRunner<AstNode> parseRunner = new ErrorReportingParseRunner<AstNode>(parser.Page(), 0);
+        ParsingResult<AstNode> result = parseRunner.run(text);
         if ( ! result.isSuccess()) {
             fail(ErrorUtils.printParseErrors(result));
         }
@@ -24,8 +24,8 @@ public class BasicTest {
 
     public void parseFails(String text) {
         OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
-        ErrorReportingParseRunner<ObAstNode> parseRunner = new ErrorReportingParseRunner<ObAstNode>(parser.Page(), 0);
-        ParsingResult<ObAstNode> result = parseRunner.run(text);
+        ErrorReportingParseRunner<AstNode> parseRunner = new ErrorReportingParseRunner<AstNode>(parser.Page(), 0);
+        ParsingResult<AstNode> result = parseRunner.run(text);
         assertFalse(result.isSuccess());
     }
 

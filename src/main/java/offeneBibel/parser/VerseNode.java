@@ -1,20 +1,20 @@
 package offeneBibel.parser;
 
-import offeneBibel.parser.ObFassungNode.FassungType;
+import offeneBibel.parser.FassungNode.FassungType;
 
-public class ObVerseNode extends ObAstNode {
+public class VerseNode extends AstNode {
     private static final long serialVersionUID = 1L;
     private int m_fromNumber;
     private int m_toNumber;
-    private ObVerseStatus m_statusOverride = null;
+    private VerseStatus m_statusOverride = null;
 
-    public ObVerseNode(int number) {
+    public VerseNode(int number) {
         super(NodeType.verse);
         m_fromNumber = number;
         m_toNumber = number;
     }
 
-    public ObVerseNode(int fromNumber, int toNumber) {
+    public VerseNode(int fromNumber, int toNumber) {
         super(NodeType.verse);
         m_fromNumber = fromNumber;
         m_toNumber = toNumber;
@@ -36,32 +36,32 @@ public class ObVerseNode extends ObAstNode {
         return m_toNumber;
     }
     
-    public void setStatusOverride(ObVerseStatus status) {
+    public void setStatusOverride(VerseStatus status) {
     	m_statusOverride = status;
     }
 
-    public ObVerseStatus getStatus() {
-        ObFassungNode fassungNode = getFassungNode();
+    public VerseStatus getStatus() {
+        FassungNode fassungNode = getFassungNode();
         FassungType fassung = fassungNode.getFassung();
         return getStatus(fassung);
     }
 
-    public ObVerseStatus getStatus(FassungType fassung) {
+    public VerseStatus getStatus(FassungType fassung) {
     	if(m_statusOverride != null) {
     		return m_statusOverride;
     	}
     	else {
-	        ObChapterNode chapterNode = getChapterNode();
+	        ChapterNode chapterNode = getChapterNode();
 	
-	        ObVerseStatus status = ObVerseStatus.none;
+	        VerseStatus status = VerseStatus.none;
 	        // whether the last set status was a generic status or one with a range, specific ones have precedence
 	        boolean isLastTagSpecific = false;
 	
-	        for (ObChapterTag tag  : chapterNode.getChapterTags()) {
+	        for (ChapterTag tag  : chapterNode.getChapterTags()) {
 	            if(tag.getTag().doesMatchFassung(fassung)) {
 	                if(tag.tagAppliesToVerse(m_fromNumber, m_toNumber)) {
 	                    // tag applies to this verse
-	                    if(status == ObVerseStatus.none) {
+	                    if(status == VerseStatus.none) {
 	                        status = tag.getTag().getVerseStatus(fassung);
 	                        isLastTagSpecific = tag.isSpecific();
 	                    }
@@ -88,27 +88,27 @@ public class ObVerseNode extends ObAstNode {
     	}
     }
 
-    private ObChapterNode getChapterNode() {
-        ObAstNode runner = this;
-        while(runner != null && ! ObChapterNode.class.isInstance(runner)) {
+    private ChapterNode getChapterNode() {
+        AstNode runner = this;
+        while(runner != null && ! ChapterNode.class.isInstance(runner)) {
             runner = runner.getParent();
         }
 
         if (runner == null)
             throw new RuntimeException("ObVerseNode.getChapterNode() called, but was unable to retrieve chapter node.");
 
-        return (ObChapterNode) runner;
+        return (ChapterNode) runner;
     }
 
-    private ObFassungNode getFassungNode() {
-        ObAstNode runner = this;
-        while(runner != null && ! ObFassungNode.class.isInstance(runner)) {
+    private FassungNode getFassungNode() {
+        AstNode runner = this;
+        while(runner != null && ! FassungNode.class.isInstance(runner)) {
             runner = runner.getParent();
         }
 
         if (runner == null)
             throw new RuntimeException("ObVerseNode.getFassungNode() called, but was unable to retrieve fassung node.");
 
-        return (ObFassungNode) runner;
+        return (FassungNode) runner;
     }
 }

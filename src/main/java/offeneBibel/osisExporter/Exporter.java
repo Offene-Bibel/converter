@@ -44,11 +44,11 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 import offeneBibel.parser.BookNameHelper;
-import offeneBibel.parser.ObAstFixuper;
-import offeneBibel.parser.ObAstNode;
-import offeneBibel.parser.ObVerseStatus;
+import offeneBibel.parser.AstFixuper;
+import offeneBibel.parser.AstNode;
+import offeneBibel.parser.VerseStatus;
 import offeneBibel.parser.OffeneBibelParser;
-import offeneBibel.parser.ObFassungNode.FassungType;
+import offeneBibel.parser.FassungNode.FassungType;
 
 import org.parboiled.Parboiled;
 import org.parboiled.common.Base64;
@@ -114,7 +114,7 @@ public class Exporter
         /** Text of this chapter as retrieved from the wiki. */
         String wikiText = null;
         /** Result of the parsing of the text. */
-        ObAstNode node = null;
+        AstNode node = null;
 
         /** The following is used by the {@link generateOsisChapterFragments} method. */
         String studienfassungText = null;
@@ -162,7 +162,7 @@ public class Exporter
             }
         }
 
-        public boolean generateAst(OffeneBibelParser parser, BasicParseRunner<ObAstNode> parseRunner) throws Throwable {
+        public boolean generateAst(OffeneBibelParser parser, BasicParseRunner<AstNode> parseRunner) throws Throwable {
             if(wikiText != null) {
                 File cacheFile = null;
                 if (m_commandLineArguments.m_cacheAST) {
@@ -171,27 +171,27 @@ public class Exporter
                     cacheFile = new File(Misc.getPageCacheDir() + ".." + File.separator + "asts" + File.separator + Base64.custom().encodeToString(sha1.digest(), false) + ".ast");
                     if (cacheFile.exists()) {
                         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
-                            node = (ObAstNode) ois.readObject();
+                            node = (AstNode) ois.readObject();
                         }
                         return true;
                     }
                 }
 
-                ParsingResult<ObAstNode> result = parseRunner.run(wikiText);
+                ParsingResult<AstNode> result = parseRunner.run(wikiText);
 
                 if(result.matched == false) {
 
-                    ParseRunner<ObAstNode> errorParseRunner = null;
+                    ParseRunner<AstNode> errorParseRunner = null;
                     if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("tracing")) {
-                        errorParseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
+                        errorParseRunner = new TracingParseRunner<AstNode>(parser.Page());
                     }
                     else if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("recovering")) {
-                        errorParseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page());
+                        errorParseRunner = new RecoveringParseRunner<AstNode>(parser.Page());
                     }
                     else {
-                        errorParseRunner = new ReportingParseRunner<ObAstNode>(parser.Page());
+                        errorParseRunner = new ReportingParseRunner<AstNode>(parser.Page());
                     }
-                    ParsingResult<ObAstNode> validatorParsingResult = errorParseRunner.run(wikiText);
+                    ParsingResult<AstNode> validatorParsingResult = errorParseRunner.run(wikiText);
 
                     if(validatorParsingResult.hasErrors()) {
                         System.out.println(ErrorUtils.printParseErrors(validatorParsingResult));
@@ -210,7 +210,7 @@ public class Exporter
                 }
                 else {
                     node = result.resultValue;
-                    ObAstFixuper.fixupAstTree(node);
+                    AstFixuper.fixupAstTree(node);
                     node.host(new EmptyVerseFixupVisitor());
                     if (cacheFile != null) {
                         cacheFile.getParentFile().mkdirs();
@@ -257,7 +257,7 @@ public class Exporter
             System.out.println(" Done.");
 
             System.out.println("Parsing wiki pages...");
-            boolean success = generateAsts(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel], !m_commandLineArguments.m_continueOnError);
+            boolean success = generateAsts(books, VerseStatus.values()[m_commandLineArguments.m_exportLevel], !m_commandLineArguments.m_continueOnError);
             if(false == success) {
                 return;
             }
@@ -265,7 +265,7 @@ public class Exporter
 
             if(false == m_commandLineArguments.m_skipGenerateOsis) {
                 System.out.print("Generating OSIS documents...");
-                generateOsisChapterFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel]);
+                generateOsisChapterFragments(books, VerseStatus.values()[m_commandLineArguments.m_exportLevel]);
                 String studienFassung = generateCompleteOsisString(generateOsisBookFragment(books, false), false);
                 String leseFassung = generateCompleteOsisString(generateOsisBookFragment(books, true), true);
                 Misc.writeFile(studienFassung, m_studienFassungFilename);
@@ -275,7 +275,7 @@ public class Exporter
 
             if(m_commandLineArguments.m_generateWeb) {
                 System.out.print("Generating website backing files...");
-                generateWebViewerFragments(books, ObVerseStatus.values()[m_commandLineArguments.m_exportLevel]);
+                generateWebViewerFragments(books, VerseStatus.values()[m_commandLineArguments.m_exportLevel]);
                 System.out.println(" Done.");
             }
             if (m_commandLineArguments.m_generateStatistics) {
@@ -326,11 +326,11 @@ public class Exporter
         return bookDataCollection;
     }
 
-    private boolean generateAsts(List<Book> books, ObVerseStatus requiredTranslationStatus, boolean stopOnError) throws Throwable
+    private boolean generateAsts(List<Book> books, VerseStatus requiredTranslationStatus, boolean stopOnError) throws Throwable
     {
         OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
         parser.setDivineNameStyle(m_commandLineArguments.m_divineNameStyle);
-        BasicParseRunner<ObAstNode> parseRunner = new BasicParseRunner<ObAstNode>(parser.Page());
+        BasicParseRunner<AstNode> parseRunner = new BasicParseRunner<AstNode>(parser.Page());
         boolean reloadOnError = m_commandLineArguments.m_reloadOnError;
         StringBuilder errorList = new StringBuilder();
         for(Book book : books) {
@@ -386,7 +386,7 @@ public class Exporter
         return true;
     }
 
-    public void generateWebViewerFragments(List<Book> books, ObVerseStatus requiredTranslationStatus) throws Throwable
+    public void generateWebViewerFragments(List<Book> books, VerseStatus requiredTranslationStatus) throws Throwable
     {
         Date date = new Date();
         DateFormat format = DateFormat.getDateInstance();
@@ -395,7 +395,7 @@ public class Exporter
         for (Book book : books) {
             for (Chapter chapter : book.chapters) {
                 if (chapter.node != null) {
-                    ObWebViewerVisitor visitor = new ObWebViewerVisitor(requiredTranslationStatus);
+                    WebViewerVisitor visitor = new WebViewerVisitor(requiredTranslationStatus);
                     chapter.node.host(visitor);
                     statusFileString.append(writeWebScriptureToFile(visitor.getStudienFassung(), book, chapter, visitor.getStudienFassungStatus(), "sf"));
                     statusFileString.append(writeWebScriptureToFile(visitor.getLeseFassung(), book, chapter, visitor.getLeseFassungStatus(), "lf"));
@@ -407,7 +407,7 @@ public class Exporter
         statusFileWriter.close();
     }
 
-    private String writeWebScriptureToFile(String scriptureText, Book book, Chapter chapter, ObVerseStatus status, String type) throws IOException {
+    private String writeWebScriptureToFile(String scriptureText, Book book, Chapter chapter, VerseStatus status, String type) throws IOException {
         String statusFileLine = "";
         if(scriptureText != null) {
             String filename = book.urlName + "_" + chapter.number + "_" + type;
@@ -454,7 +454,7 @@ public class Exporter
                         verseNumbers.add(String.valueOf(j+1));
                     }
                 }
-                ObVerseStatisticVisitor visitor = new ObVerseStatisticVisitor(chapName, verseNumbers);
+                VerseStatisticVisitor visitor = new VerseStatisticVisitor(chapName, verseNumbers);
                 if (chapter.node != null) {
                     chapter.node.host(visitor);
                 }
@@ -486,10 +486,10 @@ public class Exporter
      * @return a String array. [0] = Studienfassung or null if not yet existent, [1] = Lesefassung or null if not yet existent.
      * @throws Throwable
      */
-    public String[] generateOsisTexts(Chapter chapter, ObVerseStatus requiredTranslationStatus) throws Throwable {
+    public String[] generateOsisTexts(Chapter chapter, VerseStatus requiredTranslationStatus) throws Throwable {
         String[] texts = new String[] {null, null};
         if(chapter.node != null) {
-            ObOsisGeneratorVisitor visitor = new ObOsisGeneratorVisitor(chapter.number, chapter.book.osisName, requiredTranslationStatus, m_commandLineArguments.m_inlineVerseStatus, m_commandLineArguments.m_unmilestonedLineGroup);
+            OsisGeneratorVisitor visitor = new OsisGeneratorVisitor(chapter.number, chapter.book.osisName, requiredTranslationStatus, m_commandLineArguments.m_inlineVerseStatus, m_commandLineArguments.m_unmilestonedLineGroup);
             chapter.node.host(visitor);
             texts[0] = visitor.getStudienFassung();
             texts[1] = visitor.getLeseFassung();
@@ -502,9 +502,9 @@ public class Exporter
      * @param books The books for which the OSIS texts should be generated and filled out.
      * @param stopOnError Stop on the first error found. If this is false and an error is found in a chapter, that chapter is skipped.
      * @return true if parsing was successful, false otherwise.
-     * @throws Throwable If the {@link ObOsisGeneratorVisitor} failed.
+     * @throws Throwable If the {@link OsisGeneratorVisitor} failed.
      */
-    private void generateOsisChapterFragments(List<Book> books, ObVerseStatus requiredTranslationStatus) throws Throwable
+    private void generateOsisChapterFragments(List<Book> books, VerseStatus requiredTranslationStatus) throws Throwable
     {
         for(Book book : books) {
             for(Chapter chapter : book.chapters) {

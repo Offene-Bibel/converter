@@ -1,13 +1,13 @@
 package offeneBibel.parser;
 
-public class ObParallelPassageNode extends ObAstNode {
+public class ParallelPassageNode extends AstNode {
     private static final long serialVersionUID = 1L;
     private String m_book;
     private int m_chapter;
     private int m_startVerse;
     private int m_stopVerse;
 
-    public ObParallelPassageNode(String book, int chapter, int verse) {
+    public ParallelPassageNode(String book, int chapter, int verse) {
         super(NodeType.parallelPassage);
         m_book = BookNameHelper.getInstance().getUnifiedBookNameForString(book);
         m_chapter = chapter;
@@ -15,7 +15,7 @@ public class ObParallelPassageNode extends ObAstNode {
         m_stopVerse = -1;
     }
 
-    public ObParallelPassageNode(String book, int chapter, int startVerse, int stopVerse) {
+    public ParallelPassageNode(String book, int chapter, int startVerse, int stopVerse) {
         super(NodeType.parallelPassage);
         m_book = BookNameHelper.getInstance().getUnifiedBookNameForString(book);
         m_chapter = chapter;

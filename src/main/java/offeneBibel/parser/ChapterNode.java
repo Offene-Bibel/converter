@@ -3,22 +3,22 @@ package offeneBibel.parser;
 import java.util.List;
 import java.util.Vector;
 
-public class ObChapterNode extends ObAstNode {
+public class ChapterNode extends AstNode {
     private static final long serialVersionUID = 1L;
-    private List<ObChapterTag> m_chapterTags;
+    private List<ChapterTag> m_chapterTags;
 
-    public ObChapterNode() {
+    public ChapterNode() {
         super(NodeType.chapter);
-        m_chapterTags = new Vector<ObChapterTag>();
+        m_chapterTags = new Vector<ChapterTag>();
     }
 
-    public boolean addChapterTag(ObChapterTag tag) {
+    public boolean addChapterTag(ChapterTag tag) {
         if (tag.getTag() == null) return true;
         m_chapterTags.add(tag);
         return true;
     }
 
-    public List<ObChapterTag> getChapterTags() {
+    public List<ChapterTag> getChapterTags() {
         return m_chapterTags;
     }
 }

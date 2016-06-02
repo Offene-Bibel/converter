@@ -16,12 +16,12 @@ import offeneBibel.visitorPattern.IVisitorHost;
  *
  * @param <SELF>
  */
-public abstract class ObTreeNode<SELF extends ObTreeNode<SELF>> implements Serializable, IVisitorHost<SELF>{
+public abstract class TreeNode<SELF extends TreeNode<SELF>> implements Serializable, IVisitorHost<SELF>{
     private static final long serialVersionUID = 1L;
     protected LinkedList<SELF> m_children;
     protected SELF m_parent;
 
-    public ObTreeNode()
+    public TreeNode()
     {
         m_children = new LinkedList<SELF>();
         m_parent = null;

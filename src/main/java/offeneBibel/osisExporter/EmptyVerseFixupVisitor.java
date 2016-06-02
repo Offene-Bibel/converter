@@ -1,40 +1,40 @@
 package offeneBibel.osisExporter;
 
-import offeneBibel.parser.ObAstNode;
-import offeneBibel.parser.ObTextNode;
-import offeneBibel.parser.ObVerseNode;
-import offeneBibel.parser.ObVerseStatus;
+import offeneBibel.parser.AstNode;
+import offeneBibel.parser.TextNode;
+import offeneBibel.parser.VerseNode;
+import offeneBibel.parser.VerseStatus;
 import offeneBibel.visitorPattern.DifferentiatingVisitor;
 import offeneBibel.visitorPattern.IVisitor;
 
 /**
  * Checks for empty verses and sets the status of those verses to none.
  */
-public class EmptyVerseFixupVisitor extends DifferentiatingVisitor<ObAstNode> implements IVisitor<ObAstNode>
+public class EmptyVerseFixupVisitor extends DifferentiatingVisitor<AstNode> implements IVisitor<AstNode>
 {
 	private boolean verseTextFound = false;
-	private ObVerseNode currentVerse = null;
+	private VerseNode currentVerse = null;
 	
     @Override
-    public void visitDefault(ObAstNode node) throws Throwable
+    public void visitDefault(AstNode node) throws Throwable
     {
-        if(node.getNodeType() == ObAstNode.NodeType.text) {
-            ObTextNode text = (ObTextNode)node;
+        if(node.getNodeType() == AstNode.NodeType.text) {
+            TextNode text = (TextNode)node;
             String textString = text.getText().trim();
             if(false == textString.isEmpty()) {
             	verseTextFound = true;
             }
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.verse) {
+        else if(node.getNodeType() == AstNode.NodeType.verse) {
         	if(currentVerse != null && verseTextFound == false) {
-        		currentVerse.setStatusOverride(ObVerseStatus.none);
+        		currentVerse.setStatusOverride(VerseStatus.none);
         	}
-        	currentVerse = (ObVerseNode)node;
+        	currentVerse = (VerseNode)node;
         	verseTextFound = false;
         }
     }
 
-	@Override protected void visitBeforeDefault(ObAstNode host) throws Throwable {}
-	@Override protected void visitAfterDefault(ObAstNode host) throws Throwable {}
+	@Override protected void visitBeforeDefault(AstNode host) throws Throwable {}
+	@Override protected void visitAfterDefault(AstNode host) throws Throwable {}
 }

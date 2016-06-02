@@ -3,8 +3,8 @@ package offeneBibel.validator;
 import java.io.IOException;
 
 import offeneBibel.osisExporter.EmptyVerseFixupVisitor;
-import offeneBibel.osisExporter.ObWebsiteDbVisitor;
-import offeneBibel.parser.ObAstNode;
+import offeneBibel.osisExporter.WebsiteDbVisitor;
+import offeneBibel.parser.AstNode;
 import offeneBibel.parser.OffeneBibelParser;
 
 import org.parboiled.Parboiled;
@@ -66,24 +66,24 @@ public class Validator {
 	
 	        OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
 	
-	        ParseRunner<ObAstNode> parseRunner = null;
+	        ParseRunner<AstNode> parseRunner = null;
 	        if(m_commandLineArguments.m_debugFile != null) {
-	        	TracingParseRunnerListener<ObAstNode> listener
+	        	TracingParseRunnerListener<AstNode> listener
 	        		= new TracingParseRunnerListener<>(m_commandLineArguments.m_debugFile);
-	        	parseRunner = new EventBasedParseRunner<ObAstNode>(parser.Page());
-	        	((EventBasedParseRunner<ObAstNode>)parseRunner).registerListener(listener);
+	        	parseRunner = new EventBasedParseRunner<AstNode>(parser.Page());
+	        	((EventBasedParseRunner<AstNode>)parseRunner).registerListener(listener);
 	        }
 	        else if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("tracing")) {
-	            parseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
+	            parseRunner = new TracingParseRunner<AstNode>(parser.Page());
 	        }
 	        else if(m_commandLineArguments.m_parseRunner.equalsIgnoreCase("recovering")) {
-	            parseRunner = new RecoveringParseRunner<ObAstNode>(parser.Page(), m_commandLineArguments.m_timeout);
+	            parseRunner = new RecoveringParseRunner<AstNode>(parser.Page(), m_commandLineArguments.m_timeout);
 	        }
 	        else {
-	            parseRunner = new ReportingParseRunner<ObAstNode>(parser.Page());
+	            parseRunner = new ReportingParseRunner<AstNode>(parser.Page());
 	        }
 	
-	        ParsingResult<ObAstNode> result = parseRunner.run(text);
+	        ParsingResult<AstNode> result = parseRunner.run(text);
 	
 	        if (result.hasErrors()) {
 	            System.out.println("invalid");
@@ -91,9 +91,9 @@ public class Validator {
 	            System.exit(1);
 	        } else {
 	        	if(m_commandLineArguments.m_json) {
-		        	ObAstNode node = result.resultValue;
+		        	AstNode node = result.resultValue;
 	                node.host(new EmptyVerseFixupVisitor());
-	        		ObWebsiteDbVisitor visitor = new ObWebsiteDbVisitor();
+	        		WebsiteDbVisitor visitor = new WebsiteDbVisitor();
 	        		node.host(visitor);
 	        		System.out.println("valid");
 	                System.out.println(visitor.getResult());

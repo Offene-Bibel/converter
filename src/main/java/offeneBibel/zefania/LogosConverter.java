@@ -13,7 +13,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 
-import offeneBibel.osisExporter.ObOsisGeneratorVisitor.NoteIndexCounter;
+import offeneBibel.osisExporter.OsisGeneratorVisitor.NoteIndexCounter;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

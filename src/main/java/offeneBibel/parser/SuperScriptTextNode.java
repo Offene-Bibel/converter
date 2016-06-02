@@ -1,9 +1,9 @@
 package offeneBibel.parser;
 
-public class ObSuperScriptTextNode extends ObAstNode {
+public class SuperScriptTextNode extends AstNode {
     private static final long serialVersionUID = 1L;
 
-    public ObSuperScriptTextNode() {
+    public SuperScriptTextNode() {
         super(NodeType.superScript);
     }
 }

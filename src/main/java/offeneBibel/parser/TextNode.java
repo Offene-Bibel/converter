@@ -1,10 +1,10 @@
 package offeneBibel.parser;
 
-public class ObTextNode extends ObAstNode { // implements IVisitorHost<ObAstNode> {
+public class TextNode extends AstNode { // implements IVisitorHost<ObAstNode> {
     private static final long serialVersionUID = 1L;
     private final StringBuilder m_text;
 
-    public ObTextNode(String text)
+    public TextNode(String text)
     {
         super(NodeType.text);
         m_text = new StringBuilder(text);

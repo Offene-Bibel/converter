@@ -1,11 +1,11 @@
 package offeneBibel.osisExporter;
 
-import offeneBibel.parser.ObAstNode;
-import offeneBibel.parser.ObAstNode.NodeType;
-import offeneBibel.parser.ObFassungNode;
-import offeneBibel.parser.ObNoteNode;
-import offeneBibel.parser.ObTextNode;
-import offeneBibel.parser.ObVerseNode;
+import offeneBibel.parser.AstNode;
+import offeneBibel.parser.AstNode.NodeType;
+import offeneBibel.parser.FassungNode;
+import offeneBibel.parser.NoteNode;
+import offeneBibel.parser.TextNode;
+import offeneBibel.parser.VerseNode;
 import offeneBibel.visitorPattern.DifferentiatingVisitor;
 import offeneBibel.visitorPattern.IVisitor;
 
@@ -30,21 +30,21 @@ import offeneBibel.visitorPattern.IVisitor;
 	{}, ...
 ]
  */
-public class ObWebsiteDbVisitor extends DifferentiatingVisitor<ObAstNode> implements IVisitor<ObAstNode>
+public class WebsiteDbVisitor extends DifferentiatingVisitor<AstNode> implements IVisitor<AstNode>
 {
 	private String m_currentFassung = "";
 	private StringBuilder m_result = new StringBuilder();
     private StringBuilder m_verseText = new StringBuilder();
     private int m_quoteCounter = 0;
 
-    public ObWebsiteDbVisitor()
+    public WebsiteDbVisitor()
     {
     }
 
     @Override
-    public void visitBeforeDefault(ObAstNode node) throws Throwable
+    public void visitBeforeDefault(AstNode node) throws Throwable
     {
-    	if(node.isDescendantOf(ObNoteNode.class)
+    	if(node.isDescendantOf(NoteNode.class)
     			|| node.isDescendantOf(NodeType.chapterNotes)
     			|| node.isDescendantOf(NodeType.fassungNotes)
     			|| node.isDescendantOf(NodeType.heading)) {
@@ -52,16 +52,16 @@ public class ObWebsiteDbVisitor extends DifferentiatingVisitor<ObAstNode> implem
     		return;
     	}
     	
-    	if(node.getNodeType() == ObAstNode.NodeType.chapter) {
+    	if(node.getNodeType() == AstNode.NodeType.chapter) {
     		m_result.append("[\n");
     	}
 
-    	else if(node.getNodeType() == ObAstNode.NodeType.fassung) {
-        	ObFassungNode fassung = (ObFassungNode)node;
-        	if(fassung.getFassung() == ObFassungNode.FassungType.lesefassung) {
+    	else if(node.getNodeType() == AstNode.NodeType.fassung) {
+        	FassungNode fassung = (FassungNode)node;
+        	if(fassung.getFassung() == FassungNode.FassungType.lesefassung) {
         		m_currentFassung = "lf";
         	}
-        	else if(fassung.getFassung() == ObFassungNode.FassungType.studienfassung) {
+        	else if(fassung.getFassung() == FassungNode.FassungType.studienfassung) {
         		m_currentFassung = "sf";
         	}
         	else {
@@ -69,7 +69,7 @@ public class ObWebsiteDbVisitor extends DifferentiatingVisitor<ObAstNode> implem
         	}
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.quote) {
+        else if(node.getNodeType() == AstNode.NodeType.quote) {
             if(m_quoteCounter > 0)
             	appendToVerse("»");
             else
@@ -77,23 +77,23 @@ public class ObWebsiteDbVisitor extends DifferentiatingVisitor<ObAstNode> implem
             m_quoteCounter++;
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
+        else if(node.getNodeType() == AstNode.NodeType.alternative) {
         	appendToVerse("(");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
+        else if(node.getNodeType() == AstNode.NodeType.insertion) {
         	appendToVerse("[");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.omission) {
+        else if(node.getNodeType() == AstNode.NodeType.omission) {
         	appendToVerse("{");
         }
     }
 
     @Override
-    public void visitDefault(ObAstNode node) throws Throwable
+    public void visitDefault(AstNode node) throws Throwable
     {
-    	if(node.isDescendantOf(ObNoteNode.class)
+    	if(node.isDescendantOf(NoteNode.class)
     			|| node.isDescendantOf(NodeType.chapterNotes)
     			|| node.isDescendantOf(NodeType.fassungNotes)
     			|| node.isDescendantOf(NodeType.heading)) {
@@ -101,16 +101,16 @@ public class ObWebsiteDbVisitor extends DifferentiatingVisitor<ObAstNode> implem
     		return;
     	}
     	
-        if(node.getNodeType() == ObAstNode.NodeType.text) {
-            ObTextNode text = (ObTextNode)node;
+        if(node.getNodeType() == AstNode.NodeType.text) {
+            TextNode text = (TextNode)node;
             String textString = text.getText();
             appendToVerse(textString.replaceAll("\"", "\\\""));
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.verse) {
+        else if(node.getNodeType() == AstNode.NodeType.verse) {
         	finishVerse();
         	
-            ObVerseNode verse = (ObVerseNode)node;
+            VerseNode verse = (VerseNode)node;
             m_verseText.append("{\n");
             m_verseText.append("version: \"" + m_currentFassung + "\",\n");
             m_verseText.append("from: \"" + verse.getFromNumber() + "\",\n");
@@ -121,9 +121,9 @@ public class ObWebsiteDbVisitor extends DifferentiatingVisitor<ObAstNode> implem
     }
 
     @Override
-    public void visitAfterDefault(ObAstNode node) throws Throwable
+    public void visitAfterDefault(AstNode node) throws Throwable
     {
-    	if(node.isDescendantOf(ObNoteNode.class)
+    	if(node.isDescendantOf(NoteNode.class)
     			|| node.isDescendantOf(NodeType.chapterNotes)
     			|| node.isDescendantOf(NodeType.fassungNotes)
     			|| node.isDescendantOf(NodeType.heading)) {
@@ -131,12 +131,12 @@ public class ObWebsiteDbVisitor extends DifferentiatingVisitor<ObAstNode> implem
     		return;
     	}
     	
-    	if(node.getNodeType() == ObAstNode.NodeType.chapter) {
+    	if(node.getNodeType() == AstNode.NodeType.chapter) {
     		finishVerse();
     		m_result.append("]");
     	}
 
-    	else if(node.getNodeType() == ObAstNode.NodeType.quote) {
+    	else if(node.getNodeType() == AstNode.NodeType.quote) {
             m_quoteCounter--;
             if(m_quoteCounter > 0)
             	appendToVerse("«");
@@ -144,15 +144,15 @@ public class ObWebsiteDbVisitor extends DifferentiatingVisitor<ObAstNode> implem
             	appendToVerse("“");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
+        else if(node.getNodeType() == AstNode.NodeType.alternative) {
         	appendToVerse(")");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
+        else if(node.getNodeType() == AstNode.NodeType.insertion) {
         	appendToVerse("]");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.omission) {
+        else if(node.getNodeType() == AstNode.NodeType.omission) {
         	appendToVerse("}");
         }
     }

@@ -1,15 +1,15 @@
 package offeneBibel.parser;
 
-public class ObNoteNode extends ObAstNode {
+public class NoteNode extends AstNode {
     private static final long serialVersionUID = 1L;
     private String m_noteTag;
 
-    public ObNoteNode() {
+    public NoteNode() {
         super(NodeType.note);
         m_noteTag = null;
     }
 
-    public ObNoteNode(String tag) {
+    public NoteNode(String tag) {
         super(NodeType.note);
         m_noteTag = tag;
     }

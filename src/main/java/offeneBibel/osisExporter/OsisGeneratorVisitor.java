@@ -21,15 +21,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import offeneBibel.parser.BookNameHelper;
-import offeneBibel.parser.ObAstNode;
-import offeneBibel.parser.ObAstNode.NodeType;
-import offeneBibel.parser.ObFassungNode;
-import offeneBibel.parser.ObNoteNode;
-import offeneBibel.parser.ObParallelPassageNode;
-import offeneBibel.parser.ObTextNode;
-import offeneBibel.parser.ObVerseNode;
-import offeneBibel.parser.ObVerseStatus;
-import offeneBibel.parser.ObWikiLinkNode;
+import offeneBibel.parser.AstNode;
+import offeneBibel.parser.AstNode.NodeType;
+import offeneBibel.parser.FassungNode;
+import offeneBibel.parser.NoteNode;
+import offeneBibel.parser.ParallelPassageNode;
+import offeneBibel.parser.TextNode;
+import offeneBibel.parser.VerseNode;
+import offeneBibel.parser.VerseStatus;
+import offeneBibel.parser.WikiLinkNode;
 import offeneBibel.visitorPattern.DifferentiatingVisitor;
 import offeneBibel.visitorPattern.IVisitor;
 
@@ -38,7 +38,7 @@ import offeneBibel.visitorPattern.IVisitor;
  * To use this class, first create an instance, then let it visit an ObAstNode,
  * then retrieve the results via getStudienfassung() and getLesefassung().
  */
-public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> implements IVisitor<ObAstNode>
+public class OsisGeneratorVisitor extends DifferentiatingVisitor<AstNode> implements IVisitor<AstNode>
 {
 
     private static final Pattern DIVINE_NAME_PATTERN = Pattern.compile("JHWH|(JAHWE|HERR|GOTT)[A-Z]*");
@@ -50,7 +50,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
     private String m_leseFassung = null;
     private StringBuilder m_currentFassung = new StringBuilder();
     private boolean m_currentFassungContainsVerses = false;
-    private ObVerseStatus m_currentVerseStatus = ObVerseStatus.none;
+    private VerseStatus m_currentVerseStatus = VerseStatus.none;
 
     private final String m_verseTagStart;
     private String m_verseTag = null;
@@ -86,7 +86,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
     /** Skip the current verse if true. */
     private boolean m_skipVerse = false;
 
-    private ObVerseStatus m_requiredTranslationStatus;
+    private VerseStatus m_requiredTranslationStatus;
 
     private NoteIndexCounter m_noteIndexCounter;
 
@@ -101,7 +101,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
      * @param inlineVerseStatus Whether to include inline verse status in footnotes.
      * @param unmilestonedLineGroup Do not use milestones for line groups; instead milestone quote tags
      */
-    public ObOsisGeneratorVisitor(int chapter, String book, ObVerseStatus requiredTranslationStatus, boolean inlineVerseStatus, boolean unmilestonedLineGroup)
+    public OsisGeneratorVisitor(int chapter, String book, VerseStatus requiredTranslationStatus, boolean inlineVerseStatus, boolean unmilestonedLineGroup)
     {
         m_chapter = chapter;
         m_book = book;
@@ -116,17 +116,17 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
     }
 
     @Override
-    public void visitBeforeDefault(ObAstNode node) throws Throwable
+    public void visitBeforeDefault(AstNode node) throws Throwable
     {
-        if(node.getNodeType() == ObAstNode.NodeType.fassung) {
+        if(node.getNodeType() == AstNode.NodeType.fassung) {
             m_noteIndexCounter.reset();
             m_currentFassung = new StringBuilder("");
             m_currentFassungContainsVerses = false;
             m_lTagCounter = 1;
-            m_currentVerseStatus = ObVerseStatus.none;
+            m_currentVerseStatus = VerseStatus.none;
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.quote) {
+        else if(node.getNodeType() == AstNode.NodeType.quote) {
             if(m_skipVerse) return;
             String end = ">";
             if (m_unmilestonedLineGroup) {
@@ -138,12 +138,12 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                 
                 m_currentFassung.append("»");
                 
-                if (node.getParent().isDescendantOf(ObAstNode.NodeType.italics))
+                if (node.getParent().isDescendantOf(AstNode.NodeType.italics))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                     m_currentFassung.append("</hi>");          
                 }
-                if (node.getParent().isDescendantOf(ObAstNode.NodeType.fat))
+                if (node.getParent().isDescendantOf(AstNode.NodeType.fat))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                     m_currentFassung.append("</hi>");
@@ -151,12 +151,12 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
                 m_currentFassung.append("<q level=\"" + m_quoteCounter + "\" marker=\"\"" + end);
                 
-                if (node.getParent().isDescendantOf(ObAstNode.NodeType.italics))
+                if (node.getParent().isDescendantOf(AstNode.NodeType.italics))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                     m_currentFassung.append("<hi type=\"italic\">");          
                 }
-                if (node.getParent().isDescendantOf(ObAstNode.NodeType.fat))
+                if (node.getParent().isDescendantOf(AstNode.NodeType.fat))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                     m_currentFassung.append("<hi type=\"bold\">");
@@ -169,12 +169,12 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
                 m_currentFassung.append("„");
 
-                if (node.getParent().isDescendantOf(ObAstNode.NodeType.italics))
+                if (node.getParent().isDescendantOf(AstNode.NodeType.italics))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                     m_currentFassung.append("</hi>");          
                 }
-                if (node.getParent().isDescendantOf(ObAstNode.NodeType.fat))
+                if (node.getParent().isDescendantOf(AstNode.NodeType.fat))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                     m_currentFassung.append("</hi>");
@@ -187,12 +187,12 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                     m_currentFassung.append("<q level=\"" + m_quoteCounter + "\" marker=\"\"" + end);
                 }
 
-                if (node.getParent().isDescendantOf(ObAstNode.NodeType.italics))
+                if (node.getParent().isDescendantOf(AstNode.NodeType.italics))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                     m_currentFassung.append("<hi type=\"italic\">");          
                 }
-                if (node.getParent().isDescendantOf(ObAstNode.NodeType.fat))
+                if (node.getParent().isDescendantOf(AstNode.NodeType.fat))
                 {
                     // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                     m_currentFassung.append("<hi type=\"bold\">");
@@ -200,72 +200,72 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             }
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
+        else if(node.getNodeType() == AstNode.NodeType.alternative) {
             if(m_skipVerse) return;
-            if (node.isDescendantOf(ObAstNode.NodeType.note))
+            if (node.isDescendantOf(AstNode.NodeType.note))
                 m_currentFassung.append("(");
             else
                 m_currentFassung.append("<seg type=\"x-alternative\">(");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
+        else if(node.getNodeType() == AstNode.NodeType.insertion) {
             if(m_skipVerse) return;
-            if (node.getParent().isDescendantOf(ObAstNode.NodeType.insertion) || node.isDescendantOf(ObAstNode.NodeType.omission))
+            if (node.getParent().isDescendantOf(AstNode.NodeType.insertion) || node.isDescendantOf(AstNode.NodeType.omission))
                 m_currentFassung.append("[");
             else
                 m_currentFassung.append("<transChange type=\"added\">[");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.omission) {
+        else if(node.getNodeType() == AstNode.NodeType.omission) {
             if(m_skipVerse) return;
-            if (node.getParent().isDescendantOf(ObAstNode.NodeType.omission) || node.isDescendantOf(ObAstNode.NodeType.insertion))
+            if (node.getParent().isDescendantOf(AstNode.NodeType.omission) || node.isDescendantOf(AstNode.NodeType.insertion))
                 m_currentFassung.append("{");
             else
                 m_currentFassung.append("<transChange type=\"deleted\">{");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.heading) {
+        else if(node.getNodeType() == AstNode.NodeType.heading) {
             m_currentFassung.append("<title>");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.hebrew) {
+        else if(node.getNodeType() == AstNode.NodeType.hebrew) {
             if(m_skipVerse) return;
 
-            if (!node.getParent().isDescendantOf(ObAstNode.NodeType.wikiLink))
+            if (!node.getParent().isDescendantOf(AstNode.NodeType.wikiLink))
             {
                 // foreign are not allowed inside of <a>, so skip them
                 m_currentFassung.append("<foreign xml:lang=\"he\">");
             }
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.note) {
+        else if(node.getNodeType() == AstNode.NodeType.note) {
             if(m_skipVerse) return;
             m_currentFassung.append("<note type=\"x-footnote\" n=\"" + m_noteIndexCounter.getNextNoteString() + "\">");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.italics) {
+        else if(node.getNodeType() == AstNode.NodeType.italics) {
             if (m_skipVerse) return;
             m_currentFassung.append("<hi type=\"italic\">");
         }
-        else if(node.getNodeType() == ObAstNode.NodeType.fat) {
+        else if(node.getNodeType() == AstNode.NodeType.fat) {
             if (m_skipVerse) return;
             m_currentFassung.append("<hi type=\"bold\">");
         }
-        else if (node.getNodeType() == ObAstNode.NodeType.superScript) {
+        else if (node.getNodeType() == AstNode.NodeType.superScript) {
             if (m_skipVerse) return;
             m_currentFassung.append("<hi type=\"super\">");
         }
-        else if (node.getNodeType() == ObAstNode.NodeType.strikeThrough) {
+        else if (node.getNodeType() == AstNode.NodeType.strikeThrough) {
             if (m_skipVerse) return;
             m_currentFassung.append("<hi type=\"line-through\">");
         }
-        else if (node.getNodeType() == ObAstNode.NodeType.underline) {
+        else if (node.getNodeType() == AstNode.NodeType.underline) {
             if (m_skipVerse) return;
             m_currentFassung.append("<hi type=\"underline\">");
         }
-        else if (node.getNodeType() == ObAstNode.NodeType.wikiLink) {
+        else if (node.getNodeType() == AstNode.NodeType.wikiLink) {
             if (m_skipVerse) return;
-            ObWikiLinkNode obWikiLinkNode = (ObWikiLinkNode)node;
+            WikiLinkNode obWikiLinkNode = (WikiLinkNode)node;
             m_currentFassung.append("<a href=\"");
             if(obWikiLinkNode.isWikiLink())
                 m_currentFassung.append("http://offene-bibel.de/wiki/");
@@ -278,11 +278,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
     }
 
     @Override
-    public void visitDefault(ObAstNode node) throws Throwable
+    public void visitDefault(AstNode node) throws Throwable
     {
-        if(node.getNodeType() == ObAstNode.NodeType.text) {
+        if(node.getNodeType() == AstNode.NodeType.text) {
             if(m_skipVerse) return;
-            ObTextNode text = (ObTextNode)node;
+            TextNode text = (TextNode)node;
             String textString = text.getText();
 
             // Escaping &<> has to happen *before* inserting <l> tags.
@@ -292,11 +292,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             textString = textString.replaceAll("<", "&lt;");
 
             // Tag greek.
-            if (node.isDescendantOf(ObAstNode.NodeType.note))
+            if (node.isDescendantOf(AstNode.NodeType.note))
                 textString = tagGreek(textString);
 
             // pretty print divine names
-            if (!node.isDescendantOf(ObNoteNode.class)) {
+            if (!node.isDescendantOf(NoteNode.class)) {
                 if (textString.contains("|")) {
                     textString = textString.replaceAll("\\|([^ |]+)\\|", "<divineName>$1</divineName>").replace("|", "");
                 }
@@ -316,7 +316,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                 }
             }
 
-            if(m_poemMode && ! node.isDescendantOf(ObNoteNode.class)) {
+            if(m_poemMode && ! node.isDescendantOf(NoteNode.class)) {
                 if(textString.contains("\n")) {
                     if(m_lineStarted == false) {
                         textString = textString.replaceFirst("\n", getLTagStart());
@@ -332,8 +332,8 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             m_currentFassung.append(textString);
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.verse) {
-            ObVerseNode verse = (ObVerseNode)node;
+        else if(node.getNodeType() == AstNode.NodeType.verse) {
+            VerseNode verse = (VerseNode)node;
             addStopTag();
             //System.out.println("Verse:" + m_verseTagStart + verse.getNumber() + " " + verse.getStatus().toString());
             if(verse.getStatus().ordinal() >= m_requiredTranslationStatus.ordinal()) {
@@ -346,10 +346,10 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                     m_lineStarted = true;
                 }
                 if (m_inlineVersStatus) {
-                    ObAstNode nextNode = verse.getNextSibling();
+                    AstNode nextNode = verse.getNextSibling();
                     while(nextNode != null) {
-                        if(nextNode instanceof ObTextNode) {
-                            if (!((ObTextNode) nextNode).getText().trim().isEmpty())
+                        if(nextNode instanceof TextNode) {
+                            if (!((TextNode) nextNode).getText().trim().isEmpty())
                                 break;
                         }
                         else if (nextNode.getNodeType() != NodeType.poemStart && nextNode.getNodeType() != NodeType.poemStop) {
@@ -357,11 +357,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                         }
                         nextNode = nextNode.getNextSibling();
                     }
-                    if (nextNode == null || nextNode instanceof ObVerseNode || nextNode.getNodeType() == NodeType.heading) {
+                    if (nextNode == null || nextNode instanceof VerseNode || nextNode.getNodeType() == NodeType.heading) {
                         // empty verses do not need any status
-                        m_currentVerseStatus = ObVerseStatus.none;
+                        m_currentVerseStatus = VerseStatus.none;
                     } else {
-                        ObVerseStatus status = verse.getStatus();
+                        VerseStatus status = verse.getStatus();
                         if (m_currentVerseStatus != status) {
                             m_currentVerseStatus = status;
                             m_currentFassung.append("<note type=\"x-footnote\" n=\"Status\">[Status: " + status.getExportStatusString() + "]</note> ");
@@ -375,9 +375,9 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             }
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.parallelPassage) {
+        else if(node.getNodeType() == AstNode.NodeType.parallelPassage) {
             if(m_skipVerse) return;
-            ObParallelPassageNode passage = (ObParallelPassageNode)node;
+            ParallelPassageNode passage = (ParallelPassageNode)node;
 
             if(m_multiParallelPassage == false) {
                 m_currentFassung.append("<note type=\"crossReference\" osisID=\"" + m_verseTag + "!crossReference\" osisRef=\"" + m_verseTag + "\">");
@@ -387,7 +387,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                                             passage.getOsisBookId() + "." + passage.getChapter() + "." + passage.getStartVerse() + "\">" +
                                             BookNameHelper.getInstance().getGermanBookNameForOsisId(passage.getOsisBookId()) + " " + passage.getChapter() + "," + passage.getStartVerse() + "</reference>");
 
-            if(passage.getNextSibling() != null && passage.getNextSibling().getNodeType() == ObAstNode.NodeType.parallelPassage) {
+            if(passage.getNextSibling() != null && passage.getNextSibling().getNodeType() == AstNode.NodeType.parallelPassage) {
                 m_multiParallelPassage = true;
                 m_currentFassung.append("; ");
             }
@@ -397,12 +397,12 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             }
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.poemStart) {
+        else if(node.getNodeType() == AstNode.NodeType.poemStart) {
             m_poemMode = true;
             m_currentFassung.append(getLgTagStart());
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.poemStop) {
+        else if(node.getNodeType() == AstNode.NodeType.poemStop) {
             m_poemMode = false;
             if(m_lineStarted) {
                 m_currentFassung.append(getLTagStop());
@@ -413,11 +413,11 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
     }
 
     @Override
-    public void visitAfterDefault(ObAstNode node) throws Throwable
+    public void visitAfterDefault(AstNode node) throws Throwable
     {
 
-        if(node.getNodeType() == ObAstNode.NodeType.fassung) {
-            ObFassungNode fassung = (ObFassungNode)node;
+        if(node.getNodeType() == AstNode.NodeType.fassung) {
+            FassungNode fassung = (FassungNode)node;
             addStopTag();
 
             // prevent empty chapters
@@ -425,7 +425,7 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                 m_currentFassung = null;
             }
 
-            if(fassung.getFassung() == ObFassungNode.FassungType.lesefassung) {
+            if(fassung.getFassung() == FassungNode.FassungType.lesefassung) {
                 m_leseFassung = m_currentFassung == null ? null : m_currentFassung.toString();
             }
             else {
@@ -433,17 +433,17 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
             }
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.quote) {
+        else if(node.getNodeType() == AstNode.NodeType.quote) {
             if(m_skipVerse) return;
             if(m_quoteCounter>0)
                 m_quoteCounter--;
 
-            if (node.getParent().isDescendantOf(ObAstNode.NodeType.italics))
+            if (node.getParent().isDescendantOf(AstNode.NodeType.italics))
             {
                 // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                 m_currentFassung.append("</hi>");          
             }
-            if (node.getParent().isDescendantOf(ObAstNode.NodeType.fat))
+            if (node.getParent().isDescendantOf(AstNode.NodeType.fat))
             {
                 // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                 m_currentFassung.append("</hi>");
@@ -456,12 +456,12 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
                 m_currentFassung.append("</q>");
             }
 
-            if (node.getParent().isDescendantOf(ObAstNode.NodeType.italics))
+            if (node.getParent().isDescendantOf(AstNode.NodeType.italics))
             {
                 // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                 m_currentFassung.append("<hi type=\"italic\">");          
             }
-            if (node.getParent().isDescendantOf(ObAstNode.NodeType.fat))
+            if (node.getParent().isDescendantOf(AstNode.NodeType.fat))
             {
                 // Quotations are not allowed inside of <hi/>, so wrap <hi/> around them.
                 m_currentFassung.append("<hi type=\"bold\">");
@@ -474,69 +474,69 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
 
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
+        else if(node.getNodeType() == AstNode.NodeType.alternative) {
             if(m_skipVerse) return;
-            if (node.isDescendantOf(ObAstNode.NodeType.note))
+            if (node.isDescendantOf(AstNode.NodeType.note))
                 m_currentFassung.append(")");
             else
                 m_currentFassung.append(")</seg>");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
+        else if(node.getNodeType() == AstNode.NodeType.insertion) {
             if(m_skipVerse) return;
-            if (node.getParent().isDescendantOf(ObAstNode.NodeType.insertion) || node.isDescendantOf(ObAstNode.NodeType.omission))
+            if (node.getParent().isDescendantOf(AstNode.NodeType.insertion) || node.isDescendantOf(AstNode.NodeType.omission))
                 m_currentFassung.append("]");
             else
                 m_currentFassung.append("]</transChange>");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.omission) {
+        else if(node.getNodeType() == AstNode.NodeType.omission) {
             if(m_skipVerse) return;
-            if (node.getParent().isDescendantOf(ObAstNode.NodeType.omission) || node.isDescendantOf(ObAstNode.NodeType.insertion))
+            if (node.getParent().isDescendantOf(AstNode.NodeType.omission) || node.isDescendantOf(AstNode.NodeType.insertion))
                 m_currentFassung.append("}");
             else
                 m_currentFassung.append("}</transChange>");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.heading) {
+        else if(node.getNodeType() == AstNode.NodeType.heading) {
             m_currentFassung.append("</title>");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.hebrew) {
+        else if(node.getNodeType() == AstNode.NodeType.hebrew) {
             if(m_skipVerse) return;
-            if (!node.getParent().isDescendantOf(ObAstNode.NodeType.wikiLink))
+            if (!node.getParent().isDescendantOf(AstNode.NodeType.wikiLink))
             {
                 // foreign are not allowed inside of <a>, so skip them
                 m_currentFassung.append("</foreign>");
             }
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.note) {
+        else if(node.getNodeType() == AstNode.NodeType.note) {
             if(m_skipVerse) return;
             m_currentFassung.append("</note>");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.italics) {
+        else if(node.getNodeType() == AstNode.NodeType.italics) {
             if (m_skipVerse) return;
             m_currentFassung.append("</hi>");
         }
-        else if(node.getNodeType() == ObAstNode.NodeType.fat) {
+        else if(node.getNodeType() == AstNode.NodeType.fat) {
             if (m_skipVerse) return;
             m_currentFassung.append("</hi>");
         }
-        else if(node.getNodeType() == ObAstNode.NodeType.superScript) {
+        else if(node.getNodeType() == AstNode.NodeType.superScript) {
             if (m_skipVerse) return;
             m_currentFassung.append("</hi>");
         }
-        else if(node.getNodeType() == ObAstNode.NodeType.strikeThrough) {
+        else if(node.getNodeType() == AstNode.NodeType.strikeThrough) {
             if (m_skipVerse) return;
             m_currentFassung.append("</hi>");
         }
-        else if(node.getNodeType() == ObAstNode.NodeType.underline) {
+        else if(node.getNodeType() == AstNode.NodeType.underline) {
             if (m_skipVerse) return;
             m_currentFassung.append("</hi>");
         }
-        else if (node.getNodeType() == ObAstNode.NodeType.wikiLink) {
+        else if (node.getNodeType() == AstNode.NodeType.wikiLink) {
             if (m_skipVerse) return;
             m_currentFassung.append("</a>");
         }
@@ -601,18 +601,18 @@ public class ObOsisGeneratorVisitor extends DifferentiatingVisitor<ObAstNode> im
         return result.toString();
     }
 
-    class QuoteSearcher implements IVisitor<ObAstNode>
+    class QuoteSearcher implements IVisitor<AstNode>
     {
         public boolean foundQuote = false;
         @Override
-        public void visit(ObAstNode node) throws Throwable {
-            if(node.getNodeType() == ObAstNode.NodeType.quote)
+        public void visit(AstNode node) throws Throwable {
+            if(node.getNodeType() == AstNode.NodeType.quote)
                 foundQuote = true;
         }
         @Override
-        public void visitBefore(ObAstNode hostNode) throws Throwable {}
+        public void visitBefore(AstNode hostNode) throws Throwable {}
         @Override
-        public void visitAfter(ObAstNode hostNode) throws Throwable {}
+        public void visitAfter(AstNode hostNode) throws Throwable {}
     }
 
     public static class NoteIndexCounter {

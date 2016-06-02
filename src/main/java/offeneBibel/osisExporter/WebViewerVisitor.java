@@ -1,23 +1,23 @@
 package offeneBibel.osisExporter;
 
-import offeneBibel.parser.ObAstNode;
-import offeneBibel.parser.ObChapterNode;
-import offeneBibel.parser.ObChapterTag;
-import offeneBibel.parser.ObChapterTag.ChapterTagName;
-import offeneBibel.parser.ObFassungNode;
-import offeneBibel.parser.ObFassungNode.FassungType;
-import offeneBibel.parser.ObNoteNode;
-import offeneBibel.parser.ObParallelPassageNode;
-import offeneBibel.parser.ObTextNode;
-import offeneBibel.parser.ObVerseNode;
-import offeneBibel.parser.ObVerseStatus;
+import offeneBibel.parser.AstNode;
+import offeneBibel.parser.ChapterNode;
+import offeneBibel.parser.ChapterTag;
+import offeneBibel.parser.ChapterTag.ChapterTagName;
+import offeneBibel.parser.FassungNode;
+import offeneBibel.parser.FassungNode.FassungType;
+import offeneBibel.parser.NoteNode;
+import offeneBibel.parser.ParallelPassageNode;
+import offeneBibel.parser.TextNode;
+import offeneBibel.parser.VerseNode;
+import offeneBibel.parser.VerseStatus;
 import offeneBibel.visitorPattern.DifferentiatingVisitor;
 import offeneBibel.visitorPattern.IVisitor;
 
-public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implements IVisitor<ObAstNode>
+public class WebViewerVisitor extends DifferentiatingVisitor<AstNode> implements IVisitor<AstNode>
 {
-    private ObVerseStatus m_studienFassungStatus = ObVerseStatus.none;
-    private ObVerseStatus m_leseFassungStatus = ObVerseStatus.none;
+    private VerseStatus m_studienFassungStatus = VerseStatus.none;
+    private VerseStatus m_leseFassungStatus = VerseStatus.none;
     private String m_studienFassung = null;
     private String m_leseFassung = null;
     private StringBuilder m_currentFassung = new StringBuilder();
@@ -37,26 +37,26 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
     /** Skip the current verse if true. */
     private boolean m_skipVerse = false;
 
-    private ObVerseStatus m_requiredTranslationStatus;
+    private VerseStatus m_requiredTranslationStatus;
 
     private NoteIndexCounter m_noteIndexCounter;
 
-    public ObWebViewerVisitor(ObVerseStatus requiredTranslationStatus)
+    public WebViewerVisitor(VerseStatus requiredTranslationStatus)
     {
         m_noteIndexCounter = new NoteIndexCounter();
         m_requiredTranslationStatus = requiredTranslationStatus;
     }
 
     @Override
-    public void visitBeforeDefault(ObAstNode node) throws Throwable
+    public void visitBeforeDefault(AstNode node) throws Throwable
     {
-        if(node.getNodeType() == ObAstNode.NodeType.fassung) {
+        if(node.getNodeType() == AstNode.NodeType.fassung) {
             m_noteIndexCounter.reset();
             m_currentFassung = new StringBuilder();
             m_currentFassungContainsVerses = false;
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.quote) {
+        else if(node.getNodeType() == AstNode.NodeType.quote) {
             if(m_skipVerse) return;
             if(m_quoteCounter>0)
             {
@@ -76,40 +76,40 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
             }
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
+        else if(node.getNodeType() == AstNode.NodeType.alternative) {
             if(m_skipVerse) return;
             m_currentFassung.append("<span class=\"alternative\">(");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
+        else if(node.getNodeType() == AstNode.NodeType.insertion) {
             if(m_skipVerse) return;
             m_currentFassung.append("<span class=\"insertion-start\">[</span><span class=\"insertion\">");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.omission) {
+        else if(node.getNodeType() == AstNode.NodeType.omission) {
             if(m_skipVerse) return;
             m_currentFassung.append("<span class=\"omission\">{");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.heading) {
+        else if(node.getNodeType() == AstNode.NodeType.heading) {
             m_currentFassung.append("<h3>");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.note) {
+        else if(node.getNodeType() == AstNode.NodeType.note) {
             if(m_skipVerse) return;
             m_currentFassung.append("<a href=\"#\" data-toggle=\"tooltip\" data-placement=\"auto bottom\" title=\"");
         }
     }
 
     @Override
-    public void visitDefault(ObAstNode node) throws Throwable
+    public void visitDefault(AstNode node) throws Throwable
     {
-        if(node.getNodeType() == ObAstNode.NodeType.text) {
+        if(node.getNodeType() == AstNode.NodeType.text) {
             if(m_skipVerse) return;
-            ObTextNode text = (ObTextNode)node;
+            TextNode text = (TextNode)node;
             String textString = text.getText();
 
-            if(m_poemMode && ! node.isDescendantOf(ObNoteNode.class)) {
+            if(m_poemMode && ! node.isDescendantOf(NoteNode.class)) {
                 textString.replaceAll("\n", "<br/>");
             }
 
@@ -118,8 +118,8 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
             m_currentFassung.append(textString);
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.verse) {
-            ObVerseNode verse = (ObVerseNode)node;
+        else if(node.getNodeType() == AstNode.NodeType.verse) {
+            VerseNode verse = (VerseNode)node;
             if(verse.getStatus().ordinal() >= m_requiredTranslationStatus.ordinal()) {
                 m_currentFassungContainsVerses = true;
                 m_skipVerse = false;
@@ -131,26 +131,26 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
             }
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.parallelPassage) {
+        else if(node.getNodeType() == AstNode.NodeType.parallelPassage) {
             if(m_skipVerse) return;
-            ObParallelPassageNode passage = (ObParallelPassageNode)node;
+            ParallelPassageNode passage = (ParallelPassageNode)node;
             m_currentFassung.append("<a href=\"" + passage.getOsisBookId() + "_" + passage.getChapter() + "?verse=" + passage.getStartVerse() +
                                             "\" data-toggle=\"tooltip\" data-placement=\"auto bottom\" title=\"" +
                                             passage.getOsisBookId() + " " + passage.getChapter() + ", " + passage.getStartVerse() + "\">℘</a>");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.poemStart) {
+        else if(node.getNodeType() == AstNode.NodeType.poemStart) {
             m_poemMode = true;
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.poemStop) {
+        else if(node.getNodeType() == AstNode.NodeType.poemStop) {
             m_poemMode = false;
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.chapter) {
-            ObChapterNode chapterNode = (ObChapterNode)node;
+        else if(node.getNodeType() == AstNode.NodeType.chapter) {
+            ChapterNode chapterNode = (ChapterNode)node;
             ChapterTagName tagName = null;
-            for (ObChapterTag tag  : chapterNode.getChapterTags()) {
+            for (ChapterTag tag  : chapterNode.getChapterTags()) {
                 if(false == tag.isSpecific()) {
                     if(tagName == null || tagName.getPriority() < tag.getTag().getPriority()) {
                         tagName = tag.getTag();
@@ -165,18 +165,18 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
     }
 
     @Override
-    public void visitAfterDefault(ObAstNode node) throws Throwable
+    public void visitAfterDefault(AstNode node) throws Throwable
     {
 
-        if(node.getNodeType() == ObAstNode.NodeType.fassung) {
-            ObFassungNode fassung = (ObFassungNode)node;
+        if(node.getNodeType() == AstNode.NodeType.fassung) {
+            FassungNode fassung = (FassungNode)node;
 
             // prevent empty chapters
             if(m_currentFassungContainsVerses == false) {
                 m_currentFassung = null;
             }
 
-            if(fassung.getFassung() == ObFassungNode.FassungType.lesefassung) {
+            if(fassung.getFassung() == FassungNode.FassungType.lesefassung) {
                 m_leseFassung = m_currentFassung == null ? null : m_currentFassung.toString();
             }
             else {
@@ -184,7 +184,7 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
             }
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.quote) {
+        else if(node.getNodeType() == AstNode.NodeType.quote) {
             if(m_skipVerse) return;
             if(m_quoteCounter>0)
                 m_quoteCounter--;
@@ -195,26 +195,26 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
 
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.alternative) {
+        else if(node.getNodeType() == AstNode.NodeType.alternative) {
             if(m_skipVerse) return;
             m_currentFassung.append(")</span>");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.insertion) {
+        else if(node.getNodeType() == AstNode.NodeType.insertion) {
             if(m_skipVerse) return;
             m_currentFassung.append("</span><span class=\"insertion-end\">]</span>");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.omission) {
+        else if(node.getNodeType() == AstNode.NodeType.omission) {
             if(m_skipVerse) return;
             m_currentFassung.append("}</span>");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.heading) {
+        else if(node.getNodeType() == AstNode.NodeType.heading) {
             m_currentFassung.append("</h3>");
         }
 
-        else if(node.getNodeType() == ObAstNode.NodeType.note) {
+        else if(node.getNodeType() == AstNode.NodeType.note) {
             if(m_skipVerse) return;
             m_currentFassung.append("\">〈" + m_noteIndexCounter.getNextNoteString() + "〉</a>");
         }
@@ -234,26 +234,26 @@ public class ObWebViewerVisitor extends DifferentiatingVisitor<ObAstNode> implem
         return m_leseFassung;
     }
 
-    public ObVerseStatus getStudienFassungStatus() {
+    public VerseStatus getStudienFassungStatus() {
         return m_studienFassungStatus;
     }
 
-    public ObVerseStatus getLeseFassungStatus() {
+    public VerseStatus getLeseFassungStatus() {
         return m_leseFassungStatus;
     }
 
-    class QuoteSearcher implements IVisitor<ObAstNode>
+    class QuoteSearcher implements IVisitor<AstNode>
     {
         public boolean foundQuote = false;
         @Override
-        public void visit(ObAstNode node) throws Throwable {
-            if(node.getNodeType() == ObAstNode.NodeType.quote)
+        public void visit(AstNode node) throws Throwable {
+            if(node.getNodeType() == AstNode.NodeType.quote)
                 foundQuote = true;
         }
         @Override
-        public void visitBefore(ObAstNode hostNode) throws Throwable {}
+        public void visitBefore(AstNode hostNode) throws Throwable {}
         @Override
-        public void visitAfter(ObAstNode hostNode) throws Throwable {}
+        public void visitAfter(AstNode hostNode) throws Throwable {}
     }
 
     class NoteIndexCounter {

@@ -32,9 +32,9 @@ class Tester
             }
 
             OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
-            TracingParseRunner<ObAstNode> parseRunner = new TracingParseRunner<ObAstNode>(parser.Page());
+            TracingParseRunner<AstNode> parseRunner = new TracingParseRunner<AstNode>(parser.Page());
             InputBuffer parboiledInputBuffer = new DefaultInputBuffer(charWriter.toCharArray());
-            ParsingResult<ObAstNode> result = parseRunner.run(parboiledInputBuffer);
+            ParsingResult<AstNode> result = parseRunner.run(parboiledInputBuffer);
             String parseTreePrintOut = ParseTreeUtils.printNodeTree(result);
             System.out.println("Tree:");
             System.out.println(parseTreePrintOut);

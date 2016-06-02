@@ -1,11 +1,11 @@
 package offeneBibel.parser;
 
-public class ObWikiLinkNode extends ObAstNode {
+public class WikiLinkNode extends AstNode {
     private static final long serialVersionUID = 1L;
     private String m_link;
     private boolean m_wikiLink;
 
-    public ObWikiLinkNode(String link, boolean wikiLink) {
+    public WikiLinkNode(String link, boolean wikiLink) {
         super(NodeType.wikiLink);
         m_link = link;
         m_wikiLink = wikiLink;

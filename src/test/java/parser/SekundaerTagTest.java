@@ -3,10 +3,10 @@ package parser;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
-import offeneBibel.parser.ObAstNode;
-import offeneBibel.parser.ObAstNode.NodeType;
-import offeneBibel.parser.ObChapterNode;
-import offeneBibel.parser.ObTextNode;
+import offeneBibel.parser.AstNode;
+import offeneBibel.parser.AstNode.NodeType;
+import offeneBibel.parser.ChapterNode;
+import offeneBibel.parser.TextNode;
 import offeneBibel.parser.OffeneBibelParser;
 
 import org.parboiled.Parboiled;
@@ -19,17 +19,17 @@ import org.testng.annotations.Test;
 
 public class SekundaerTagTest {
     OffeneBibelParser parser;
-    BasicParseRunner<ObAstNode> parseRunner;
+    BasicParseRunner<AstNode> parseRunner;
     @BeforeClass
     public void setup() {
         parser = Parboiled.createParser(OffeneBibelParser.class);
-        parseRunner = new BasicParseRunner<ObAstNode>(parser.SecondaryContent());
+        parseRunner = new BasicParseRunner<AstNode>(parser.SecondaryContent());
     }
     
     public void resetValueStack() {
-        parseRunner = new BasicParseRunner<ObAstNode>(parser.SecondaryContent());
-        ValueStack<ObAstNode> valueStack = new DefaultValueStack<ObAstNode>();
-        valueStack.push(new ObChapterNode());
+        parseRunner = new BasicParseRunner<AstNode>(parser.SecondaryContent());
+        ValueStack<AstNode> valueStack = new DefaultValueStack<AstNode>();
+        valueStack.push(new ChapterNode());
         parseRunner.withValueStack(valueStack);
     }
     
@@ -54,15 +54,15 @@ public class SekundaerTagTest {
         assertTrue("Standard case small caps should match", parseRunner.run("{{sekundär}}Inhalt{{sekundär ende}}").matched);
 
         resetValueStack();
-        ParsingResult<ObAstNode> result = parseRunner.run("{{Sekundär}}Inhalt{{Sekundär ende}}");
+        ParsingResult<AstNode> result = parseRunner.run("{{Sekundär}}Inhalt{{Sekundär ende}}");
         assertTrue("Standard case capital caps should match", result.matched);
         assertEquals("Shouldn't modify parent", NodeType.chapter, result.resultValue.getNodeType());
         assertEquals("Should add itself to parent", 1, result.resultValue.childCount());
-        assertTrue("Should add correct class", result.resultValue.peekChild() instanceof ObAstNode);
-        ObAstNode secondaryTag = (ObAstNode)(result.resultValue.peekChild());
+        assertTrue("Should add correct class", result.resultValue.peekChild() instanceof AstNode);
+        AstNode secondaryTag = (AstNode)(result.resultValue.peekChild());
         assertEquals("Tag type should be correct", NodeType.secondaryContent, secondaryTag.getNodeType());
         assertEquals("Child should have been added", 1, secondaryTag.childCount());
         assertEquals("Child tag type should match", NodeType.text, secondaryTag.peekChild().getNodeType());
-        assertTrue(((ObTextNode)secondaryTag.peekChild()).getText().equals("Inhalt"));
+        assertTrue(((TextNode)secondaryTag.peekChild()).getText().equals("Inhalt"));
     }
 }

@@ -1,6 +1,6 @@
 package offeneBibel.parser;
 
-public enum ObVerseStatus {
+public enum VerseStatus {
     none(0, "Unbekannt"),
     ungeprueft(1, "Ungeprüft"),
     zuverlaessig(2, "Zuverlässig"),
@@ -12,7 +12,7 @@ public enum ObVerseStatus {
     private final int quality;
     private final String stringRepresentation;
     
-    private ObVerseStatus(int quality, String humanReadableString) {
+    private VerseStatus(int quality, String humanReadableString) {
         this.quality = quality;
         this.stringRepresentation = humanReadableString;
     }

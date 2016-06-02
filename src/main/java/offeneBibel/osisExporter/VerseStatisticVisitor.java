@@ -3,14 +3,14 @@ package offeneBibel.osisExporter;
 import java.util.ArrayList;
 import java.util.List;
 
-import offeneBibel.parser.ObAstNode;
-import offeneBibel.parser.ObFassungNode;
-import offeneBibel.parser.ObFassungNode.FassungType;
-import offeneBibel.parser.ObVerseNode;
+import offeneBibel.parser.AstNode;
+import offeneBibel.parser.FassungNode;
+import offeneBibel.parser.FassungNode.FassungType;
+import offeneBibel.parser.VerseNode;
 import offeneBibel.visitorPattern.DifferentiatingVisitor;
 import offeneBibel.visitorPattern.IVisitor;
 
-public class ObVerseStatisticVisitor extends DifferentiatingVisitor<ObAstNode> implements IVisitor<ObAstNode>
+public class VerseStatisticVisitor extends DifferentiatingVisitor<AstNode> implements IVisitor<AstNode>
 {
 
     private final String chapName;
@@ -20,7 +20,7 @@ public class ObVerseStatisticVisitor extends DifferentiatingVisitor<ObAstNode> i
     private final int[][] statusCounters = new int[2][10];
     private final List<List<String>> remainingVerses;
 
-    public ObVerseStatisticVisitor(String chapName, List<String> allVerses)
+    public VerseStatisticVisitor(String chapName, List<String> allVerses)
     {
         this.chapName = chapName;
         this.remainingVerses = new ArrayList<List<String>>();
@@ -29,21 +29,21 @@ public class ObVerseStatisticVisitor extends DifferentiatingVisitor<ObAstNode> i
     }
 
     @Override
-    public void visitBeforeDefault(ObAstNode node) throws Throwable
+    public void visitBeforeDefault(AstNode node) throws Throwable
     {
-        if (node.getNodeType() == ObAstNode.NodeType.fassung) {
-            ObFassungNode fassung = (ObFassungNode) node;
+        if (node.getNodeType() == AstNode.NodeType.fassung) {
+            FassungNode fassung = (FassungNode) node;
             currentFassung = fassung.getFassung().ordinal();
         }
     }
 
     @Override
-    public void visitDefault(ObAstNode node) throws Throwable
+    public void visitDefault(AstNode node) throws Throwable
     {
-        if (node.getNodeType() == ObAstNode.NodeType.verse) {
-            ObVerseNode verse = (ObVerseNode) node;
+        if (node.getNodeType() == AstNode.NodeType.verse) {
+            VerseNode verse = (VerseNode) node;
             int ordinal = 7-verse.getStatus().ordinal();
-            if (verse.getNextSibling() instanceof ObVerseNode) {
+            if (verse.getNextSibling() instanceof VerseNode) {
                 ordinal = 8;
             }
             List<String> verses = remainingVerses.get(currentFassung);
@@ -57,9 +57,9 @@ public class ObVerseStatisticVisitor extends DifferentiatingVisitor<ObAstNode> i
     }
 
     @Override
-    public void visitAfterDefault(ObAstNode node) throws Throwable
+    public void visitAfterDefault(AstNode node) throws Throwable
     {
-        if (node.getNodeType() == ObAstNode.NodeType.fassung) {
+        if (node.getNodeType() == AstNode.NodeType.fassung) {
             currentFassung = -2;
         }
     }

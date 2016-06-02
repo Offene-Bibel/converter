@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import offeneBibel.parser.ObVerseStatus;
+import offeneBibel.parser.VerseStatus;
 import util.Misc;
 
 public class StatisticHTMLBuilder {
@@ -75,9 +75,9 @@ public class StatisticHTMLBuilder {
                     "<table>");
             for (int i = 0; i < COLORS.length; i++) {
                 bw.write("<tr><th style=\"background-color: " + COLORS[i] + "\">#" + (9 - i) + "</th><td>");
-                int statusCount = ObVerseStatus.values().length;
+                int statusCount = VerseStatus.values().length;
                 if (i < statusCount) {
-                    bw.write(ObVerseStatus.values()[statusCount - 1 - i].getHumanReadableString());
+                    bw.write(VerseStatus.values()[statusCount - 1 - i].getHumanReadableString());
                 } else if (i == statusCount) {
                     bw.write("Leer");
                 } else if (i == statusCount + 1) {

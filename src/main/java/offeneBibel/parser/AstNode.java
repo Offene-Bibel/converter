@@ -1,6 +1,6 @@
 package offeneBibel.parser;
 
-public class ObAstNode extends ObTreeNode<ObAstNode> { // implements IVisitorHost<ObAstNode> {
+public class AstNode extends TreeNode<AstNode> { // implements IVisitorHost<ObAstNode> {
     private static final long serialVersionUID = 1L;
 
     public enum NodeType {
@@ -34,7 +34,7 @@ public class ObAstNode extends ObTreeNode<ObAstNode> { // implements IVisitorHos
     }
     private NodeType m_nodeType;
 
-    public ObAstNode(NodeType type)
+    public AstNode(NodeType type)
     {
         setNodeType(type);
     }
@@ -49,7 +49,7 @@ public class ObAstNode extends ObTreeNode<ObAstNode> { // implements IVisitorHos
     }
 
     public boolean isDescendantOf(NodeType nodeType) {
-        ObAstNode runner =  this;
+        AstNode runner =  this;
         while(runner != null && runner.getNodeType() != nodeType)
             runner = runner.getParent();
 
