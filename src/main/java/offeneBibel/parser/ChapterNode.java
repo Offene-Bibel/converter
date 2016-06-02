@@ -1,7 +1,7 @@
 package offeneBibel.parser;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class ChapterNode extends AstNode {
     private static final long serialVersionUID = 1L;
@@ -9,7 +9,7 @@ public class ChapterNode extends AstNode {
 
     public ChapterNode() {
         super(NodeType.chapter);
-        chapterTags = new Vector<ChapterTag>();
+        chapterTags = new ArrayList<>();
     }
 
     public boolean addChapterTag(ChapterTag tag) {

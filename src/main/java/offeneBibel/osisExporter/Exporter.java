@@ -38,7 +38,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
@@ -233,7 +232,7 @@ public class Exporter
         String osisName;
         /** Number of chapters in this book. */
         int chapterCount;
-        Vector<Chapter> chapters = new Vector<Chapter>();
+        ArrayList<Chapter> chapters = new ArrayList<Chapter>();
     }
 
     public static void main(String [] args)
@@ -296,14 +295,14 @@ public class Exporter
      */
     private List<Book> retrieveBooks() throws IOException
     {
-        List<String> bookFilter = new ArrayList<String>();
+        List<String> bookFilter = new ArrayList<>();
         if (commandLineArguments.books.length() > 0) {
             for(String bookName : commandLineArguments.books.split(",")) {
                 bookFilter.add(BookNameHelper.getInstance().getUnifiedBookNameForString(bookName));
             }
         }
         List<List<String>> bookDataList = Misc.readCsv(bibleBooks);
-        List<Book>  bookDataCollection = new Vector<Book>();
+        List<Book>  bookDataCollection = new ArrayList<>();
         for(List<String> bookData : bookDataList) {
             Book book = new Book();
             //Genesis,Gen,50 == german name, sword name, chapter count

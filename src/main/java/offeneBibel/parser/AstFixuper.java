@@ -1,7 +1,7 @@
 package offeneBibel.parser;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import offeneBibel.visitorPattern.IVisitor;
 
@@ -22,7 +22,7 @@ public class AstFixuper
 
     private static class ObAstNoteLinkSetter implements IVisitor<AstNode>
     {
-        public List<NoteNode> noteList = new Vector<NoteNode>();
+        public List<NoteNode> noteList = new ArrayList<>();
 
         public ObAstNoteLinkSetter(List<NoteNode> noteList)
         {
@@ -50,7 +50,7 @@ public class AstFixuper
 
     private static class ObAstNoteSearcher implements IVisitor<AstNode>
     {
-        public List<NoteNode> noteList = new Vector<NoteNode>();
+        public List<NoteNode> noteList = new ArrayList<>();
 
         @Override
         public void visit(AstNode node) throws Throwable

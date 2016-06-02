@@ -1,7 +1,7 @@
 package offeneBibel.parser;
 
 import java.io.Serializable;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import offeneBibel.parser.FassungNode.FassungType;
 
@@ -137,7 +137,7 @@ public class ChapterTag implements Serializable {
     }
 
     private ChapterTagName m_tag;
-    private Vector<VerseRange> m_verseRanges = new Vector<VerseRange>();
+    private ArrayList<VerseRange> m_verseRanges = new ArrayList<>();
     public ChapterTag(ChapterTagName tag)
     {
         m_tag = tag;
