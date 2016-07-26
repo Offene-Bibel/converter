@@ -53,28 +53,28 @@ AST layout
 ----------
 
 Important types:
-- **ObTreeNode**
+- **TreeNode**
   Generic base class of all AST elements. Contains no OfBi specifics. Defines the tree structure
   and supports the visitor pattern.
-- **ObAstNode**
-  Generic base class of all Offene Bibel (Ob...Node) AST nodes. Contains an `enum` with all
+- **AstNode**
+  Generic base class of all Offene Bibel (...Node) AST nodes. Contains an `enum` with all
   possible node types. Not every node type has an extra class, most are just instances of
-  `ObAstNode` with the respective type set.
-- **ObTextNode**
+  `AstNode` with the respective type set.
+- **TextNode**
   Used for all textual information.
-- **ObVerseStatus**
+- **VerseStatus**
   Represents the status of one single verse. It's calculated from the chapter tags via
-  `ObVerseNode.getStatus()`.
+  `VerseNode.getStatus()`.
 
 Other \*Node types:
-- ObFassungNode
-- ObChapterNode
-- ObVerseNode
-- ObNoteNode
-- ObParallelPassageNode
-- ObSuperScriptTextNode
-- ObNoteLinkNode
-- ObWikiLinkNode
+- FassungNode
+- ChapterNode
+- VerseNode
+- NoteNode
+- ParallelPassageNode
+- SuperScriptTextNode
+- NoteLinkNode
+- WikiLinkNode
 
 Verses have no children. They are markers.
 
