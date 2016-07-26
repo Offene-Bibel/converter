@@ -83,7 +83,7 @@ public class Exporter
     /**
      * Oldest date for a history page to be considered to be retrieved. Increase it when parsing succeeded to find errors faster.
      */
-    static final String minHistoryDate = "2015-01-01";
+    static final String minHistoryDate = "2016-07-01";
 
     /**
      * A list of all bible books as they are named on the wiki.

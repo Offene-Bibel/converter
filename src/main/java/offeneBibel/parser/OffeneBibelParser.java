@@ -146,7 +146,7 @@ public class OffeneBibelParser extends BaseParser<AstNode> {
                     Note(),
                     Comment()
                 )),
-                "{{Bemerkungen}}",
+                firstOf("{{Bemerkungen}}", "{{Anliegen}}"),
                 optional(sequence(
                         push(new AstNode(NodeType.fassungNotes)),
                         zeroOrMore(Whitespace()),
@@ -154,7 +154,8 @@ public class OffeneBibelParser extends BaseParser<AstNode> {
                         peek(1).insertChild(0, pop()) // put the notes of the Fassung at the beginning
                     )
                 ),
-                peek(1).appendChild(pop())
+                peek(1).appendChild(pop()),
+                optional("{{Bemerkungen}}")
         );
     }
     
@@ -480,6 +481,9 @@ public class OffeneBibelParser extends BaseParser<AstNode> {
             sequence("*", createOrAppendTextNode("*")),
             // Urtext unklar (Klagelieder 1)
             sequence("†", createOrAppendTextNode("†")),
+            // stars (Hohelied)
+            sequence("★", createOrAppendTextNode("★")),
+            sequence("(★)", createOrAppendTextNode("(★)")),
             // empty footnotes (Genesis 10, 1Chronik 1, Johannes 15, Jakobus 1)
             "<ref></ref>"
         );
@@ -1005,13 +1009,28 @@ public class OffeneBibelParser extends BaseParser<AstNode> {
     }
     
     public Rule Comment() {
-        return sequence(
-            "<!--",
-            oneOrMore(
-                testNot("-->"),
-                ANY
-            ),
-            "-->"
+        return firstOf(
+                // will hide it from both export and display...
+                sequence(
+                    "<!--",
+                    oneOrMore(
+                        testNot("-->"),
+                        ANY
+                    ),
+                    "-->"
+                ),
+                // only a comment for exporting...
+                sequence(
+                        "{{KeinExport}}",
+                        oneOrMore(
+                            testNot("{{KeinExport_Ende}}"),
+                            ANY
+                        ),
+                        "{{KeinExport_Ende}}"
+                ),
+                // and a "comment" for displaying...
+                "{{NurExport||",
+                "||NurExport_Ende}}"
         );
     }
 
