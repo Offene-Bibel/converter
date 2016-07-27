@@ -38,6 +38,26 @@ There is also a convenience script that creates two sword modules, copies them t
 And then there is the validator that checks a given Wiki page for validity.
 You can run it as follows: `install/bin/validator.sh --help`.
 
+More format converters
+----------------------
+
+The remaining formats can be created by calling different Main classes. Most of these tools do not take any command line arguments, but will just read their input files (OSIS or Zefania XML) and write output files. [I](https://github.com/schierlm) run them on Windows since most of the post-processing tools run on Windows as well, but the converters should run as well on Linux (just that there are no individual shell scripts for them).
+
+- **offeneBibel.zefania.ZefaniaConverter**   
+  produces Zefania XML from OSIS
+- **offeneBibel.zefania.FootnoteHTMLGrabber**   
+  Reads existing Zefania XML and produces Zefania XML with HTML footnotes (by grabbing the wiki)
+- **offeneBibel.zefania.LogosConverter**   
+  Reads Zefania XML (both with and without HTML footnotes) and produces HTML that can be converted for Logos
+- **offeneBibel.zefania.ESwordConverter**   
+  Reads Zefania XML (without HTML footnotes) and produces HTML that can be converted for E-Sword (with E-Sword ToolTipTool NT).
+  This one supports a parameter, a marker value (use e.g. `$MARKER$`) to mark the end of lines/verses (to work around bugs in ToolTipTool's HTML import which sometimes skips and adds linebreaks). The marker should not appear anywhere in the Bible text and you will have to use the same Marker later when producing the actual E-Sword files.
+- **offeneBibel.zefania.MyBibleZoneConverter**   
+  Reads Zefania XML (with HTML footnotes) and produces MyBible.Zone database files
+- **offeneBibel.zefania.MySwordConverter**   
+  Reads Zefania XML (with HTML footnotes) and produces MySword database files
+
+
 Web viewer file generation
 --------------------------
 The parser can generate files suitable as input for the *Offene Bibel Web Viewer*. It generates a file structure as follows:
