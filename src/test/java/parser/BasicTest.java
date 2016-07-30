@@ -1,34 +1,10 @@
 package parser;
 
-import offeneBibel.parser.AstNode;
-import offeneBibel.parser.OffeneBibelParser;
-
-import org.parboiled.Parboiled;
-import org.parboiled.parserunners.ErrorReportingParseRunner;
-import org.parboiled.support.ParsingResult;
-import org.parboiled.errors.ErrorUtils;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static parser.ParseTester.*;
 
 public class BasicTest {
-
-    public void parseOk(String text) {
-        OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
-        ErrorReportingParseRunner<AstNode> parseRunner = new ErrorReportingParseRunner<AstNode>(parser.Page(), 0);
-        ParsingResult<AstNode> result = parseRunner.run(text);
-        if ( ! result.isSuccess()) {
-            fail(ErrorUtils.printParseErrors(result));
-        }
-    }
-
-    public void parseFails(String text) {
-        OffeneBibelParser parser = Parboiled.createParser(OffeneBibelParser.class);
-        ErrorReportingParseRunner<AstNode> parseRunner = new ErrorReportingParseRunner<AstNode>(parser.Page(), 0);
-        ParsingResult<AstNode> result = parseRunner.run(text);
-        assertFalse(result.isSuccess());
-    }
-
     @Test
     public void basicPageWorks() {
         parseOk( "{{Lesefassung}}\n\n"
@@ -49,3 +25,4 @@ public class BasicTest {
                 + "{{Kapitelseite Fuß}}\n" );
     }
 }
+
