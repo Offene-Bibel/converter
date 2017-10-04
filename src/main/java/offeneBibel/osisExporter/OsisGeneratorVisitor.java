@@ -564,28 +564,30 @@ public class OsisGeneratorVisitor extends DifferentiatingVisitor<AstNode> implem
     private String getLTagStop() {
         if (unmilestonedLineGroup)
             return "</l>";
-        return "<l eID=\"" + lTagStart + lTagCounter + "\"/>";
+        String result = "<l eID=\"" + lTagStart + lTagCounter + "\"/>";
+        ++lTagCounter;
+        return result;
     }
 
     private String getLTagStart() {
         if (unmilestonedLineGroup)
             return "<l>";
         String lTag = lTagStart + lTagCounter;
-        ++lTagCounter;
         return "<l sID=\"" + lTag + "\"/>";
     }
     
     private String getLgTagStop() {
         if (unmilestonedLineGroup)
             return "</lg>";
-        return "<lg eID=\"" + lgTagStart + lgTagCounter + "\"/>";
+        String result = "<lg eID=\"" + lgTagStart + lgTagCounter + "\"/>";
+        ++lgTagCounter;
+        return result;
     }
 
     private String getLgTagStart() {
         if (unmilestonedLineGroup)
             return "<lg>";
         String lgTag = lgTagStart + lgTagCounter;
-        ++lgTagCounter;
         return "<lg sID=\"" + lgTag + "\"/>";
     }
 
