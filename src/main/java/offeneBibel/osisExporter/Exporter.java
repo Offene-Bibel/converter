@@ -72,13 +72,12 @@ public class Exporter
     /**
      * URL prefix to use for retrieving the translation pages.
      */
-    //static final String urlBase = "http://www.offene-bibel.de/wiki/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=";
-    static final String urlBase = "http://www.offene-bibel.de/mediawiki/index.php?action=raw&title=";
+    static final String urlBase = "https://offene-bibel.de/wiki/<%title%>?action=raw";
 
     /**
      * URL prefix to use for retrieving history of a page.
      */
-    static final String historyURLBase = "http://www.offene-bibel.de/mediawiki/api.php?action=query&prop=revisions&rvprop=ids|timestamp&rvlimit=100&format=xml&titles=";
+    static final String historyURLBase = "https://www.offene-bibel.de/mediawiki/api.php?action=query&prop=revisions&rvprop=ids|timestamp&rvlimit=100&format=xml&titles=<%title%>";
 
     /**
      * Oldest date for a history page to be considered to be retrieved. Increase it when parsing succeeded to find errors faster.
@@ -142,7 +141,7 @@ public class Exporter
                 }
                 else {
                     try {
-                        result = Misc.retrieveUrl(urlBase + URLEncoder.encode(wikiPage, "UTF-8"));
+                        result = Misc.retrieveUrl(urlBase.replace("<%title%>", URLEncoder.encode(wikiPage, "UTF-8")));
                         System.out.println(wikiPage);
                     } catch (IOException e) {
                         // chapter not yet created, skip
@@ -343,7 +342,7 @@ public class Exporter
                 if (false == success && commandLineArguments.tryPreviousVersions) {
                     String wikiPage = chapter.book.urlName + "_" + chapter.number;
                     List<Integer> ids = new ArrayList<Integer>();
-                    String revisions = Misc.retrieveUrl(historyURLBase + URLEncoder.encode(wikiPage, "UTF-8"));
+                    String revisions = Misc.retrieveUrl(historyURLBase.replace("<%title%>", URLEncoder.encode(wikiPage, "UTF-8")));
                     Document revisionsXML = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(revisions)));
                     NodeList revisionNodes = (NodeList) XPathFactory.newInstance().newXPath().evaluate("/api/query/pages/page/revisions/rev", revisionsXML, XPathConstants.NODESET);
                     for(int i=0; i < revisionNodes.getLength(); i++) {
@@ -356,7 +355,7 @@ public class Exporter
                     String fileCacheString = Misc.getPageCacheDir() + wikiPage;
                     for(int id : ids) {
                         try {
-                            String result = Misc.retrieveUrl(urlBase + URLEncoder.encode(wikiPage, "UTF-8")+"&oldid="+id);
+                            String result = Misc.retrieveUrl(urlBase.replace("<%title%>", URLEncoder.encode(wikiPage, "UTF-8"))+"&oldid="+id);
                             Misc.writeFile(result, fileCacheString);
                             System.out.println(wikiPage+"@"+id);
                         } catch (IOException e) {
