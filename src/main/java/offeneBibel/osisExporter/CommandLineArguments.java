@@ -40,6 +40,9 @@ class CommandLineArguments {
     @Parameter(names = { "-a", "--cacheAST" }, description = "Cache the already parsed ASTs. Delete them manually if you edited the parser code.")
     boolean cacheAST = false;
 
+    @Parameter(names = { "--saveRAM" }, description = "Persist the parsed ASTs to disk and only load them when needed. Use this if you run out of RAM running the parser.")
+    boolean saveRAM = false;
+
     @Parameter(names = { "-i", "--inlineVersStatus" }, description = "Show verse status as a footnote at the beginning of the verse.")
     boolean inlineVerseStatus = false;
 

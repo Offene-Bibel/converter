@@ -111,8 +111,11 @@ public class Exporter
         int number;
         /** Text of this chapter as retrieved from the wiki. */
         String wikiText = null;
+
         /** Result of the parsing of the text. */
-        AstNode node = null;
+        private AstNode node = null;
+        // Might be serialized to a file to save RAM.
+        private File cacheFile = null;
 
         /** The following is used by the {@link generateOsisChapterFragments} method. */
         String studienfassungText = null;
@@ -121,6 +124,65 @@ public class Exporter
         public Chapter(Book book, int number) {
             this.book = book;
             this.number = number;
+        }
+
+        public AstNode getAst() throws Exception {
+            if (node != null) {
+                return node;
+            }
+            if (wikiText == null) {
+                return null;
+            }
+            if (node == null) {
+                boolean astLoaded = loadAst();
+                if (!astLoaded) {
+                    return null;
+                }
+            }
+            return node;
+        }
+
+        public void freeAst() {
+            if (commandLineArguments.saveRAM) {
+                node = null;
+                System.gc();
+            }
+        }
+
+        private void saveAst() throws Exception {
+            assert node != null;
+            createAstFile();
+
+            cacheFile.getParentFile().mkdirs();
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
+                oos.writeObject(node);
+            }
+            node = null;
+        }
+
+        /**
+         * Returns true if there was a saved AST and it was loaded correctly.
+         */
+        private boolean loadAst() throws Exception {
+            assert node == null;
+            createAstFile();
+
+            if (cacheFile.exists()) {
+                try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
+                    node = (AstNode) ois.readObject();
+                }
+                return true;
+            }
+            return false;
+        }
+
+        private void createAstFile() throws Exception {
+            assert wikiText != null;
+            if (cacheFile == null) {
+                MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+                sha1.update(wikiText.getBytes("UTF-8"));
+                cacheFile = new File(Misc.getPageCacheDir() + ".." + File.separator + "asts" + File.separator + Base64.custom().encodeToString(sha1.digest(), false) + ".ast");
+            }
         }
 
         /**
@@ -162,15 +224,10 @@ public class Exporter
 
         public boolean generateAst(OffeneBibelParser parser, BasicParseRunner<AstNode> parseRunner) throws Throwable {
             if(wikiText != null) {
-                File cacheFile = null;
                 if (commandLineArguments.cacheAST) {
-                    MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
-                    sha1.update(wikiText.getBytes("UTF-8"));
-                    cacheFile = new File(Misc.getPageCacheDir() + ".." + File.separator + "asts" + File.separator + Base64.custom().encodeToString(sha1.digest(), false) + ".ast");
-                    if (cacheFile.exists()) {
-                        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
-                            node = (AstNode) ois.readObject();
-                        }
+                    boolean astLoaded = loadAst();
+
+                    if (astLoaded) {
                         return true;
                     }
                 }
@@ -210,11 +267,13 @@ public class Exporter
                     node = result.resultValue;
                     AstFixuper.fixupAstTree(node);
                     node.host(new EmptyVerseFixupVisitor());
-                    if (cacheFile != null) {
-                        cacheFile.getParentFile().mkdirs();
-                        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
-                            oos.writeObject(node);
-                        }
+                    if (commandLineArguments.saveRAM) {
+                        saveAst();
+                        node = null;
+                        System.gc();
+                    }
+                    else if (commandLineArguments.cacheAST) {
+                        saveAst();
                     }
                 }
             }
@@ -392,9 +451,11 @@ public class Exporter
         statusFileString.append("# Export level: " + commandLineArguments.exportLevel + "\n");
         for (Book book : books) {
             for (Chapter chapter : book.chapters) {
-                if (chapter.node != null) {
+                if (chapter.getAst() != null) {
                     WebViewerVisitor visitor = new WebViewerVisitor(requiredTranslationStatus);
-                    chapter.node.host(visitor);
+                    chapter.getAst().host(visitor);
+                    chapter.freeAst();
+
                     statusFileString.append(writeWebScriptureToFile(visitor.getStudienFassung(), book, chapter, visitor.getStudienFassungStatus(), "sf"));
                     statusFileString.append(writeWebScriptureToFile(visitor.getLeseFassung(), book, chapter, visitor.getLeseFassungStatus(), "lf"));
                 }
@@ -453,8 +514,9 @@ public class Exporter
                     }
                 }
                 VerseStatisticVisitor visitor = new VerseStatisticVisitor(chapName, verseNumbers);
-                if (chapter.node != null) {
-                    chapter.node.host(visitor);
+                if (chapter.getAst() != null) {
+                    chapter.getAst().host(visitor);
+                    chapter.freeAst();
                 }
                 props.setProperty(chapName+",LF", statusToString(visitor.getStatusCounters(FassungType.lesefassung)));
                 props.setProperty(chapName+",SF", statusToString(visitor.getStatusCounters(FassungType.studienfassung)));
@@ -486,9 +548,11 @@ public class Exporter
      */
     public String[] generateOsisTexts(Chapter chapter, VerseStatus requiredTranslationStatus) throws Throwable {
         String[] texts = new String[] {null, null};
-        if(chapter.node != null) {
+        if(chapter.getAst() != null) {
             OsisGeneratorVisitor visitor = new OsisGeneratorVisitor(chapter.number, chapter.book.osisName, requiredTranslationStatus, commandLineArguments.inlineVerseStatus, commandLineArguments.unmilestonedLineGroup);
-            chapter.node.host(visitor);
+            chapter.getAst().host(visitor);
+            chapter.freeAst();
+
             texts[0] = visitor.getStudienFassung();
             texts[1] = visitor.getLeseFassung();
         }
